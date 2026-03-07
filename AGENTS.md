@@ -37,6 +37,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 
 ### Architecture & Types
 - **Modularity:** Keep logic ultra-modularized. Templates must be defined in separate files in `src/templates/`.
+- **Dependency Management:** Manage dependencies centrally in `src/config/dependencies.json` and reference them by name in template definitions.
 - **Type Safety:** Use `zod` for runtime schema validation and `z.infer` for type definitions.
 - **Interfaces:** Define clear interfaces for template configurations in `src/types.ts`.
 - **Immutability:** Prefer `readonly` and `const` where possible to ensure data integrity during scaffolding.

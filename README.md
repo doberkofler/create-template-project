@@ -83,7 +83,7 @@ Classic web application structure with a `frontend/` and a `backend/` Express se
 
 ### ⚛️ Fullstack
 A full-stack monorepo featuring:
-- **Client**: React with MUI and TypeScript.
+- **Client**: React with MUI (including Icons) and TypeScript.
 - **Server**: Express.js backend.
 - **E2E**: Playwright for end-to-end testing.
 

@@ -137,6 +137,8 @@ describe('generateProject', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await fse.pathExists(projectPath)).toBe(true);
 		expect(await fse.pathExists(path.join(projectPath, 'client/tsdown.config.ts'))).toBe(true);
+		const pkg = await fse.readJson(path.join(projectPath, 'package.json'));
+		expect(pkg.dependencies).toHaveProperty('@mui/icons-material');
 	});
 
 	it('should handle --force flag', async () => {

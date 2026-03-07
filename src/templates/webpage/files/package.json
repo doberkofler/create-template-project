@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"tsdown": "^0.20.3"
+		"tsdown": ""
 	},
 	"scripts": {
 		"build": "tsdown"

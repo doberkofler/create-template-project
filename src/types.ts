@@ -35,3 +35,13 @@ export interface TemplateDefinition {
 	scripts: Record<string, string>;
 	templateDir?: string;
 }
+
+export interface DependencyConfig {
+	dependencies: Record<
+		string,
+		{
+			version: string;
+			description: string;
+		}
+	>;
+}

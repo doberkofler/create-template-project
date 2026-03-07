@@ -1,11 +1,11 @@
 {
 	"dependencies": {
-		"commander": "^14.0.3",
-		"cli-progress": "^3.12.0"
+		"commander": "",
+		"cli-progress": ""
 	},
 	"devDependencies": {
-		"@types/cli-progress": "^3.11.6",
-		"tsdown": "^0.20.3"
+		"@types/cli-progress": "",
+		"tsdown": ""
 	},
 	"scripts": {
 		"dev": "tsdown --watch",

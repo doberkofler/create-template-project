@@ -11,20 +11,20 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"debug": "^4.4.3"
+		"debug": ""
 	},
 	"devDependencies": {
-		"@commitlint/cli": "^20.4.2",
-		"@commitlint/config-conventional": "^20.4.2",
-		"@types/debug": "^4.1.12",
-		"@types/node": "^25.3.0",
-		"@vitest/coverage-v8": "^4.0.18",
-		"conventional-changelog-cli": "^5.0.0",
-		"husky": "^9.1.7",
-		"oxlint": "^1.50.0",
-		"oxlint-tsgolint": "^0.15.0",
-		"prettier": "^3.8.1",
-		"typescript": "^5.9.3",
-		"vitest": "^4.0.18"
+		"@commitlint/cli": "",
+		"@commitlint/config-conventional": "",
+		"@types/debug": "",
+		"@types/node": "",
+		"@vitest/coverage-v8": "",
+		"conventional-changelog": "",
+		"husky": "",
+		"oxlint": "",
+		"oxlint-tsgolint": "",
+		"prettier": "",
+		"typescript": "",
+		"vitest": ""
 	}
 }

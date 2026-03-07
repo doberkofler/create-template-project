@@ -4,19 +4,20 @@
 		"server"
 	],
 	"dependencies": {
-		"react": "^18.3.1",
-		"react-dom": "^18.3.1",
-		"@mui/material": "^6.1.1",
-		"@emotion/react": "^11.13.3",
-		"@emotion/styled": "^11.11.5",
-		"express": "^4.21.0"
+		"react": "",
+		"react-dom": "",
+		"@mui/material": "",
+		"@mui/icons-material": "",
+		"@emotion/react": "",
+		"@emotion/styled": "",
+		"express": ""
 	},
 	"devDependencies": {
-		"@types/react": "^18.3.5",
-		"@types/react-dom": "^18.3.0",
-		"@types/express": "^4.17.21",
-		"@playwright/test": "^1.47.1",
-		"tsdown": "^0.20.3"
+		"@types/react": "",
+		"@types/react-dom": "",
+		"@types/express": "",
+		"@playwright/test": "",
+		"tsdown": ""
 	},
 	"scripts": {
 		"build": "npm run build --workspaces",

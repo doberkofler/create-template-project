@@ -1,7 +1,8 @@
 import fse from 'fs-extra';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import {ProjectOptions, TemplateDefinition} from '../types.js';
+import {fileURLToPath} from 'node:url';
+import {ProjectOptions, TemplateDefinition, DependencyConfig} from '../types.js';
 import {getBaseTemplate} from '../templates/base/index.js';
 import {getCliTemplate} from '../templates/cli/index.js';
 import {getWebpageTemplate} from '../templates/webpage/index.js';
@@ -12,6 +13,8 @@ import * as p from '@clack/prompts';
 import debugLib from 'debug';
 
 const debug = debugLib('create-template-project:generator');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DEPENDENCY_CONFIG_PATH = path.resolve(__dirname, '../config/dependencies.json');
 
 export const generateProject = async (opts: ProjectOptions) => {
 	const {template: type, projectName, directory, force, update, overwrite, skipBuild} = opts;
@@ -171,7 +174,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 	if (pm !== 'npm') {
 		for (const [key, value] of Object.entries(finalPkg.scripts)) {
 			if (typeof value === 'string') {
-				finalPkg.scripts[key] = value.replaceAll('npm run ', `${pm} run `);
+				finalPkg.scripts[key] = (value as string).replaceAll('npm run ', `${pm} run `);
 			}
 		}
 	}
@@ -192,6 +195,27 @@ export const generateProject = async (opts: ProjectOptions) => {
 		await fs.rm(path.join(projectDir, 'client/tsdown.config.ts'), {force: true});
 		await fs.rm(path.join(projectDir, 'server/tsdown.config.ts'), {force: true});
 	}
+
+	// Resolve versions from master dependency config
+	debug('Loading dependency configuration');
+	const depConfig = (await fse.readJson(DEPENDENCY_CONFIG_PATH)) as DependencyConfig;
+	const addedDeps: Array<{name: string; description: string}> = [];
+
+	const resolveDeps = (deps: Record<string, string> = {}) => {
+		for (const dep of Object.keys(deps)) {
+			const config = depConfig.dependencies[dep];
+			if (config) {
+				deps[dep] = config.version;
+				addedDeps.push({name: dep, description: config.description});
+			} else {
+				p.log.warn(`Dependency "${dep}" not found in master configuration. Using empty version.`);
+				debug(`Dependency "${dep}" missing in config`);
+			}
+		}
+	};
+
+	resolveDeps(finalPkg.dependencies);
+	resolveDeps(finalPkg.devDependencies);
 
 	// Write final package.json
 	const finalPkgPath = path.join(projectDir, 'package.json');
@@ -276,7 +300,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 	}
 
 	p.log.info(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
-	showSummary(opts, pm);
+	showSummary(opts, pm, addedDeps);
 
 	if (opts.dev && finalPkg.scripts.dev) {
 		p.log.info('Starting dev server...');
@@ -374,7 +398,7 @@ async function mergeFile(filePath: string, existing: string, template: string) {
 	}
 }
 
-function showSummary(opts: ProjectOptions, pm: string) {
+function showSummary(opts: ProjectOptions, pm: string, dependencies: Array<{name: string; description: string}>) {
 	debug('Showing summary for options: %O', opts);
 	const {template, skipBuild, installDependencies, build, dev, open, projectName} = opts;
 
@@ -405,6 +429,15 @@ function showSummary(opts: ProjectOptions, pm: string) {
 	);
 
 	p.log.info([`About this project:`, `  ${desc}`, `  All essential tools (linting, formatting, testing) are pre-configured.`].join('\n'));
+
+	if (dependencies.length > 0) {
+		p.log.info('Dependencies:');
+		// Remove duplicates if any (e.g. if resolved multiple times)
+		const uniqueDeps = Array.from(new Set(dependencies.map((d) => JSON.stringify(d)))).map((s) => JSON.parse(s));
+		for (const dep of uniqueDeps) {
+			p.log.info(`${dep.name} - ${dep.description}`);
+		}
+	}
 
 	p.log.info(
 		[

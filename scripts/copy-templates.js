@@ -8,6 +8,15 @@ const src = path.join(root, 'src/templates');
 const dist = path.join(root, 'dist/templates');
 
 async function copyTemplates() {
+	// Copy config
+	const srcConfig = path.join(root, 'src/config');
+	const distConfig = path.join(root, 'dist/config');
+	if (await fse.pathExists(srcConfig)) {
+		await fse.ensureDir(distConfig);
+		await fse.copy(srcConfig, distConfig);
+		console.log(`Copied config files to dist`);
+	}
+
 	const templates = ['base', 'cli', 'webpage', 'webapp', 'fullstack'];
 
 	for (const t of templates) {
