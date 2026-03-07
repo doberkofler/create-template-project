@@ -1,62 +1,205 @@
 import fse from 'fs-extra';
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import {ProjectOptions, TemplateDefinition} from '../types.js';
-import {getBaseTemplate} from '../templates/base.js';
-import {getNodeTemplate} from '../templates/node.js';
-import {getVanillaHtmlTemplate} from '../templates/vanilla-html.js';
-import {getVanillaJsTemplate} from '../templates/vanilla-js.js';
-import {getReactTemplate} from '../templates/react.js';
+import {getBaseTemplate} from '../templates/base/index.js';
+import {getCliTemplate} from '../templates/cli/index.js';
+import {getWebpageTemplate} from '../templates/webpage/index.js';
+import {getWebappTemplate} from '../templates/webapp/index.js';
+import {getFullstackTemplate} from '../templates/fullstack/index.js';
 import {execa} from 'execa';
+import * as p from '@clack/prompts';
+import debugLib from 'debug';
+
+const debug = debugLib('create-template-project:generator');
 
 export const generateProject = async (opts: ProjectOptions) => {
-	const {template: type, projectName, directory} = opts;
+	const {template: type, projectName, directory, force, update, overwrite, skipBuild} = opts;
+	const projectDir = path.join(directory, projectName);
+	debug('Project generation started for: %s', projectName);
+	debug('Options: %O', opts);
+	debug('Project directory: %s', projectDir);
 
-	const templates: TemplateDefinition[] = [getBaseTemplate(projectName)];
+	const isUpdate = !!update;
 
+	if (await fse.pathExists(projectDir)) {
+		if (force) {
+			await fs.rm(projectDir, {recursive: true, force: true});
+		} else if (!isUpdate && !overwrite) {
+			throw new Error(`Directory "${projectDir}" already exists. Use --force to remove, --overwrite to overwrite or --update to update.`);
+		}
+	}
+
+	const templates: TemplateDefinition[] = [getBaseTemplate(opts)];
+
+	debug('Applying template: base');
 	switch (type) {
-		case 'node':
-			templates.push(getNodeTemplate());
+		case 'cli':
+			debug('Applying template: cli');
+			templates.push(getCliTemplate(opts));
 			break;
-		case 'vanilla-html':
-			templates.push(getVanillaHtmlTemplate());
+		case 'webpage':
+			debug('Applying template: webpage');
+			templates.push(getWebpageTemplate(opts));
 			break;
-		case 'vanilla-js':
-			templates.push(getVanillaJsTemplate());
+		case 'webapp':
+			debug('Applying template: webapp');
+			templates.push(getWebappTemplate(opts));
 			break;
-		case 'react':
-			templates.push(getReactTemplate());
+		case 'fullstack':
+			debug('Applying template: fullstack');
+			templates.push(getFullstackTemplate(opts));
 			break;
 	}
 
-	await fse.ensureDir(directory);
+	debug('Ensuring directory exists: %s', projectDir);
+	await fse.ensureDir(projectDir);
 
-	// Merge templates
-	const finalPkg = {
+	// Final consolidated data
+	let finalPkg: any = {
 		name: projectName,
 		version: '0.1.0',
 		type: 'module',
-		scripts: {} as Record<string, string>,
-		dependencies: {} as Record<string, string>,
-		devDependencies: {} as Record<string, string>,
+		scripts: {},
+		dependencies: {},
+		devDependencies: {},
 	};
 
+	// If update, load existing package.json as base
+	if (isUpdate && (await fse.pathExists(path.join(projectDir, 'package.json')))) {
+		debug('Loading existing package.json for update');
+		const existingPkg = await fse.readJson(path.join(projectDir, 'package.json'));
+		finalPkg = {...finalPkg, ...existingPkg}; // Keep existing name/version/type if they exist
+		finalPkg.scripts = {...existingPkg.scripts};
+		finalPkg.dependencies = {...existingPkg.dependencies};
+		finalPkg.devDependencies = {...existingPkg.devDependencies};
+		debug('Loaded existing package.json: %O', finalPkg);
+	}
+
 	for (const t of templates) {
+		debug('Processing template files and metadata');
+		// Merge programmatic deps/scripts
 		Object.assign(finalPkg.scripts, t.scripts);
 		Object.assign(finalPkg.dependencies, t.dependencies);
 		Object.assign(finalPkg.devDependencies, t.devDependencies);
 
+		// Handle physical files
+		if (t.templateDir) {
+			debug('Reading physical files from: %s', t.templateDir);
+			const files = await getAllFiles(t.templateDir);
+			for (const file of files) {
+				const relativePath = path.relative(t.templateDir, file);
+				const targetPath = path.join(projectDir, relativePath);
+
+				// Skip seed files during update
+				if (isUpdate && isSeedFile(relativePath)) {
+					debug('Skipping seed file during update: %s', relativePath);
+					continue;
+				}
+
+				if (relativePath === 'package.json') {
+					debug('Merging package.json parts');
+					const pkgPart = await fse.readJson(file);
+					mergePackageJson(finalPkg, pkgPart);
+					continue;
+				}
+
+				await fse.ensureDir(path.dirname(targetPath));
+
+				debug('Reading and replacing variables for: %s', relativePath);
+				let content = await fse.readFile(file, 'utf8');
+				content = replaceVariables(content, opts);
+
+				// Specific logic for webpage template script tag
+				if (type === 'webpage' && relativePath === 'index.html') {
+					debug('Applying webpage index.html specific replacement');
+					content = content.replace('{{scriptSrc}}', skipBuild ? './src/index.js' : './dist/index.js');
+				}
+
+				// Specific logic for webpage template index.ts/js
+				let finalTargetPath = targetPath;
+				if (type === 'webpage' && skipBuild && relativePath === 'src/index.ts') {
+					debug('Changing target path for webpage index.ts to .js due to skipBuild');
+					finalTargetPath = path.join(projectDir, 'src/index.js');
+				}
+
+				if (isUpdate && (await fse.pathExists(finalTargetPath))) {
+					debug('File exists, attempting to merge: %s', finalTargetPath);
+					const existingContent = await fse.readFile(finalTargetPath, 'utf8');
+					if (existingContent !== content) {
+						await mergeFile(finalTargetPath, existingContent, content);
+					} else {
+						debug('Content identical, skipping merge: %s', finalTargetPath);
+					}
+				} else {
+					debug('Writing file: %s', finalTargetPath);
+					await fse.writeFile(finalTargetPath, content);
+				}
+			}
+		}
+
+		// Handle programmatic files (for backward compat or complex cases)
 		for (const file of t.files) {
-			const filePath = path.join(directory, file.path);
-			await fse.ensureDir(path.dirname(filePath));
+			const targetPath = path.join(projectDir, file.path);
+			if (isUpdate && isSeedFile(file.path)) {
+				debug('Skipping programmatic seed file: %s', file.path);
+				continue;
+			}
+
+			debug('Processing programmatic file: %s', file.path);
+			await fse.ensureDir(path.dirname(targetPath));
 			const content = typeof file.content === 'function' ? file.content() : file.content;
-			await fse.writeFile(filePath, content);
+
+			if (isUpdate && (await fse.pathExists(targetPath))) {
+				debug('File exists, attempting to merge programmatic file: %s', targetPath);
+				const existingContent = await fse.readFile(targetPath, 'utf8');
+				if (existingContent !== content) {
+					await mergeFile(targetPath, existingContent, content);
+				} else {
+					debug('Content identical, skipping programmatic merge: %s', targetPath);
+				}
+			} else {
+				debug('Writing programmatic file: %s', targetPath);
+				await fse.writeFile(targetPath, content);
+			}
 		}
 	}
 
-	// Write package.json
-	await fse.writeJson(path.join(directory, 'package.json'), finalPkg, {spaces: '\t'});
+	// Apply final programmatic overrides
+	const pm = opts.packageManager || 'npm';
 
-	// Write tsconfig.json
+	if (pm !== 'npm') {
+		for (const [key, value] of Object.entries(finalPkg.scripts)) {
+			if (typeof value === 'string') {
+				finalPkg.scripts[key] = value.replaceAll('npm run ', `${pm} run `);
+			}
+		}
+	}
+
+	if (skipBuild) {
+		debug('Applying skipBuild overrides');
+		delete finalPkg.scripts.build;
+		delete finalPkg.scripts.dev;
+		if (finalPkg.devDependencies) {
+			delete finalPkg.devDependencies.tsdown;
+		}
+		if (finalPkg.scripts.ci) {
+			finalPkg.scripts.ci = finalPkg.scripts.ci.replace(' && npm run build', '').replace(` && ${pm} run build`, '');
+		}
+		// Remove tsdown.config.ts if it was copied
+		debug('Removing tsdown configs due to skipBuild');
+		await fs.rm(path.join(projectDir, 'tsdown.config.ts'), {force: true});
+		await fs.rm(path.join(projectDir, 'client/tsdown.config.ts'), {force: true});
+		await fs.rm(path.join(projectDir, 'server/tsdown.config.ts'), {force: true});
+	}
+
+	// Write final package.json
+	const finalPkgPath = path.join(projectDir, 'package.json');
+	debug('Writing final consolidated package.json to: %s', finalPkgPath);
+	await fse.writeJson(finalPkgPath, finalPkg, {spaces: '\t'});
+
+	// Write tsconfig.json (standardized base)
+	debug('Writing standardized tsconfig.json');
 	const tsconfig = {
 		compilerOptions: {
 			target: 'ESNext',
@@ -69,34 +212,225 @@ export const generateProject = async (opts: ProjectOptions) => {
 		},
 		include: ['src/**/*'],
 	};
-	await fse.writeJson(path.join(directory, 'tsconfig.json'), tsconfig, {spaces: '\t'});
+	if (type === 'fullstack') {
+		(tsconfig as any).include = ['client/src/**/*', 'server/src/**/*'];
+	}
+	await fse.writeJson(path.join(projectDir, 'tsconfig.json'), tsconfig, {spaces: '\t'});
 
 	// Initialize Git
-	try {
-		await execa('git', ['init'], {cwd: directory});
-		console.log('Initialized Git repository.');
-	} catch (e) {
-		console.error('Failed to initialize Git:', e);
+	const isGit = await fse.pathExists(path.join(projectDir, '.git'));
+	if (!isGit) {
+		debug('Initializing Git repository');
+		try {
+			await execa('git', ['init'], {cwd: projectDir});
+			p.log.success('Initialized Git repository.');
+		} catch (e) {
+			debug('Failed to initialize Git: %O', e);
+			p.log.error('Failed to initialize Git: ' + e);
+		}
+	} else {
+		debug('Git repository already initialized');
 	}
 
 	// GitHub Integration
-	if (opts.createGithub) {
+	if (opts.createGithubRepository && !isUpdate) {
+		debug('Creating GitHub repository');
 		try {
 			await execa('gh', ['repo', 'create', projectName, '--public', '--source=.', '--remote=origin'], {
-				cwd: directory,
+				cwd: projectDir,
 			});
-			console.log('Created GitHub repository.');
+			p.log.success('Created GitHub repository.');
 		} catch (e) {
-			console.error('Failed to create GitHub repository. Ensure "gh" CLI is installed and authenticated.', e);
+			debug('Failed to create GitHub repository: %O', e);
+			p.log.warn('Failed to create GitHub repository. Ensure "gh" CLI is installed and authenticated.');
 		}
 	}
 
-	console.log(`\nProject "${projectName}" scaffolded successfully in ${directory}`);
-	console.log('\nNext steps:');
-	const relativePath = path.relative(process.cwd(), directory);
-	if (relativePath && relativePath !== '.') {
-		console.log(`  cd ${relativePath}`);
+	// Post-scaffolding actions
+	if (opts.installDependencies) {
+		debug('Installing dependencies using %s', pm);
+		const s = p.spinner();
+		s.start(`Installing dependencies using ${pm}...`);
+		try {
+			await execa(pm, ['install'], {cwd: projectDir});
+			s.stop('Dependencies installed.');
+		} catch (e) {
+			debug('Failed to install dependencies: %O', e);
+			s.stop('Failed to install dependencies.');
+			p.log.error(String(e));
+		}
 	}
-	console.log('  npm install');
-	console.log('  npm run dev');
+
+	if (opts.build && finalPkg.scripts.build) {
+		debug('Building project');
+		const s = p.spinner();
+		s.start('Building project...');
+		try {
+			await execa(pm, ['run', 'build'], {cwd: projectDir});
+			s.stop('Project built.');
+		} catch (e) {
+			debug('Failed to build project: %O', e);
+			s.stop('Failed to build project.');
+			p.log.error(String(e));
+		}
+	}
+
+	p.log.info(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
+	showSummary(opts, pm);
+
+	if (opts.dev && finalPkg.scripts.dev) {
+		p.log.info('Starting dev server...');
+		if (opts.open) {
+			// Try to open the browser. Many dev servers have an --open flag.
+			// For vite, we can pass --open.
+			try {
+				await execa(pm, ['run', 'dev', '--', '--open'], {cwd: projectDir, stdio: 'inherit'});
+			} catch (e) {
+				p.log.error('Dev server failed: ' + e);
+			}
+		} else {
+			try {
+				await execa(pm, ['run', 'dev'], {cwd: projectDir, stdio: 'inherit'});
+			} catch (e) {
+				p.log.error('Dev server failed: ' + e);
+			}
+		}
+	}
 };
+
+async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) {
+	const files = await fse.readdir(dirPath);
+
+	for (const file of files) {
+		if ((await fse.stat(path.join(dirPath, file))).isDirectory()) {
+			arrayOfFiles = await getAllFiles(path.join(dirPath, file), arrayOfFiles);
+		} else {
+			arrayOfFiles.push(path.join(dirPath, file));
+		}
+	}
+
+	return arrayOfFiles;
+}
+
+function replaceVariables(content: string, opts: ProjectOptions): string {
+	const {projectName, template} = opts;
+	let description = '';
+
+	switch (template) {
+		case 'cli':
+			description = 'A modern Node.js CLI application with TypeScript and automated tooling.';
+			break;
+		case 'webpage':
+			description = 'A standalone web page/application for modern browsers.';
+			break;
+		case 'fullstack':
+			description = 'A full-stack monorepo with an Express server and a React/MUI client.';
+			break;
+		case 'webapp':
+			description = 'A classic web application with an Express backend.';
+			break;
+	}
+
+	return content.replaceAll('{{projectName}}', projectName).replaceAll('{{description}}', description);
+}
+
+function mergePackageJson(target: any, source: any) {
+	if (source.scripts) target.scripts = {...target.scripts, ...source.scripts};
+	if (source.dependencies) target.dependencies = {...target.dependencies, ...source.dependencies};
+	if (source.devDependencies) target.devDependencies = {...target.devDependencies, ...source.devDependencies};
+	if (source.workspaces) target.workspaces = source.workspaces;
+}
+
+function isSeedFile(filePath: string): boolean {
+	const seedDirs = ['src/', 'client/src/', 'server/src/', 'backend/src/', 'frontend/src/'];
+	const seedFiles = ['index.html', 'App.tsx', 'main.tsx'];
+	return seedDirs.some((dir) => filePath.startsWith(dir)) || seedFiles.some((file) => filePath === file);
+}
+
+async function mergeFile(filePath: string, existing: string, template: string) {
+	debug('Merging file: %s', filePath);
+	const tempBase = filePath + '.base.tmp';
+	const tempNew = filePath + '.new.tmp';
+
+	try {
+		await fse.writeFile(tempNew, template);
+		await fse.writeFile(tempBase, '');
+
+		try {
+			debug('Executing git merge-file for %s', filePath);
+			await execa('git', ['merge-file', filePath, tempBase, tempNew]);
+		} catch (e: any) {
+			if (e.exitCode === 1) {
+				debug('Merge conflict in %s', filePath);
+				p.log.warn(`Conflict in ${filePath}. Please resolve manually.`);
+			} else {
+				debug('Git merge-file failed: %O', e);
+				p.log.error(`Failed to merge ${filePath}: ${e.message}`);
+			}
+		}
+	} finally {
+		await fs.rm(tempBase, {force: true});
+		await fs.rm(tempNew, {force: true});
+	}
+}
+
+function showSummary(opts: ProjectOptions, pm: string) {
+	debug('Showing summary for options: %O', opts);
+	const {template, skipBuild, installDependencies, build, dev, open, projectName} = opts;
+
+	const descriptions: Record<string, string> = {
+		cli: 'A modern Node.js CLI application with TypeScript, automated tooling, and argument parsing.',
+		webpage: 'A standalone web page/application ready for modern browsers.',
+		fullstack: 'A full-stack monorepo featuring an Express server API and a React/MUI client front-end.',
+		webapp: 'A classic web application utilizing an Express backend and standard templating.',
+	};
+
+	const desc = descriptions[template] || 'A new template project.';
+
+	// The array format avoids stray tabs and newlines that break the clack box rendering
+	p.note(
+		[
+			`Project:          ${projectName}`,
+			`Template:         ${template}`,
+			`Package manager:  ${pm}`,
+			`Tools included:   tsc, oxlint, prettier, vitest, husky, debug`,
+			``,
+			`Configuration:`,
+			`  Install deps:   ${installDependencies ? 'Yes' : 'No'}`,
+			`  Build on init:  ${build ? 'Yes' : 'No'}`,
+			`  Start dev:      ${dev ? 'Yes' : 'No'}`,
+			`  Open browser:   ${open ? 'Yes' : 'No'}`,
+		].join('\n'),
+		'Project Summary',
+	);
+
+	p.log.info([`About this project:`, `  ${desc}`, `  All essential tools (linting, formatting, testing) are pre-configured.`].join('\n'));
+
+	p.log.info(
+		[
+			`Available Commands:`,
+			`  ${pm} run dev    - Starts the development server`,
+			`  ${pm} run build  - Builds the project for production`,
+			`  ${pm} run test   - Runs the unit test suite (Vitest)`,
+			`  ${pm} run lint   - Lints and formats the codebase`,
+			`  ${pm} run ci     - Runs lint, build, and test (used by CI/CD)`,
+		].join('\n'),
+	);
+
+	const nextSteps = [];
+	const relativePath = path.relative(process.cwd(), path.join(opts.directory, opts.projectName));
+	if (relativePath && relativePath !== '.') {
+		nextSteps.push(`  cd ${relativePath}`);
+	}
+	if (!installDependencies) {
+		nextSteps.push(`  ${pm} install`);
+	}
+	if (!dev) {
+		if (!skipBuild) {
+			nextSteps.push(`  ${pm} run dev`);
+		}
+		nextSteps.push(`  ${pm} run test`);
+	}
+
+	p.log.success([`Next steps:`, ...nextSteps].join('\n'));
+}

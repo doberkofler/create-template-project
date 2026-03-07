@@ -1,4 +1,3 @@
-*.md
-*.jsonc
-*.html
 src/templates/*/files
+dist
+node_modules

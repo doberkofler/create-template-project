@@ -20,7 +20,7 @@ When working in this repository, please:
 
 - **Runtime:** Node.js (>=22.0.0)
 - **Language:** TypeScript (Strict Mode)
-- **CLI Framework:** `commander` and `@inquirer/prompts`
+- **CLI Framework:** `commander` and `@clack/prompts`
 - **Process Execution:** `execa`
 - **Validation:** `zod`
 - **Bundler:** `tsdown`

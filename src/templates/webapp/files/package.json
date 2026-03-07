@@ -1,0 +1,13 @@
+{
+	"dependencies": {
+		"express": "^4.21.0"
+	},
+	"devDependencies": {
+		"@types/express": "^4.17.21",
+		"tsdown": "^0.20.3"
+	},
+	"scripts": {
+		"build": "tsdown",
+		"start": "node dist/server/index.js"
+	}
+}

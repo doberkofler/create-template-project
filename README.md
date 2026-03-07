@@ -5,14 +5,15 @@
 [![Node.js CI](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml)
 [![Coverage Status](https://coveralls.io/repos/github/doberkofler/create-template-project/badge.svg?branch=master)](https://coveralls.io/github/doberkofler/create-template-project?branch=master)
 
-An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (Node, Vanilla JS, Vanilla HTML, React) with best-practice configurations pre-installed.
+An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Webpage, Webapp, Fullstack) with best-practice configurations pre-installed.
 
 ## Features
 
 - **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `prettier`, and `typescript` (strict mode).
-- **Interactive CLI:** Prompts you for project details if CLI arguments are missing.
+- **Interactive CLI:** Prompts you for project details if CLI arguments are missing, using `@clack/prompts`.
+- **Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`.
+- **No-Build Option:** Supports creating simple projects without a build step (strips `tsdown`).
 - **GitHub Integration:** Automatically initializes a Git repository and can create a GitHub repository using the `gh` CLI.
-- **Modular Templates:** Easily extensible architecture for adding new project types.
 - **CI Ready:** Generates GitHub Actions workflows for automated testing and linting.
 
 ## Installation
@@ -29,43 +30,62 @@ npx create-template-project
 
 ## Usage
 
-### Interactive Mode
+### Interactive Mode (Onboarding)
 
-Simply run the command without arguments to be prompted for project details:
-
-```bash
-create-template-project
-```
-
-### CLI Arguments
-
-You can also provide arguments to skip prompts:
+To start the interactive wizard, use the `onboard` command:
 
 ```bash
-create-template-project --template node --name my-cool-api --github
+create-template-project onboard
 ```
 
-#### Options:
+Running the tool without any command will display the help message.
 
-- `-t, --template <type>`: Template type (`node`, `vanilla-html`, `vanilla-js`, `react`)
+### CLI Commands
+
+You can skip the wizard by using the `create` or `update` commands with the appropriate options.
+
+#### Create a new project
+
+```bash
+create-template-project create --template cli --name my-cool-tool --github
+```
+
+#### Update an existing project
+
+```bash
+create-template-project update --template cli --name existing-project
+```
+
+#### Global Options:
+
+- `-h, --help`: Show help
+- `-V, --version`: Show version
+
+#### Command Options (create/update):
+
+- `-t, --template <type>`: Template type (`cli`, `webpage`, `webapp`, `fullstack`)
 - `-n, --name <name>`: Project name
 - `--github`: Create GitHub project (requires `gh` CLI authenticated)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
-- `-h, --help`: Show help
+- `-f, --force`: Force overwrite of existing directory (create only)
+- `--no-build`: Create a project without a build step (not allowed for `webapp`)
 
 ## Project Templates
 
-### 🟢 Node.js
-A clean Node.js environment featuring `tsdown` for bundling, `commander` for CLI development, and `cli-progress`.
+### 🟢 CLI
+A clean Node.js CLI environment featuring `commander` and `cli-progress`. Supports optional `tsdown` bundling.
 
-### 🔵 Vanilla HTML
-Simple static site setup with TypeScript compilation.
+### 🔵 Webpage
+Standalone web page setup for modern browsers. Can be used with or without a build step.
 
-### 🟡 Vanilla JavaScript
-Monorepo-style structure with a separate `frontend/` and a `backend/` Express server.
+### 🟡 Webapp
+Classic web application structure with a `frontend/` and a `backend/` Express server. Built with TypeScript.
 
-### ⚛️ React
-Full-stack React setup with MUI, Express backend, and Playwright for E2E testing.
+### ⚛️ Fullstack
+A full-stack monorepo featuring:
+- **Client**: React with MUI and TypeScript.
+- **Server**: Express.js backend.
+- **E2E**: Playwright for end-to-end testing.
 
 ## Contributing
 

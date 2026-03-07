@@ -1,0 +1,30 @@
+{
+	"name": "{{projectName}}",
+	"version": "0.1.0",
+	"type": "module",
+	"scripts": {
+		"lint": "tsc && oxlint --type-aware --type-check && npm run prettier",
+		"prettier": "prettier --check .",
+		"prettier-write": "prettier --write .",
+		"test": "vitest run --coverage",
+		"ci": "npm run lint && npm run build && npm run test",
+		"prepare": "husky"
+	},
+	"dependencies": {
+		"debug": "^4.4.3"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^20.4.2",
+		"@commitlint/config-conventional": "^20.4.2",
+		"@types/debug": "^4.1.12",
+		"@types/node": "^25.3.0",
+		"@vitest/coverage-v8": "^4.0.18",
+		"conventional-changelog-cli": "^5.0.0",
+		"husky": "^9.1.7",
+		"oxlint": "^1.50.0",
+		"oxlint-tsgolint": "^0.15.0",
+		"prettier": "^3.8.1",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.18"
+	}
+}

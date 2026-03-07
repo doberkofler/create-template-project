@@ -3,7 +3,7 @@
 This document provides essential instructions for autonomous agents (like Cursor, GitHub Copilot, or CLI agents) working on the `create-template-project` repository.
 
 ## Project Overview
-An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (Node, Vanilla JS, Vanilla HTML, React). It emphasizes best practices including strict TypeScript, automated linting, testing, and GitHub integration.
+An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Webpage, Webapp, Fullstack). It emphasizes best practices including strict TypeScript, automated linting, testing, and GitHub integration.
 
 ## Build, Lint, and Test Commands
 
@@ -54,8 +54,8 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 
 ### Project Structure
 - `src/index.ts`: Entry point. Orchestrates the CLI flow.
-- `src/cli.ts`: Argument parsing (using `commander`) and interactive user prompts (using `@inquirer/prompts`).
-- `src/templates/`: Individual template definitions (e.g., `base.ts`, `node.ts`). Each exports a `TemplateDefinition`.
+- `src/cli.ts`: Argument parsing (using `commander` subcommands: `onboard`, `create`, `update`) and interactive user prompts (using `@clack/prompts`).
+- `src/templates/`: Individual template definitions (e.g., `base/index.ts`, `cli/index.ts`). Each exports a `TemplateDefinition` getter.
 - `src/generators/`: Functions that write files and perform side effects like `git init` or `gh repo create`.
 - `src/types.ts`: Shared type definitions and Zod schemas.
 
