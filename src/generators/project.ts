@@ -222,24 +222,16 @@ export const generateProject = async (opts: ProjectOptions) => {
 	debug('Writing final consolidated package.json to: %s', finalPkgPath);
 	await fse.writeJson(finalPkgPath, finalPkg, {spaces: '\t'});
 
-	// Write tsconfig.json (standardized base)
-	debug('Writing standardized tsconfig.json');
-	const tsconfig = {
-		compilerOptions: {
-			target: 'ESNext',
-			module: 'NodeNext',
-			moduleResolution: 'NodeNext',
-			strict: true,
-			skipLibCheck: true,
-			outDir: './dist',
-			esModuleInterop: true,
-		},
-		include: ['src/**/*'],
-	};
+	// For fullstack templates, adjust the tsconfig.json include paths
 	if (type === 'fullstack') {
-		(tsconfig as any).include = ['client/src/**/*', 'server/src/**/*'];
+		const tsconfigPath = path.join(projectDir, 'tsconfig.json');
+		if (await fse.pathExists(tsconfigPath)) {
+			let tsconfigContent = await fse.readFile(tsconfigPath, 'utf8');
+			tsconfigContent = tsconfigContent.replace(/"src\/\*\*\/\*"/g, '"client/src/**/*",\n\t\t"server/src/**/*"');
+			await fse.writeFile(tsconfigPath, tsconfigContent);
+			debug('Updated tsconfig.json includes for fullstack template');
+		}
 	}
-	await fse.writeJson(path.join(projectDir, 'tsconfig.json'), tsconfig, {spaces: '\t'});
 
 	// Initialize Git
 	const isGit = await fse.pathExists(path.join(projectDir, '.git'));

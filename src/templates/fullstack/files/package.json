@@ -10,12 +10,20 @@
 		"@mui/icons-material": "",
 		"@emotion/react": "",
 		"@emotion/styled": "",
-		"express": ""
+		"express": "",
+		"@trpc/server": "",
+		"@trpc/client": "",
+		"@trpc/tanstack-react-query": "",
+		"@tanstack/react-query": "",
+		"zod": "",
+		"react-router-dom": "",
+		"cors": ""
 	},
 	"devDependencies": {
 		"@types/react": "",
 		"@types/react-dom": "",
 		"@types/express": "",
+		"@types/cors": "",
 		"@playwright/test": "",
 		"tsdown": ""
 	},

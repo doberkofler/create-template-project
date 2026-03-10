@@ -65,7 +65,7 @@
 			"description": "TypeScript definitions for cli-progress."
 		},
 		"tsdown": {
-			"version": "^0.21.0",
+			"version": "^0.21.1",
 			"description": "A zero-config bundler for TypeScript."
 		},
 		"express": {
@@ -111,6 +111,38 @@
 		"@playwright/test": {
 			"version": "^1.58.2",
 			"description": "End-to-end testing framework."
+		},
+		"@trpc/server": {
+			"version": "^11.12.0",
+			"description": "tRPC server library."
+		},
+		"@trpc/client": {
+			"version": "^11.12.0",
+			"description": "tRPC client library."
+		},
+		"@trpc/tanstack-react-query": {
+			"version": "^11.12.0",
+			"description": "tRPC integration for TanStack React Query."
+		},
+		"@tanstack/react-query": {
+			"version": "^5.90.21",
+			"description": "Powerful asynchronous state management for TS/JS."
+		},
+		"zod": {
+			"version": "^4.3.6",
+			"description": "TypeScript-first schema validation with static type inference."
+		},
+		"react-router-dom": {
+			"version": "^7.13.1",
+			"description": "Declarative routing for React web applications."
+		},
+		"cors": {
+			"version": "^2.8.6",
+			"description": "Node.js CORS middleware."
+		},
+		"@types/cors": {
+			"version": "^2.8.19",
+			"description": "TypeScript definitions for cors."
 		}
 	}
 }
