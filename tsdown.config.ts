@@ -6,5 +6,5 @@ export default defineConfig({
 	platform: 'node',
 	dts: true,
 	unbundle: true,
-	external: [/^[^./]/], // Mark all non-relative imports as external
+	deps: {neverBundle: [/^[^./]/]}, // Mark all non-relative imports as external
 });

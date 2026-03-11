@@ -12,7 +12,6 @@ export interface ProjectOptions {
 	packageManager?: PackageManagerType;
 	createGithubRepository?: boolean;
 	directory: string;
-	force?: boolean;
 	overwrite?: boolean;
 	update?: boolean;
 	skipBuild?: boolean;

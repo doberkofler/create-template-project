@@ -67,7 +67,7 @@ create-template-project update --template cli --name existing-project
 - `-n, --name <name>`: Project name
 - `--github`: Create GitHub project (requires `gh` CLI authenticated)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
-- `-f, --force`: Force overwrite of existing directory (create only)
+- `--overwrite`: Overwrite existing directory by removing it first (create & update)
 - `--no-build`: Create a project without a build step (not allowed for `webapp`)
 
 ## Project Templates

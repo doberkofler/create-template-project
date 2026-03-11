@@ -28,11 +28,6 @@ Templates:
   webpage     - Standalone web page (modern HTML/JS).
   webapp      - Web application with TypeScript and an Express backend.
   fullstack   - Full-stack monorepo with Express server and React/MUI client.
-
-Commands:
-  create      - Create a new project from a template.
-  update      - Update an existing project from its template.
-  onboard     - Start interactive onboarding.
 `,
 		);
 
@@ -46,11 +41,10 @@ Commands:
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'npm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
-		.option('-f, --force', 'Remove existing directory before scaffolding', false)
-		.option('--overwrite', 'Overwrite existing files without removing the directory', false)
+		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
 		.option('--skip-build', 'Skip build tooling (disables bundling and uses raw source files)', false)
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
-		.option('--build', 'Build the target after scaffolding', false)
+		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
 		.action((opts) => {
@@ -67,7 +61,6 @@ Commands:
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: path.resolve(opts.directory),
 				createGithubRepository: !!opts.createGithubRepository,
-				force: !!opts.force,
 				overwrite: !!opts.overwrite,
 			};
 			debug('Processed "create" options: %O', commandResult);
@@ -81,11 +74,10 @@ Commands:
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'npm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
-		.option('-f, --force', 'Remove existing directory before updating', false)
-		.option('--overwrite', 'Overwrite existing files instead of merging', false)
+		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
 		.option('--skip-build', 'Skip build tooling (disables bundling and uses raw source files)', false)
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
-		.option('--build', 'Build the target after scaffolding', false)
+		.option('--build', 'Run the CI script (lint, build, test) after updating', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
 		.action((opts) => {
@@ -102,7 +94,6 @@ Commands:
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: path.resolve(opts.directory),
 				createGithubRepository: !!opts.createGithubRepository,
-				force: !!opts.force,
 				overwrite: !!opts.overwrite,
 			};
 			debug('Processed "update" options: %O', commandResult);
@@ -171,15 +162,13 @@ Commands:
 			const exists = await fse.pathExists(projectDir);
 
 			let update = false;
-			let force = false;
 			let overwrite = false;
 
 			if (exists) {
 				const action = await p.select({
 					message: `Directory "${projectDir}" already exists. What would you like to do?`,
 					options: [
-						{label: 'Remove the project directory and create fresh', value: 'remove'},
-						{label: 'Overwrite its content', value: 'overwrite'},
+						{label: 'Overwrite existing directory by removing it first', value: 'overwrite'},
 						{label: 'Run an update', value: 'update'},
 						{label: 'Cancel', value: 'cancel'},
 					],
@@ -190,9 +179,7 @@ Commands:
 					process.exit(0);
 				}
 
-				if (action === 'remove') {
-					force = true;
-				} else if (action === 'update') {
+				if (action === 'update') {
 					update = true;
 				} else if (action === 'overwrite') {
 					overwrite = true;
@@ -227,7 +214,7 @@ Commands:
 			let build = false;
 			if (installDependencies) {
 				const res = await p.confirm({
-					message: 'Should we build application?',
+					message: 'Should we run the CI script (lint, build, test)?',
 					initialValue: true,
 				});
 
@@ -256,7 +243,6 @@ Commands:
 				createGithubRepository,
 				directory: path.resolve(directory as string),
 				update,
-				force,
 				overwrite,
 				skipBuild,
 				installDependencies,
@@ -299,8 +285,8 @@ Commands:
 	const projectDir = path.resolve(commandResult.directory, commandResult.projectName);
 	const exists = await fse.pathExists(projectDir);
 
-	if (exists && !commandResult.force && !commandResult.update && !commandResult.overwrite) {
-		p.cancel(`Directory "${projectDir}" already exists. Use --force to overwrite or "update" command.`);
+	if (exists && !commandResult.update && !commandResult.overwrite) {
+		p.cancel(`Directory "${projectDir}" already exists. Use --overwrite to overwrite or "update" command.`);
 		process.exit(1);
 	}
 

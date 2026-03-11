@@ -17,19 +17,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEPENDENCY_CONFIG_PATH = path.resolve(__dirname, '../config/dependencies.json');
 
 export const generateProject = async (opts: ProjectOptions) => {
-	const {template: type, projectName, directory, force, update, overwrite, skipBuild} = opts;
+	const {template: type, projectName, directory, update, overwrite, skipBuild} = opts;
 	const projectDir = path.join(directory, projectName);
 	debug('Project generation started for: %s', projectName);
 	debug('Options: %O', opts);
 	debug('Project directory: %s', projectDir);
 
-	const isUpdate = !!update;
+	let isUpdate = !!update;
 
 	if (await fse.pathExists(projectDir)) {
-		if (force) {
+		if (overwrite) {
 			await fs.rm(projectDir, {recursive: true, force: true});
-		} else if (!isUpdate && !overwrite) {
-			throw new Error(`Directory "${projectDir}" already exists. Use --force to remove, --overwrite to overwrite or --update to update.`);
+			isUpdate = false; // Directory wiped, treat as fresh creation
+		} else if (!isUpdate) {
+			throw new Error(`Directory "${projectDir}" already exists. Use --overwrite to replace it or --update to update.`);
 		}
 	}
 
@@ -227,6 +228,21 @@ export const generateProject = async (opts: ProjectOptions) => {
 	debug('Writing final consolidated package.json to: %s', finalPkgPath);
 	await fse.writeJson(finalPkgPath, finalPkg, {spaces: '\t'});
 
+	// Append dependencies to CONTRIBUTING.md
+	if (addedDeps.length > 0) {
+		const contributingPath = path.join(projectDir, 'CONTRIBUTING.md');
+		if (await fse.pathExists(contributingPath)) {
+			let contribContent = await fse.readFile(contributingPath, 'utf8');
+			contribContent += '\n## Dependencies\n\n';
+			const uniqueDeps = Array.from(new Set(addedDeps.map((d) => JSON.stringify(d)))).map((s) => JSON.parse(s)) as Array<{name: string; description: string}>;
+			for (const dep of uniqueDeps) {
+				contribContent += `- **${dep.name}**: ${dep.description}\n`;
+			}
+			await fse.writeFile(contributingPath, contribContent);
+			debug('Appended dependencies to CONTRIBUTING.md');
+		}
+	}
+
 	// For fullstack templates, adjust the tsconfig.json include paths
 	if (type === 'fullstack') {
 		const tsconfigPath = path.join(projectDir, 'tsconfig.json');
@@ -279,25 +295,39 @@ export const generateProject = async (opts: ProjectOptions) => {
 			debug('Failed to install dependencies: %O', e);
 			s.stop('Failed to install dependencies.');
 			p.log.error(String(e));
+			throw new Error('Failed to install dependencies.');
 		}
 	}
 
-	if (opts.build && finalPkg.scripts.build) {
-		debug('Building project');
+	if (opts.build && finalPkg.scripts.ci) {
+		debug('Running CI script');
 		const s = p.spinner();
-		s.start('Building project...');
+
+		if (finalPkg.scripts['prettier-write']) {
+			s.start('Formatting files with Prettier...');
+			try {
+				await execa(pm, ['run', 'prettier-write'], {cwd: projectDir});
+				s.stop('Files formatted.');
+			} catch (e) {
+				debug('Failed to format files: %O', e);
+				s.stop('Failed to format files.');
+			}
+		}
+
+		s.start('Running CI script (lint, build, test)...');
 		try {
-			await execa(pm, ['run', 'build'], {cwd: projectDir});
-			s.stop('Project built.');
+			await execa(pm, ['run', 'ci'], {cwd: projectDir});
+			s.stop('CI script completed.');
 		} catch (e) {
-			debug('Failed to build project: %O', e);
-			s.stop('Failed to build project.');
+			debug('Failed to run CI script: %O', e);
+			s.stop('Failed to run CI script.');
 			p.log.error(String(e));
+			throw new Error('Failed to run CI script.');
 		}
 	}
 
 	p.log.info(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
-	showSummary(opts, pm, addedDeps);
+	showSummary(opts, pm);
 
 	if (opts.dev && finalPkg.scripts.dev) {
 		p.log.info('Starting dev server...');
@@ -395,72 +425,32 @@ async function mergeFile(filePath: string, existing: string, template: string) {
 	}
 }
 
-function showSummary(opts: ProjectOptions, pm: string, dependencies: Array<{name: string; description: string}>) {
+function showSummary(opts: ProjectOptions, pm: string) {
 	debug('Showing summary for options: %O', opts);
-	const {template, skipBuild, installDependencies, build, dev, open, projectName} = opts;
-
-	const descriptions: Record<string, string> = {
-		cli: 'A modern Node.js CLI application with TypeScript, automated tooling, and argument parsing.',
-		webpage: 'A standalone web page/application ready for modern browsers.',
-		fullstack: 'A full-stack monorepo featuring an Express server API and a React/MUI client front-end.',
-		webapp: 'A classic web application utilizing an Express backend and standard templating.',
-	};
-
-	const desc = descriptions[template] || 'A new template project.';
-
-	// The array format avoids stray tabs and newlines that break the clack box rendering
-	p.note(
-		[
-			`Project:          ${projectName}`,
-			`Template:         ${template}`,
-			`Package manager:  ${pm}`,
-			`Tools included:   tsc, oxlint, prettier, vitest, husky, debug`,
-			``,
-			`Configuration:`,
-			`  Install deps:   ${installDependencies ? 'Yes' : 'No'}`,
-			`  Build on init:  ${build ? 'Yes' : 'No'}`,
-			`  Start dev:      ${dev ? 'Yes' : 'No'}`,
-			`  Open browser:   ${open ? 'Yes' : 'No'}`,
-		].join('\n'),
-		'Project Summary',
-	);
-
-	p.log.info([`About this project:`, `  ${desc}`, `  All essential tools (linting, formatting, testing) are pre-configured.`].join('\n'));
-
-	if (dependencies.length > 0) {
-		p.log.info('Dependencies:');
-		// Remove duplicates if any (e.g. if resolved multiple times)
-		const uniqueDeps = Array.from(new Set(dependencies.map((d) => JSON.stringify(d)))).map((s) => JSON.parse(s));
-		for (const dep of uniqueDeps) {
-			p.log.info(`${dep.name} - ${dep.description}`);
-		}
-	}
-
-	p.log.info(
-		[
-			`Available Commands:`,
-			`  ${pm} run dev    - Starts the development server`,
-			`  ${pm} run build  - Builds the project for production`,
-			`  ${pm} run test   - Runs the unit test suite (Vitest)`,
-			`  ${pm} run lint   - Lints and formats the codebase`,
-			`  ${pm} run ci     - Runs lint, build, and test (used by CI/CD)`,
-		].join('\n'),
-	);
+	const {skipBuild, installDependencies, dev} = opts;
 
 	const nextSteps = [];
 	const relativePath = path.relative(process.cwd(), path.join(opts.directory, opts.projectName));
 	if (relativePath && relativePath !== '.') {
-		nextSteps.push(`  cd ${relativePath}`);
+		nextSteps.push(`cd ${relativePath}`);
 	}
 	if (!installDependencies) {
-		nextSteps.push(`  ${pm} install`);
+		nextSteps.push(`${pm} install`);
 	}
 	if (!dev) {
 		if (!skipBuild) {
-			nextSteps.push(`  ${pm} run dev`);
+			nextSteps.push(`${pm} run dev`);
 		}
-		nextSteps.push(`  ${pm} run test`);
+		nextSteps.push(`${pm} run test`);
 	}
 
-	p.log.success([`Next steps:`, ...nextSteps].join('\n'));
+	const commands = [
+		`${pm} run dev    - Starts the development server`,
+		`${pm} run build  - Builds the project for production`,
+		`${pm} run test   - Runs the unit test suite (Vitest)`,
+		`${pm} run lint   - Lints and formats the codebase`,
+		`${pm} run ci     - Runs lint, build, and test (used by CI/CD)`,
+	];
+
+	p.note(['Available Commands:', ...commands.map((c) => `  ${c}`), '', 'Next steps:', ...nextSteps.map((s) => `  ${s}`)].join('\n'), 'Project ready');
 }

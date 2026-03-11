@@ -73,7 +73,7 @@ describe('generateProject', () => {
 		expect(execa).toHaveBeenCalledWith('git', ['init'], expect.anything());
 		expect(execa).toHaveBeenCalledWith('gh', expect.anything(), expect.anything());
 		expect(execa).toHaveBeenCalledWith('npm', ['install'], expect.anything());
-		expect(execa).toHaveBeenCalledWith('npm', ['run', 'build'], expect.anything());
+		expect(execa).toHaveBeenCalledWith('npm', ['run', 'ci'], expect.anything());
 	});
 
 	it('should handle git init failure', async () => {
@@ -141,8 +141,8 @@ describe('generateProject', () => {
 		expect(pkg.dependencies).toHaveProperty('@mui/icons-material');
 	});
 
-	it('should handle --force flag', async () => {
-		const projectName = 'test-force-project';
+	it('should handle --overwrite flag', async () => {
+		const projectName = 'test-overwrite-project';
 		const projectPath = path.join(tmpDir, projectName);
 		await fse.ensureDir(projectPath);
 		await fse.writeFile(path.join(projectPath, 'old-file.txt'), 'old');
@@ -152,7 +152,7 @@ describe('generateProject', () => {
 			createGithubRepository: false,
 			directory: tmpDir,
 			update: false,
-			force: true,
+			overwrite: true,
 		};
 		await generateProject(opts);
 		expect(await fse.pathExists(path.join(projectPath, 'old-file.txt'))).toBe(false);
@@ -250,10 +250,10 @@ describe('generateProject', () => {
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('Failed to merge'));
 	});
 
-	it('should handle build failure', async () => {
-		const projectName = 'test-build-fail';
+	it('should handle ci script failure', async () => {
+		const projectName = 'test-ci-fail';
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'build') throw new Error('fail');
+			if (cmd === 'npm' && args?.[1] === 'ci') throw new Error('fail');
 			return {stdout: '', stderr: ''};
 		});
 		const opts = {
@@ -263,7 +263,7 @@ describe('generateProject', () => {
 			update: false,
 			build: true,
 		};
-		await generateProject(opts);
+		await expect(generateProject(opts)).rejects.toThrow('Failed to run CI script.');
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('fail'));
 	});
 
@@ -353,7 +353,7 @@ describe('generateProject', () => {
 			return {stdout: '', stderr: ''};
 		});
 		const opts = {template: 'cli' as const, projectName, directory: tmpDir, update: false, installDependencies: true};
-		await generateProject(opts);
+		await expect(generateProject(opts)).rejects.toThrow('Failed to install dependencies.');
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
 	});
 
@@ -368,7 +368,7 @@ describe('generateProject', () => {
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('dev fail'));
 	});
 
-	it('should throw if directory exists and no force/update/overwrite', async () => {
+	it('should throw if directory exists and no update/overwrite', async () => {
 		const projectName = 'test-exists-error';
 		const projectPath = path.join(tmpDir, projectName);
 		await fse.ensureDir(projectPath);
