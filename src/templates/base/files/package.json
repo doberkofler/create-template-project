@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"lint": "tsc && oxlint --type-aware --type-check && npm run prettier",
+		"lint": "tsc && oxlint && npm run prettier",
 		"prettier": "prettier --check .",
 		"prettier-write": "prettier --write .",
 		"test": "vitest run --coverage",
