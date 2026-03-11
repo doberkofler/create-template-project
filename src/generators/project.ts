@@ -91,13 +91,18 @@ export const generateProject = async (opts: ProjectOptions) => {
 			debug('Reading physical files from: %s', t.templateDir);
 			const files = await getAllFiles(t.templateDir);
 			for (const file of files) {
-				const relativePath = path.relative(t.templateDir, file);
-				const targetPath = path.join(projectDir, relativePath);
+				let relativePath = path.relative(t.templateDir, file);
+				let targetPath = path.join(projectDir, relativePath);
 
 				// Skip seed files during update
 				if (isUpdate && isSeedFile(relativePath)) {
 					debug('Skipping seed file during update: %s', relativePath);
 					continue;
+				}
+
+				if (relativePath === '_oxlint.config.ts') {
+					relativePath = 'oxlint.config.ts';
+					targetPath = path.join(projectDir, relativePath);
 				}
 
 				if (relativePath === 'package.json') {
