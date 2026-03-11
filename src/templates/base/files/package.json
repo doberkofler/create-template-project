@@ -23,6 +23,7 @@
 		"husky": "",
 		"oxlint": "",
 		"oxlint-tsgolint": "",
+		"eslint-plugin-regexp": "",
 		"prettier": "",
 		"typescript": "",
 		"vitest": ""

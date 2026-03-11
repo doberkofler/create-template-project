@@ -8,7 +8,9 @@ export const getBaseTemplate = (_opts: ProjectOptions): TemplateDefinition => {
 	return {
 		name: 'base',
 		dependencies: {},
-		devDependencies: {},
+		devDependencies: {
+			'eslint-plugin-regexp': '',
+		},
 		scripts: {},
 		files: [],
 		templateDir: path.resolve(__dirname, 'files'),

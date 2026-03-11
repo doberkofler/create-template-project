@@ -143,6 +143,10 @@
 		"@types/cors": {
 			"version": "^2.8.19",
 			"description": "TypeScript definitions for cors."
+		},
+		"eslint-plugin-regexp": {
+			"version": "^3.0.0",
+			"description": "ESLint plugin for finding regexp mistakes and style guide violations."
 		}
 	}
 }

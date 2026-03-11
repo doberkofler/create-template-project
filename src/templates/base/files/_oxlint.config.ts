@@ -1,233 +1,74 @@
 import { defineConfig } from 'oxlint';
+import pluginRegexp from 'eslint-plugin-regexp';
 
 export default defineConfig({
 	options: {
 		typeAware: true,
 		typeCheck: true
 	},
-  "plugins": [
-    "unicorn",
-    "typescript",
-    "oxc",
-    "import",
-    "react",
-    "jsdoc",
-    "promise",
-    "vitest"
-  ],
-  "jsPlugins": [
-    "eslint-plugin-regexp"
-  ],
-  "categories": {},
-  "rules": {
-    "constructor-super": "error",
-    "for-direction": "error",
-    "no-async-promise-executor": "error",
-    "no-caller": "error",
-    "no-class-assign": "error",
-    "no-compare-neg-zero": "error",
-    "no-cond-assign": "error",
-    "no-const-assign": "error",
-    "no-constant-binary-expression": "error",
-    "no-constant-condition": "error",
-    "no-control-regex": "error",
-    "no-debugger": "error",
-    "no-delete-var": "error",
-    "no-dupe-class-members": "error",
-    "no-dupe-else-if": "error",
-    "no-dupe-keys": "error",
-    "no-duplicate-case": "error",
-    "no-empty-character-class": "error",
-    "no-empty-pattern": "error",
-    "no-empty-static-block": "error",
-    "no-eval": "error",
-    "no-ex-assign": "error",
-    "no-extra-boolean-cast": "error",
-    "no-func-assign": "error",
-    "no-global-assign": "error",
-    "no-import-assign": "error",
-    "no-invalid-regexp": "error",
-    "no-irregular-whitespace": "error",
-    "no-loss-of-precision": "error",
-    "no-new-native-nonconstructor": "error",
-    "no-nonoctal-decimal-escape": "error",
-    "no-obj-calls": "error",
-    "no-self-assign": "error",
-    "no-setter-return": "error",
-    "no-shadow-restricted-names": "error",
-    "no-sparse-arrays": "error",
-    "no-this-before-super": "error",
-    "no-unassigned-vars": "error",
-    "no-unsafe-finally": "error",
-    "no-unsafe-negation": "error",
-    "no-unsafe-optional-chaining": "error",
-    "no-unused-expressions": "error",
-    "no-unused-labels": "error",
-    "no-unused-private-class-members": "error",
-    "no-useless-backreference": "error",
-    "no-useless-catch": "error",
-    "no-useless-escape": "error",
-    "no-useless-rename": "error",
-    "no-with": "error",
-    "require-yield": "error",
-    "use-isnan": "error",
-    "valid-typeof": "error",
-    "oxc/bad-array-method-on-arguments": "error",
-    "oxc/bad-char-at-comparison": "error",
-    "oxc/bad-comparison-sequence": "error",
-    "oxc/bad-min-max-func": "error",
-    "oxc/bad-object-literal-comparison": "error",
-    "oxc/bad-replace-all-arg": "error",
-    "oxc/const-comparisons": "error",
-    "oxc/double-comparisons": "error",
-    "oxc/erasing-op": "error",
-    "oxc/missing-throw": "error",
-    "oxc/number-arg-out-of-range": "error",
-    "oxc/only-used-in-recursion": "error",
-    "oxc/uninvoked-array-callback": "error",
-    "typescript/await-thenable": "error",
-    "typescript/no-array-delete": "error",
-    "typescript/no-base-to-string": "error",
-    "typescript/no-duplicate-enum-values": "error",
-    "typescript/no-duplicate-type-constituents": "error",
-    "typescript/no-extra-non-null-assertion": "error",
-    "typescript/no-floating-promises": "error",
-    "typescript/no-for-in-array": "error",
-    "typescript/no-implied-eval": "error",
-    "typescript/no-meaningless-void-operator": "error",
-    "typescript/no-misused-new": "error",
-    "typescript/no-misused-spread": "error",
-    "typescript/no-non-null-asserted-optional-chain": "error",
-    "typescript/no-redundant-type-constituents": "error",
-    "typescript/no-this-alias": "error",
-    "typescript/no-unnecessary-parameter-property-assignment": "error",
-    "typescript/no-unsafe-declaration-merging": "error",
-    "typescript/no-unsafe-unary-minus": "error",
-    "typescript/no-unused-vars": [
-      "error",
-      {
-        "caughtErrors": "none",
-        "argsIgnorePattern": "^_"
-      }
-    ],
-    "typescript/no-useless-empty-export": "error",
-    "typescript/no-wrapper-object-types": "error",
-    "typescript/prefer-as-const": "error",
-    "typescript/require-array-sort-compare": "error",
-    "typescript/restrict-template-expressions": "error",
-    "typescript/triple-slash-reference": "error",
-    "typescript/unbound-method": "error",
-    "unicorn/no-await-in-promise-methods": "error",
-    "unicorn/no-empty-file": "error",
-    "unicorn/no-invalid-fetch-options": "error",
-    "unicorn/no-invalid-remove-event-listener": "error",
-    "unicorn/no-new-array": "error",
-    "unicorn/no-single-promise-in-promise-methods": "error",
-    "unicorn/no-thenable": "error",
-    "unicorn/no-unnecessary-await": "error",
-    "unicorn/no-useless-fallback-in-spread": "error",
-    "unicorn/no-useless-length-check": "error",
-    "unicorn/no-useless-spread": "error",
-    "unicorn/prefer-set-size": "error",
-    "unicorn/prefer-string-starts-ends-with": "error",
-    "regexp/confusing-quantifier": "error",
-    "regexp/control-character-escape": "error",
-    "regexp/match-any": "error",
-    "regexp/negation": "error",
-    "regexp/no-contradiction-with-assertion": "error",
-    "regexp/no-dupe-characters-character-class": "error",
-    "regexp/no-dupe-disjunctions": "error",
-    "regexp/no-empty-alternative": "error",
-    "regexp/no-empty-capturing-group": "error",
-    "regexp/no-empty-character-class": "error",
-    "regexp/no-empty-group": "error",
-    "regexp/no-empty-lookarounds-assertion": "error",
-    "regexp/no-empty-string-literal": "error",
-    "regexp/no-escape-backspace": "error",
-    "regexp/no-extra-lookaround-assertions": "error",
-    "regexp/no-invalid-regexp": "error",
-    "regexp/no-invisible-character": "error",
-    "regexp/no-lazy-ends": "error",
-    "regexp/no-legacy-features": "error",
-    "regexp/no-misleading-capturing-group": "error",
-    "regexp/no-misleading-unicode-character": "error",
-    "regexp/no-missing-g-flag": "error",
-    "regexp/no-non-standard-flag": "error",
-    "regexp/no-obscure-range": "error",
-    "regexp/no-optional-assertion": "error",
-    "regexp/no-potentially-useless-backreference": "error",
-    "regexp/no-super-linear-backtracking": "error",
-    "regexp/no-trivially-nested-assertion": "error",
-    "regexp/no-trivially-nested-quantifier": "error",
-    "regexp/no-unused-capturing-group": "error",
-    "regexp/no-useless-assertions": "error",
-    "regexp/no-useless-backreference": "error",
-    "regexp/no-useless-character-class": "error",
-    "regexp/no-useless-dollar-replacements": "error",
-    "regexp/no-useless-escape": "error",
-    "regexp/no-useless-flag": "error",
-    "regexp/no-useless-lazy": "error",
-    "regexp/no-useless-non-capturing-group": "error",
-    "regexp/no-useless-quantifier": "error",
-    "regexp/no-useless-range": "error",
-    "regexp/no-useless-set-operand": "error",
-    "regexp/no-useless-string-literal": "error",
-    "regexp/no-useless-two-nums-quantifier": "error",
-    "regexp/no-zero-quantifier": "error",
-    "regexp/optimal-lookaround-quantifier": "error",
-    "regexp/optimal-quantifier-concatenation": "error",
-    "regexp/prefer-character-class": "error",
-    "regexp/prefer-d": "error",
-    "regexp/prefer-plus-quantifier": "error",
-    "regexp/prefer-predefined-assertion": "error",
-    "regexp/prefer-question-quantifier": "error",
-    "regexp/prefer-range": "error",
-    "regexp/prefer-set-operation": "error",
-    "regexp/prefer-star-quantifier": "error",
-    "regexp/prefer-unicode-codepoint-escapes": "error",
-    "regexp/prefer-w": "error",
-    "regexp/simplify-set-operations": "error",
-    "regexp/sort-flags": "error",
-    "regexp/strict": "error",
-    "regexp/use-ignore-case": "error"
-  },
-  "settings": {
-    "jsx-a11y": {
-      "polymorphicPropName": null,
-      "components": {},
-      "attributes": {}
-    },
-    "next": {
-      "rootDir": []
-    },
-    "react": {
-      "formComponents": [],
-      "linkComponents": [],
-      "version": null
-    },
-    "jsdoc": {
-      "ignorePrivate": false,
-      "ignoreInternal": false,
-      "ignoreReplacesDocs": true,
-      "overrideReplacesDocs": true,
-      "augmentsExtendsReplacesDocs": false,
-      "implementsReplacesDocs": false,
-      "exemptDestructuredRootsFromChecks": false,
-      "tagNamePreference": {}
-    },
-    "vitest": {
-      "typecheck": false
-    }
-  },
-  "env": {
-    "builtin": true
-  },
-  "globals": {},
-  "ignorePatterns": [
-    "**/.*",
-    "node_modules/**",
-    "dist/**",
-    "coverage/**",
-    "public/**"
-  ]
+	plugins: [
+		'unicorn',
+		'typescript',
+		'oxc',
+		'import',
+		'react',
+		'jsdoc',
+		'promise',
+		'vitest'
+	],
+	jsPlugins: [
+		'eslint-plugin-regexp'
+	],
+	categories: {
+		correctness: 'error'
+	},
+	rules: {
+		...pluginRegexp.configs.recommended.rules,
+		'typescript/no-unused-vars': [
+			'error',
+			{
+				caughtErrors: 'none',
+				argsIgnorePattern: '^_'
+			}
+		]
+	},
+	settings: {
+		'jsx-a11y': {
+			polymorphicPropName: null,
+			components: {},
+			attributes: {}
+		},
+		next: {
+			rootDir: []
+		},
+		react: {
+			formComponents: [],
+			linkComponents: [],
+			version: null
+		},
+		jsdoc: {
+			ignorePrivate: false,
+			ignoreInternal: false,
+			ignoreReplacesDocs: true,
+			overrideReplacesDocs: true,
+			augmentsExtendsReplacesDocs: false,
+			implementsReplacesDocs: false,
+			exemptDestructuredRootsFromChecks: false,
+			tagNamePreference: {}
+		},
+		vitest: {
+			typecheck: false
+		}
+	},
+	env: {
+		builtin: true
+	},
+	globals: {},
+	ignorePatterns: [
+		'**/.*',
+		'node_modules/**',
+		'dist/**',
+		'coverage/**',
+		'public/**'
+	]
 });
