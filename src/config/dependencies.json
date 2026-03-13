@@ -133,7 +133,7 @@
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"tinyexec": {
-			"version": "1.0.2",
+			"version": "^1.0.4",
 			"description": "A minimal library for executing processes in Node (pinned to 1.0.2 due to broken 1.0.3 release)."
 		},
 		"react-router-dom": {
