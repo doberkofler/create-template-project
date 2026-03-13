@@ -1,4 +1,4 @@
-import fse from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execa} from 'execa';
@@ -39,7 +39,7 @@ async function main() {
 	const updateMode = args.includes('--update');
 
 	console.log(`Reading dependencies from ${configPath}...`);
-	const config = (await fse.readJson(configPath)) as Config;
+	const config = JSON.parse(await fs.readFile(configPath, 'utf8')) as Config;
 	const dependencies = config.dependencies;
 	const packageNames = Object.keys(dependencies);
 
@@ -86,7 +86,7 @@ async function main() {
 			dependencies[update.pkg].version = newVersion;
 		}
 
-		await fse.writeJson(configPath, config, {spaces: '\t'});
+		await fs.writeFile(configPath, JSON.stringify(config, null, '\t') + '\n');
 		console.log('Dependencies updated successfully.');
 	} else {
 		console.log('Available updates:');

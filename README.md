@@ -30,12 +30,12 @@ npx create-template-project
 
 ## Usage
 
-### Interactive Mode (Onboarding)
+### Interactive Mode
 
-To start the interactive wizard, use the `onboard` command:
+To start the interactive wizard, use the `interactive` command:
 
 ```bash
-create-template-project onboard
+create-template-project interactive
 ```
 
 Running the tool without any command will display the help message.
@@ -69,6 +69,7 @@ create-template-project update --template cli --name existing-project
 - `-d, --directory <path>`: Output directory (defaults to `.`)
 - `--overwrite`: Overwrite existing directory by removing it first (create & update)
 - `--no-build`: Create a project without a build step (not allowed for `webapp`)
+- `--silent`: Reduce console output (useful for CI and scripts)
 
 ## Project Templates
 

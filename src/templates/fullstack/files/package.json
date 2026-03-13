@@ -13,7 +13,7 @@
 		"express": "",
 		"@trpc/server": "",
 		"@trpc/client": "",
-		"@trpc/tanstack-react-query": "",
+		"@trpc/react-query": "",
 		"@tanstack/react-query": "",
 		"zod": "",
 		"react-router-dom": "",

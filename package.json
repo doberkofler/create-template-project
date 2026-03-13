@@ -17,11 +17,11 @@
 		"create-template-project": "./dist/index.mjs"
 	},
 	"scripts": {
-		"run-onboard": "node dist/index.mjs onboard",
-		"run-create-cli": "node dist/index.mjs create --name=my-cli --directory=./temp --template=cli --overwrite --build",
-		"run-create-webpage": "node dist/index.mjs create --name=my-webpage --directory=./temp --template=webpage --overwrite --build",
-		"run-create-webapp": "node dist/index.mjs create --name=my-webapp --directory=./temp --template=webapp --overwrite && node dist/index.mjs create --name=my-fullstack --template=fullstack --overwrite --build",
-		"run-create-fullstack": "node dist/index.mjs create --name=my-fullstack --directory=./temp --template=fullstack --overwrite --build",
+		"run-interactive": "node dist/index.mjs interactive",
+		"run-create-cli": "node dist/index.mjs create --name=my-cli --directory=./temp --template=cli --overwrite --package-manager=pnpm --build",
+		"run-create-webpage": "node dist/index.mjs create --name=my-webpage --directory=./temp --template=webpage --package-manager=pnpm --overwrite --build",
+		"run-create-webapp": "node dist/index.mjs create --name=my-webapp --directory=./temp --template=webapp --package-manager=pnpm --overwrite --build",
+		"run-create-fullstack": "node dist/index.mjs create --name=my-fullstack --directory=./temp --template=fullstack --package-manager=pnpm --overwrite --build",
 		"run-create-all": "npm run run-create-cli && npm run run-create-webpage && npm run run-create-webapp && npm run run-create-fullstack",
 		"build": "tsdown && node scripts/copy-templates.ts",
 		"dependencies-check": "node scripts/dependencies.ts",
@@ -29,7 +29,8 @@
 		"lint": "tsc && oxlint --ignore-pattern \"src/templates/**/files\" && npm run prettier",
 		"prettier": "prettier --check .",
 		"prettier-write": "prettier --write .",
-		"test": "vitest run --coverage",
+		"test": "vitest run --coverage --exclude '**/*.integration.test.ts'",
+		"test:integration": "vitest run src/generators/project.integration.test.ts --fileParallelism=false --testTimeout=600000",
 		"ci": "npm run lint && npm run build && npm run test",
 		"create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
 		"prepare": "husky"
@@ -50,30 +51,29 @@
 	},
 	"homepage": "https://github.com/doberkofler/create-template-project#readme",
 	"devDependencies": {
-		"@commitlint/cli": "20.4.3",
-		"@commitlint/config-conventional": "20.4.3",
+		"@commitlint/cli": "20.4.4",
+		"@commitlint/config-conventional": "20.4.4",
 		"@types/cli-progress": "3.11.6",
 		"@types/debug": "4.1.12",
-		"@types/fs-extra": "^11.0.4",
-		"@types/node": "25.3.5",
-		"@vitest/coverage-v8": "4.0.18",
+		"@types/node": "25.5.0",
+		"@vitest/coverage-v8": "4.1.0",
 		"conventional-changelog": "^7.2.0",
 		"conventional-changelog-angular": "8.3.0",
-		"eslint-plugin-regexp": "3.0.0",
+		"eslint-plugin-regexp": "3.1.0",
 		"husky": "9.1.7",
-		"oxlint": "1.51.0",
+		"oxlint": "1.55.0",
 		"oxlint-tsgolint": "0.16.0",
+		"pnpm": "^10.32.1",
 		"prettier": "3.8.1",
-		"tsdown": "0.21.0",
+		"tsdown": "0.21.2",
 		"typescript": "5.9.3",
-		"vitest": "4.0.18"
+		"vitest": "4.1.0"
 	},
 	"dependencies": {
 		"@clack/prompts": "^1.1.0",
 		"commander": "14.0.3",
 		"debug": "4.4.3",
 		"execa": "^9.6.1",
-		"fs-extra": "11.3.4",
 		"zod": "4.3.6"
 	}
 }

@@ -13,14 +13,23 @@ const debug = debugLib('create-template-project:main');
 export const main = async () => {
 	try {
 		debug('Starting CLI execution');
-		intro('create-template-project');
 		debug('Parsing arguments');
 		const options = await parseArgs();
+		if (!options) return;
+		const isSilent = !!options.silent;
+
+		if (!isSilent) {
+			intro('create-template-project');
+		}
+
 		debug('Arguments parsed: %O', options);
 		debug('Generating project');
 		await generateProject(options);
 		debug('Project generation complete');
-		outro('Done!');
+
+		if (!isSilent) {
+			outro('Done!');
+		}
 	} catch (error: any) {
 		debug('Execution failed: %O', error);
 		if (error.code === 'PROCESS_EXIT_0' || error.code === 'commander.helpDisplayed' || error.code === 'commander.version') {

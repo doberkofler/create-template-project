@@ -2,12 +2,11 @@ import {defineConfig} from 'vitest/config';
 
 export default defineConfig({
 	test: {
-		exclude: ['**/node_modules/**', '**/dist/**'],
+		exclude: ['**/node_modules/**', '**/dist/**', 'src/templates/**/files/**', 'temp/**'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'lcov', 'clover'],
-			include: ['src/**/*.ts'],
-			exclude: ['src/types.ts', '**/*.test.ts', 'src/templates/**/files/**'],
+			exclude: ['**/*.test.ts', 'src/templates/**/files/**', 'temp/**'],
 			thresholds: {
 				lines: 90,
 				functions: 90,

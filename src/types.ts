@@ -6,20 +6,23 @@ export type TemplateType = z.infer<typeof TemplateTypeSchema>;
 export const PackageManagerSchema = z.enum(['npm', 'pnpm', 'yarn']);
 export type PackageManagerType = z.infer<typeof PackageManagerSchema>;
 
-export interface ProjectOptions {
-	template: TemplateType;
-	projectName: string;
-	packageManager?: PackageManagerType;
-	createGithubRepository?: boolean;
-	directory: string;
-	overwrite?: boolean;
-	update?: boolean;
-	skipBuild?: boolean;
-	installDependencies?: boolean;
-	build?: boolean;
-	dev?: boolean;
-	open?: boolean;
-}
+export const ProjectOptionsSchema = z.object({
+	template: TemplateTypeSchema,
+	projectName: z.string().min(1, 'Project name is required'),
+	packageManager: PackageManagerSchema.optional().default('npm'),
+	createGithubRepository: z.boolean().optional().default(false),
+	directory: z.string(),
+	overwrite: z.boolean().optional().default(false),
+	update: z.boolean().optional().default(false),
+	skipBuild: z.boolean().optional().default(false),
+	installDependencies: z.boolean().optional().default(false),
+	build: z.boolean().optional().default(false),
+	dev: z.boolean().optional().default(false),
+	open: z.boolean().optional().default(false),
+	silent: z.boolean().optional().default(false),
+});
+
+export type ProjectOptions = z.infer<typeof ProjectOptionsSchema>;
 
 export interface FileDefinition {
 	path: string;

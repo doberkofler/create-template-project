@@ -1,4 +1,3 @@
-import React from 'react';
 import {Container, Typography, Button, Paper, Box} from '@mui/material';
 import {useAuth} from '../contexts/AuthContext.js';
 import {useNavigate} from 'react-router-dom';
@@ -9,7 +8,7 @@ export const Dashboard = () => {
 
 	const handleLogout = () => {
 		logout();
-		navigate('/login');
+		void navigate('/login');
 	};
 
 	return (

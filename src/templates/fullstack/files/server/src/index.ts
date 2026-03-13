@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env['PORT'] || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -23,7 +23,7 @@ app.use(
 
 app.use(express.static(path.join(__dirname, '../../client/dist')));
 
-app.get('*', (req, res) => {
+app.get('*', (_req, res) => {
 	res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
 });
 

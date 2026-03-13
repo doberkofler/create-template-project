@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState, FormEvent} from 'react';
 import {
 	Button,
 	TextField,
@@ -24,14 +24,14 @@ export const Login = () => {
 	const loginMutation = trpc.auth.login.useMutation({
 		onSuccess: (data) => {
 			login(data.token, data.user);
-			navigate('/dashboard');
+			void navigate('/dashboard');
 		},
 		onError: (err) => {
 			setError(err.message);
 		},
 	});
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
 		setError(null);
 		loginMutation.mutate({email, password});
@@ -53,7 +53,7 @@ export const Login = () => {
 							fullWidth
 							required
 							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							onChange={(e) => setEmail(e.currentTarget.value)}
 						/>
 						<TextField
 							label="Password"
@@ -61,7 +61,7 @@ export const Login = () => {
 							fullWidth
 							required
 							value={password}
-							onChange={(e) => setPassword(e.target.value)}
+							onChange={(e) => setPassword(e.currentTarget.value)}
 						/>
 					</Box>
 				</DialogContent>

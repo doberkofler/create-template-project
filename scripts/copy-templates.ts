@@ -1,6 +1,12 @@
-import fse from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+
+const pathExists = (p: string) =>
+	fs
+		.access(p)
+		.then(() => true)
+		.catch(() => false);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
@@ -11,9 +17,9 @@ async function copyTemplates() {
 	// Copy config
 	const srcConfig = path.join(root, 'src/config');
 	const distConfig = path.join(root, 'dist/config');
-	if (await fse.pathExists(srcConfig)) {
-		await fse.ensureDir(distConfig);
-		await fse.copy(srcConfig, distConfig);
+	if (await pathExists(srcConfig)) {
+		await fs.mkdir(distConfig, {recursive: true});
+		await fs.cp(srcConfig, distConfig, {recursive: true});
 		console.log(`Copied config files to dist`);
 	}
 
@@ -23,9 +29,9 @@ async function copyTemplates() {
 		const srcFiles = path.join(src, t, 'files');
 		const distFiles = path.join(dist, t, 'files');
 
-		if (await fse.pathExists(srcFiles)) {
-			await fse.ensureDir(distFiles);
-			await fse.copy(srcFiles, distFiles);
+		if (await pathExists(srcFiles)) {
+			await fs.mkdir(distFiles, {recursive: true});
+			await fs.cp(srcFiles, distFiles, {recursive: true});
 			console.log(`Copied ${t} template files to dist`);
 		}
 	}

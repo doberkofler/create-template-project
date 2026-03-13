@@ -4,3 +4,4 @@ temp
 coverage
 .vscode/*
 .DS_Store
+.opencode

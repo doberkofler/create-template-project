@@ -1,15 +1,27 @@
 import {Command} from 'commander';
 import * as p from '@clack/prompts';
-import {ProjectOptions} from './types.js';
+import {ProjectOptions, ProjectOptionsSchema} from './types.js';
 import path from 'node:path';
-import fse from 'fs-extra';
+import fs from 'node:fs/promises';
 import debugLib from 'debug';
+
+const pathExists = (p: string) =>
+	fs
+		.access(p)
+		.then(() => true)
+		.catch(() => false);
 
 const debug = debugLib('create-template-project:cli');
 
 export const parseArgs = async (): Promise<ProjectOptions> => {
 	debug('Parsing CLI arguments: %O', process.argv);
 	const program = new Command();
+	if (process.env.NODE_ENV === 'test') {
+		program.configureOutput({
+			writeOut: () => {},
+			writeErr: () => {},
+		});
+	}
 
 	program
 		.name('create-template-project')
@@ -47,10 +59,11 @@ Templates:
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
+		.option('--silent', 'Reduce console output', false)
 		.action((opts) => {
 			debug('Executing "create" command with options: %O', opts);
 			if (opts.template === 'webapp' && opts.skipBuild) {
-				console.error('The --skip-build option is not allowed for the "webapp" template.');
+				p.log.error('The --skip-build option is not allowed for the "webapp" template.');
 				process.exit(1);
 			}
 			commandResult = {
@@ -62,6 +75,7 @@ Templates:
 				directory: path.resolve(opts.directory),
 				createGithubRepository: !!opts.createGithubRepository,
 				overwrite: !!opts.overwrite,
+				silent: !!opts.silent,
 			};
 			debug('Processed "create" options: %O', commandResult);
 		});
@@ -80,10 +94,11 @@ Templates:
 		.option('--build', 'Run the CI script (lint, build, test) after updating', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
+		.option('--silent', 'Reduce console output', false)
 		.action((opts) => {
 			debug('Executing "update" command with options: %O', opts);
 			if (opts.template === 'webapp' && opts.skipBuild) {
-				console.error('The --skip-build option is not allowed for the "webapp" template.');
+				p.log.error('The --skip-build option is not allowed for the "webapp" template.');
 				process.exit(1);
 			}
 			commandResult = {
@@ -95,31 +110,16 @@ Templates:
 				directory: path.resolve(opts.directory),
 				createGithubRepository: !!opts.createGithubRepository,
 				overwrite: !!opts.overwrite,
+				silent: !!opts.silent,
 			};
 			debug('Processed "update" options: %O', commandResult);
 		});
 
 	program
-		.command('onboard')
-		.description('Start interactive onboarding')
+		.command('interactive')
+		.description('Start interactive project configuration')
 		.action(async () => {
-			debug('Starting interactive onboarding');
-
-			const template = await p.select({
-				message: 'Select project template:',
-				initialValue: 'cli',
-				options: [
-					{label: 'CLI Application (Node.js)', value: 'cli'},
-					{label: 'Webpage (Standalone)', value: 'webpage'},
-					{label: 'Webapp (Express Backend)', value: 'webapp'},
-					{label: 'Full-stack (Express + React/MUI Monorepo)', value: 'fullstack'},
-				],
-			});
-
-			if (p.isCancel(template)) {
-				p.cancel('Operation cancelled.');
-				process.exit(0);
-			}
+			debug('Starting interactive configuration');
 
 			const projectName = await p.text({
 				message: 'Project name:',
@@ -143,23 +143,21 @@ Templates:
 				process.exit(0);
 			}
 
-			const packageManager = await p.select({
-				message: 'Select package manager:',
-				initialValue: 'npm',
-				options: [
-					{label: 'npm', value: 'npm'},
-					{label: 'pnpm', value: 'pnpm'},
-					{label: 'yarn', value: 'yarn'},
-				],
-			});
-
-			if (p.isCancel(packageManager)) {
-				p.cancel('Operation cancelled.');
-				process.exit(0);
-			}
-
 			const projectDir = path.resolve(directory as string, projectName as string);
-			const exists = await fse.pathExists(projectDir);
+			const exists = await pathExists(projectDir);
+			const pkgPath = path.join(projectDir, 'package.json');
+			const pkgExists = await pathExists(pkgPath);
+
+			let existingConfig: any = {};
+			if (pkgExists) {
+				try {
+					const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+					existingConfig = pkg['create-template-project'] || {};
+					debug('Found existing project config: %O', existingConfig);
+				} catch (e) {
+					debug('Failed to read existing package.json: %O', e);
+				}
+			}
 
 			let update = false;
 			let overwrite = false;
@@ -168,8 +166,8 @@ Templates:
 				const action = await p.select({
 					message: `Directory "${projectDir}" already exists. What would you like to do?`,
 					options: [
-						{label: 'Overwrite existing directory by removing it first', value: 'overwrite'},
 						{label: 'Run an update', value: 'update'},
+						{label: 'Overwrite existing directory by removing it first', value: 'overwrite'},
 						{label: 'Cancel', value: 'cancel'},
 					],
 				});
@@ -183,6 +181,45 @@ Templates:
 					update = true;
 				} else if (action === 'overwrite') {
 					overwrite = true;
+				}
+			}
+
+			let template = existingConfig.template;
+			if (!update || !template) {
+				template = await p.select({
+					message: 'Select project template:',
+					initialValue: template || 'cli',
+					options: [
+						{label: 'CLI Application (Node.js)', value: 'cli'},
+						{label: 'Webpage (Standalone)', value: 'webpage'},
+						{label: 'Webapp (Express Backend)', value: 'webapp'},
+						{label: 'Full-stack (Express + React/MUI Monorepo)', value: 'fullstack'},
+					],
+				});
+
+				if (p.isCancel(template)) {
+					p.cancel('Operation cancelled.');
+					process.exit(0);
+				}
+			} else {
+				p.log.info(`Using existing template type: ${template}`);
+			}
+
+			let packageManager = 'npm';
+			if (!update) {
+				packageManager = (await p.select({
+					message: 'Select package manager:',
+					initialValue: 'npm',
+					options: [
+						{label: 'npm', value: 'npm'},
+						{label: 'pnpm', value: 'pnpm'},
+						{label: 'yarn', value: 'yarn'},
+					],
+				})) as string;
+
+				if (p.isCancel(packageManager)) {
+					p.cancel('Operation cancelled.');
+					process.exit(0);
 				}
 			}
 
@@ -249,6 +286,7 @@ Templates:
 				build,
 				dev: false,
 				open: false,
+				silent: false,
 			};
 		});
 
@@ -276,14 +314,19 @@ Templates:
 		process.exit(1);
 	}
 
-	// Validation for mandatory fields in non-interactive mode
-	if (!commandResult.projectName || !commandResult.template) {
-		p.cancel('Missing mandatory options: template and name.');
+	// Validation using Zod
+	debug('Validating command result with Zod');
+	const validationResult = ProjectOptionsSchema.safeParse(commandResult);
+	if (!validationResult.success) {
+		const errors = validationResult.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+		p.cancel(`Invalid options: ${errors}`);
 		process.exit(1);
 	}
 
+	commandResult = validationResult.data;
+
 	const projectDir = path.resolve(commandResult.directory, commandResult.projectName);
-	const exists = await fse.pathExists(projectDir);
+	const exists = await pathExists(projectDir);
 
 	if (exists && !commandResult.update && !commandResult.overwrite) {
 		p.cancel(`Directory "${projectDir}" already exists. Use --overwrite to overwrite or "update" command.`);

@@ -17,7 +17,7 @@ export const getFullstackTemplate = (_opts: ProjectOptions): TemplateDefinition 
 			express: 'express',
 			'@trpc/server': '@trpc/server',
 			'@trpc/client': '@trpc/client',
-			'@trpc/tanstack-react-query': '@trpc/tanstack-react-query',
+			'@trpc/react-query': '@trpc/react-query',
 			'@tanstack/react-query': '@tanstack/react-query',
 			zod: 'zod',
 			'react-router-dom': 'react-router-dom',

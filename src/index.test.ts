@@ -13,6 +13,13 @@ vi.mock('@clack/prompts', async (importOriginal) => {
 		intro: vi.fn(),
 		outro: vi.fn(),
 		cancel: vi.fn(),
+		note: vi.fn(),
+		log: {
+			success: vi.fn(),
+			error: vi.fn(),
+			warn: vi.fn(),
+			info: vi.fn(),
+		},
 	};
 });
 
