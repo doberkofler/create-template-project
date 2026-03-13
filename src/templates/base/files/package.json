@@ -24,6 +24,7 @@
 		"oxlint": "",
 		"oxlint-tsgolint": "",
 		"eslint-plugin-regexp": "",
+		"tinyexec": "",
 		"prettier": "",
 		"typescript": "",
 		"vitest": ""

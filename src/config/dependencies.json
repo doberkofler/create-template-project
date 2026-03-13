@@ -132,6 +132,10 @@
 			"version": "^4.3.6",
 			"description": "TypeScript-first schema validation with static type inference."
 		},
+		"tinyexec": {
+			"version": "1.0.2",
+			"description": "A minimal library for executing processes in Node (pinned to 1.0.2 due to broken 1.0.3 release)."
+		},
 		"react-router-dom": {
 			"version": "^7.13.1",
 			"description": "Declarative routing for React web applications."
