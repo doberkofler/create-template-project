@@ -1,6 +1,8 @@
 {
+	"printWidth": 160,
+	"embeddedLanguageFormatting": "off",
 	"useTabs": true,
 	"singleQuote": true,
-	"trailingComma": "all",
-	"printWidth": 100
+	"bracketSpacing": false,
+	"endOfLine": "auto"
 }

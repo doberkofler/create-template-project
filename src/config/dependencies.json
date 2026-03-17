@@ -5,11 +5,11 @@
 			"description": "A tiny JavaScript debugging utility modelled after Node.js core debugging technique."
 		},
 		"@commitlint/cli": {
-			"version": "^20.4.4",
+			"version": "^20.5.0",
 			"description": "Lint commit messages to ensure they follow conventional commits."
 		},
 		"@commitlint/config-conventional": {
-			"version": "^20.4.4",
+			"version": "^20.5.0",
 			"description": "Shareable commitlint config enforcing conventional commits."
 		},
 		"@types/debug": {
@@ -33,11 +33,11 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "^1.55.0",
+			"version": "^1.56.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "^0.16.0",
+			"version": "^0.17.0",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"prettier": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript definitions for cli-progress."
 		},
 		"tsdown": {
-			"version": "^0.21.2",
+			"version": "^0.21.4",
 			"description": "A zero-config bundler for TypeScript."
 		},
 		"express": {
@@ -113,15 +113,15 @@
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
-			"version": "^11.12.0",
+			"version": "^11.13.4",
 			"description": "tRPC server library."
 		},
 		"@trpc/client": {
-			"version": "^11.12.0",
+			"version": "^11.13.4",
 			"description": "tRPC client library."
 		},
 		"@trpc/react-query": {
-			"version": "^11.12.0",
+			"version": "^11.13.4",
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
