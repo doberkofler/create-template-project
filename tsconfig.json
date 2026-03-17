@@ -19,6 +19,6 @@
 		"strictNullChecks": true,
 		"resolveJsonModule": true
 	},
-	"include": ["src", "*.config.ts", "eslint.config.js"],
+	"include": ["src", "scripts", "*.config.ts", "eslint.config.js"],
 	"exclude": ["src/templates/**/files"]
 }
