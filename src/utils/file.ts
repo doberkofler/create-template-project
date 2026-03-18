@@ -43,7 +43,7 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 
 	// Special logic for webpage template script tag in index.html
 	if (template === 'webpage' && filePath === 'index.html') {
-		processed = processed.replace('{{scriptSrc}}', opts.skipBuild ? './src/index.js' : './dist/index.js');
+		processed = processed.replace('{{scriptSrc}}', opts.skipBuild ? './src/index.js' : './dist/index.mjs');
 	}
 
 	// Append dependencies to CONTRIBUTING.md
@@ -58,9 +58,12 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		}
 	}
 
-	// Fullstack tsconfig.json overrides
-	if (template === 'fullstack' && filePath === 'tsconfig.json') {
+	// Fullstack/Webpage/Webapp tsconfig.json overrides
+	if ((template === 'fullstack' || template === 'webpage' || template === 'webapp') && filePath === 'tsconfig.json') {
 		processed = processed.replace(/"lib":\s*\["ESNext"\]/, '"lib": ["ESNext", "DOM"]');
+	}
+
+	if (template === 'fullstack' && filePath === 'tsconfig.json') {
 		processed = processed.replace(/"module":\s*"NodeNext"/, '"module": "NodeNext",\n\t\t"jsx": "react-jsx"');
 		processed = processed.replace(/"include":\s*\[\s*"src\/\*\*\/\*"\s*\]/, '"include": ["client/src/**/*", "server/src/**/*"]');
 	}
