@@ -23,7 +23,7 @@ async function copyTemplates() {
 		console.log(`Copied config files to dist`);
 	}
 
-	const templates = ['base', 'cli', 'webpage', 'webapp', 'fullstack'];
+	const templates = ['base', 'cli', 'web-vanilla', 'web-app', 'web-fullstack'];
 
 	for (const t of templates) {
 		const srcFiles = path.join(src, t, 'files');

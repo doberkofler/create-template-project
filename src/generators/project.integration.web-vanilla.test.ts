@@ -12,11 +12,11 @@ const pathExists = (p: string) =>
 
 // This test suite performs real scaffolding and runs real commands.
 // It is intended to catch issues that mocked unit tests miss.
-describe('generateProject (Integration - Webpage)', () => {
+describe('generateProject (Integration - Web-Vanilla)', () => {
 	let tmpDir: string;
 
 	beforeEach(async () => {
-		tmpDir = path.join(os.tmpdir(), 'cp-integration-webpage-' + Math.random().toString(36).slice(2));
+		tmpDir = path.join(os.tmpdir(), 'cp-integration-web-vanilla-' + Math.random().toString(36).slice(2));
 		await fs.mkdir(tmpDir, {recursive: true});
 	});
 
@@ -24,10 +24,10 @@ describe('generateProject (Integration - Webpage)', () => {
 		await fs.rm(tmpDir, {recursive: true, force: true});
 	});
 
-	it('should scaffold and pass CI for webpage template', async () => {
-		const projectName = 'webpage-e2e';
+	it('should scaffold and pass CI for web-vanilla template', async () => {
+		const projectName = 'web-vanilla-e2e';
 		const opts: any = {
-			template: 'webpage' as const,
+			template: 'web-vanilla' as const,
 			projectName,
 			packageManager: 'pnpm',
 			createGithubRepository: false,

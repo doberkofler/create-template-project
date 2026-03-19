@@ -20,8 +20,8 @@ describe('info generator', () => {
 		expect(allInfo).toHaveLength(4);
 		const names = allInfo.map((i) => i.name);
 		expect(names).toContain('cli');
-		expect(names).toContain('webpage');
-		expect(names).toContain('webapp');
-		expect(names).toContain('fullstack');
+		expect(names).toContain('web-vanilla');
+		expect(names).toContain('web-app');
+		expect(names).toContain('web-fullstack');
 	});
 });

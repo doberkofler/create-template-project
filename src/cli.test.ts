@@ -87,7 +87,7 @@ describe('cli', () => {
 	});
 
 	it('should parse update command arguments', async () => {
-		process.argv.push('update', '-t', 'webpage', '-n', 'existing-project');
+		process.argv.push('update', '-t', 'web-vanilla', '-n', 'existing-project');
 		const result = await parseArgs();
 		expect(result.update).toBe(true);
 	});
@@ -95,18 +95,18 @@ describe('cli', () => {
 	it('should handle interactive mode', async () => {
 		process.argv.push('interactive');
 		// Order: ProjectName (text), Directory (text), Template (select), PM (select), Tooling (confirm), Deps (confirm), CI (confirm), GH (confirm)
-		vi.mocked(p.text).mockResolvedValueOnce('my-fullstack-app').mockResolvedValueOnce('./out');
-		vi.mocked(p.select).mockResolvedValueOnce('fullstack').mockResolvedValueOnce('npm');
+		vi.mocked(p.text).mockResolvedValueOnce('my-web-fullstack-app').mockResolvedValueOnce('./out');
+		vi.mocked(p.select).mockResolvedValueOnce('web-fullstack').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
 		const result = await parseArgs();
 		expect(result).toMatchObject({
-			template: 'fullstack',
-			projectName: 'my-fullstack-app',
+			template: 'web-fullstack',
+			projectName: 'my-web-fullstack-app',
 		});
 	});
 
-	it('should exit if skip-build is used with webapp', async () => {
-		process.argv.push('create', '-t', 'webapp', '-n', 'wa', '--skip-build');
+	it('should exit if skip-build is used with web-app', async () => {
+		process.argv.push('create', '-t', 'web-app', '-n', 'wa', '--skip-build');
 		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
 	});
 
@@ -139,13 +139,13 @@ describe('cli', () => {
 		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 
-	it('should handle webapp specifically in interactive', async () => {
+	it('should handle web-app specifically in interactive', async () => {
 		process.argv.push('interactive');
-		vi.mocked(p.text).mockResolvedValueOnce('webapp-test').mockResolvedValueOnce('.');
-		vi.mocked(p.select).mockResolvedValueOnce('webapp').mockResolvedValueOnce('npm');
+		vi.mocked(p.text).mockResolvedValueOnce('web-app-test').mockResolvedValueOnce('.');
+		vi.mocked(p.select).mockResolvedValueOnce('web-app').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(false);
 		const result = await parseArgs();
-		expect(result.template).toBe('webapp');
+		expect(result.template).toBe('web-app');
 		expect(result.skipBuild).toBe(false);
 	});
 
@@ -174,7 +174,7 @@ describe('cli', () => {
 			path.join(projectDir, 'package.json'),
 			JSON.stringify({
 				name: projectName,
-				'create-template-project': {template: 'fullstack'},
+				'create-template-project': {template: 'web-fullstack'},
 			}),
 		);
 
@@ -184,8 +184,8 @@ describe('cli', () => {
 		vi.mocked(p.confirm).mockResolvedValue(true);
 
 		const result = await parseArgs();
-		expect(result.template).toBe('fullstack');
-		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Using existing template type: fullstack'));
+		expect(result.template).toBe('web-fullstack');
+		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Using existing template type: web-fullstack'));
 
 		await fs.rm(projectDir, {recursive: true, force: true});
 	});
@@ -234,10 +234,10 @@ describe('cli', () => {
 	});
 
 	it('should handle update command with specific options', async () => {
-		process.argv.push('update', '-t', 'webapp', '-n', 'upd-test', '--silent');
+		process.argv.push('update', '-t', 'web-app', '-n', 'upd-test', '--silent');
 		const result = await parseArgs();
 		expect(result.update).toBe(true);
-		expect(result.template).toBe('webapp');
+		expect(result.template).toBe('web-app');
 		expect(result.silent).toBe(true);
 	});
 

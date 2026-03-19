@@ -1,9 +1,9 @@
 import {TemplateType, TemplateDefinition, ProjectOptions} from '../types.js';
 import {getBaseTemplate} from '../templates/base/index.js';
 import {getCliTemplate} from '../templates/cli/index.js';
-import {getWebpageTemplate} from '../templates/webpage/index.js';
-import {getWebappTemplate} from '../templates/webapp/index.js';
-import {getFullstackTemplate} from '../templates/fullstack/index.js';
+import {getWebVanillaTemplate} from '../templates/web-vanilla/index.js';
+import {getWebAppTemplate} from '../templates/web-app/index.js';
+import {getWebFullstackTemplate} from '../templates/web-fullstack/index.js';
 
 const MOCK_OPTS: ProjectOptions = {
 	template: 'cli',
@@ -36,14 +36,14 @@ export const getTemplateInfo = (type: TemplateType): AggregatedTemplateInfo => {
 		case 'cli':
 			template = getCliTemplate(opts);
 			break;
-		case 'webpage':
-			template = getWebpageTemplate(opts);
+		case 'web-vanilla':
+			template = getWebVanillaTemplate(opts);
 			break;
-		case 'webapp':
-			template = getWebappTemplate(opts);
+		case 'web-app':
+			template = getWebAppTemplate(opts);
 			break;
-		case 'fullstack':
-			template = getFullstackTemplate(opts);
+		case 'web-fullstack':
+			template = getWebFullstackTemplate(opts);
 			break;
 	}
 
@@ -55,5 +55,5 @@ export const getTemplateInfo = (type: TemplateType): AggregatedTemplateInfo => {
 };
 
 export const getAllTemplatesInfo = (): AggregatedTemplateInfo[] => {
-	return ['cli', 'webpage', 'webapp', 'fullstack'].map((type) => getTemplateInfo(type as TemplateType));
+	return ['cli', 'web-vanilla', 'web-app', 'web-fullstack'].map((type) => getTemplateInfo(type as TemplateType));
 };

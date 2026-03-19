@@ -12,11 +12,11 @@ const pathExists = (p: string) =>
 
 // This test suite performs real scaffolding and runs real commands.
 // It is intended to catch issues that mocked unit tests miss.
-describe('generateProject (Integration - Webapp)', () => {
+describe('generateProject (Integration - Web-App)', () => {
 	let tmpDir: string;
 
 	beforeEach(async () => {
-		tmpDir = path.join(os.tmpdir(), 'cp-integration-webapp-' + Math.random().toString(36).slice(2));
+		tmpDir = path.join(os.tmpdir(), 'cp-integration-web-app-' + Math.random().toString(36).slice(2));
 		await fs.mkdir(tmpDir, {recursive: true});
 	});
 
@@ -24,10 +24,10 @@ describe('generateProject (Integration - Webapp)', () => {
 		await fs.rm(tmpDir, {recursive: true, force: true});
 	});
 
-	it('should scaffold and pass CI for webapp template', async () => {
-		const projectName = 'webapp-e2e';
+	it('should scaffold and pass CI for web-app template', async () => {
+		const projectName = 'web-app-e2e';
 		const opts: any = {
-			template: 'webapp' as const,
+			template: 'web-app' as const,
 			projectName,
 			packageManager: 'pnpm',
 			createGithubRepository: false,
@@ -42,7 +42,6 @@ describe('generateProject (Integration - Webapp)', () => {
 
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'dist/client/index.html'))).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'dist/server/index.js'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'dist/index.html'))).toBe(true);
 	}, 300000);
 });

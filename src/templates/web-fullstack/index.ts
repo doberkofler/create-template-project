@@ -4,9 +4,9 @@ import {fileURLToPath} from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const getFullstackTemplate = (_opts: ProjectOptions): TemplateDefinition => {
+export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefinition => {
 	return {
-		name: 'fullstack',
+		name: 'web-fullstack',
 		description: 'A comprehensive full-stack monorepo featuring an Express backend with tRPC and a modern React client with MUI.',
 		components: [
 			{name: 'React', description: 'Powerful library for building component-based user interfaces.'},

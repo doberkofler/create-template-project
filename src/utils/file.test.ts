@@ -97,16 +97,16 @@ describe('file utils', () => {
 			expect(occurrences).toBe(1);
 		});
 
-		it('should handle webpage script tag index.html', () => {
+		it('should handle web-vanilla script tag index.html', () => {
 			const content = '<script src="{{scriptSrc}}"></script>';
-			const optsWebpage: any = {...opts, template: 'webpage', skipBuild: true};
+			const optsWebpage: any = {...opts, template: 'web-vanilla', skipBuild: true};
 			const processed = processContent('index.html', content, optsWebpage, []);
 			expect(processed).toContain('./src/index.js');
 		});
 
-		it('should handle fullstack tsconfig.json overrides', () => {
+		it('should handle web-fullstack tsconfig.json overrides', () => {
 			const content = '/* Language and Environment */ "lib": ["ESNext"], "module": "NodeNext" /* Strict Type-Checking Options */, "include": ["src/**/*"]';
-			const optsFullstack: any = {...opts, template: 'fullstack'};
+			const optsFullstack: any = {...opts, template: 'web-fullstack'};
 			const processed = processContent('tsconfig.json', content, optsFullstack, []);
 			expect(processed).toContain('"lib": ["ES2023", "DOM", "DOM.Iterable"]');
 			expect(processed).toContain('"jsx": "react-jsx"');

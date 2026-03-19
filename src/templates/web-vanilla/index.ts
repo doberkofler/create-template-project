@@ -4,9 +4,9 @@ import {fileURLToPath} from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const getWebpageTemplate = (_opts: ProjectOptions): TemplateDefinition => {
+export const getWebVanillaTemplate = (_opts: ProjectOptions): TemplateDefinition => {
 	return {
-		name: 'webpage',
+		name: 'web-vanilla',
 		description: 'A modern, standalone web page template with built-in development and testing tooling.',
 		components: [
 			{name: 'Vite', description: 'Fast frontend build tool and development server.'},

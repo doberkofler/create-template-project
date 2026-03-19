@@ -5,7 +5,7 @@
 [![Node.js CI](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml)
 [![Coverage Status](https://coveralls.io/repos/github/doberkofler/create-template-project/badge.svg?branch=master)](https://coveralls.io/github/doberkofler/create-template-project?branch=master)
 
-An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Webpage, Webapp, Fullstack) with best-practice configurations pre-installed.
+An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-App, Web-Fullstack) with best-practice configurations pre-installed.
 
 ## Features
 
@@ -63,12 +63,12 @@ create-template-project update --template cli --name existing-project
 
 #### Command Options (create/update):
 
-- `-t, --template <type>`: Template type (`cli`, `webpage`, `webapp`, `fullstack`)
+- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
 - `-n, --name <name>`: Project name
 - `--github`: Create GitHub project (requires `gh` CLI authenticated)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
 - `--overwrite`: Overwrite existing directory by removing it first (create & update)
-- `--no-build`: Create a project without a build step (not allowed for `webapp`)
+- `--no-build`: Create a project without a build step (not allowed for `web-app`)
 - `--silent`: Reduce console output (useful for CI and scripts)
 
 ## Project Templates
@@ -76,16 +76,16 @@ create-template-project update --template cli --name existing-project
 ### 🟢 CLI
 A clean Node.js CLI environment featuring `commander` and `cli-progress`. Supports optional `tsdown` bundling.
 
-### 🔵 Webpage
+### 🔵 Web-Vanilla
 Standalone web page setup for modern browsers. Can be used with or without a build step.
 
-### 🟡 Webapp
-Classic web application structure with a `frontend/` and a `backend/` Express server. Built with TypeScript.
+### 🟡 Web-App
+Modern React application featuring MUI components and TanStack Query for state management.
 
-### ⚛️ Fullstack
+### ⚛️ Web-Fullstack
 A full-stack monorepo featuring:
 - **Client**: React with MUI (including Icons) and TypeScript.
-- **Server**: Express.js backend.
+- **Server**: Express.js backend with tRPC for end-to-end type safety.
 - **E2E**: Playwright for end-to-end testing.
 
 ## Contributing

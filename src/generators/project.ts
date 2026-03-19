@@ -4,9 +4,9 @@ import {fileURLToPath} from 'node:url';
 import {ProjectOptions, TemplateDefinition, DependencyConfig} from '../types.js';
 import {getBaseTemplate} from '../templates/base/index.js';
 import {getCliTemplate} from '../templates/cli/index.js';
-import {getWebpageTemplate} from '../templates/webpage/index.js';
-import {getWebappTemplate} from '../templates/webapp/index.js';
-import {getFullstackTemplate} from '../templates/fullstack/index.js';
+import {getWebVanillaTemplate} from '../templates/web-vanilla/index.js';
+import {getWebAppTemplate} from '../templates/web-app/index.ts';
+import {getWebFullstackTemplate} from '../templates/web-fullstack/index.js';
 import {execa} from 'execa';
 import * as p from '@clack/prompts';
 import debugLib from 'debug';
@@ -38,7 +38,15 @@ const getSpinner = (silent: boolean) => {
 	};
 };
 
-const showNote = (msg: string, title?: string, silent?: boolean) => (!silent ? p.note(msg, title) : undefined);
+const showNote = (msg: string, title?: string, silent?: boolean) => {
+	if (silent) {
+		return;
+	}
+	if (title) {
+		p.log.success(title);
+	}
+	p.note(msg);
+};
 
 export const generateProject = async (opts: ProjectOptions) => {
 	const {template: type, projectName, directory, update, overwrite, skipBuild, silent} = opts;
@@ -69,17 +77,17 @@ export const generateProject = async (opts: ProjectOptions) => {
 			debug('Applying template: cli');
 			templates.push(getCliTemplate(opts));
 			break;
-		case 'webpage':
-			debug('Applying template: webpage');
-			templates.push(getWebpageTemplate(opts));
+		case 'web-vanilla':
+			debug('Applying template: web-vanilla');
+			templates.push(getWebVanillaTemplate(opts));
 			break;
-		case 'webapp':
-			debug('Applying template: webapp');
-			templates.push(getWebappTemplate(opts));
+		case 'web-app':
+			debug('Applying template: web-app');
+			templates.push(getWebAppTemplate(opts));
 			break;
-		case 'fullstack':
-			debug('Applying template: fullstack');
-			templates.push(getFullstackTemplate(opts));
+		case 'web-fullstack':
+			debug('Applying template: web-fullstack');
+			templates.push(getWebFullstackTemplate(opts));
 			break;
 	}
 
@@ -145,6 +153,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 		Object.assign(finalPkg.dependencies, templateDeps);
 		Object.assign(finalPkg.devDependencies, templateDevDeps);
 
+		if (t.workspaces) {
+			finalPkg.workspaces = t.workspaces;
+		}
+
 		// Also check physical package.json files in templates
 		if (t.templateDir) {
 			const templatePkgPath = path.join(t.templateDir, 'package.json');
@@ -190,10 +202,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 				let content = await fs.readFile(file, 'utf8');
 				content = processContent(relativePath, content, opts, addedDeps);
 
-				// Specific logic for webpage template index.ts/js
+				// Specific logic for web-vanilla template index.ts/js
 				let finalTargetPath = targetPath;
-				if (type === 'webpage' && skipBuild && relativePath === 'src/index.ts') {
-					debug('Changing target path for webpage index.ts to .js due to skipBuild');
+				if (type === 'web-vanilla' && skipBuild && relativePath === 'src/index.ts') {
+					debug('Changing target path for web-vanilla index.ts to .js due to skipBuild');
 					finalTargetPath = path.join(projectDir, 'src/index.js');
 				}
 
@@ -271,9 +283,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 		await fs.writeFile(path.join(projectDir, 'pnpm-workspace.yaml'), workspaceYaml);
 		delete finalPkg.workspaces;
 
-		for (const [key, value] of Object.entries(finalPkg.scripts)) {
-			if (typeof value === 'string' && (value as string).includes('--workspaces')) {
-				finalPkg.scripts[key] = (value as string).replace(' run ', ' -r run ').replace(' --workspaces', '');
+		for (const key of Object.keys(finalPkg.scripts)) {
+			const value = finalPkg.scripts[key];
+			if (typeof value === 'string' && value.includes('--workspaces')) {
+				finalPkg.scripts[key] = value.replace(' run ', ' -r run ').replace(' --workspaces', '');
 			}
 		}
 	}
@@ -374,7 +387,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 	}
 
-	log.info(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
+	log.success(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
 	showSummary(opts, pm, isSilent);
 
 	if (opts.dev && finalPkg.scripts.dev) {

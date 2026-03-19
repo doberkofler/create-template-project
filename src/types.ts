@@ -1,6 +1,6 @@
 import {z} from 'zod';
 
-export const TemplateTypeSchema = z.enum(['cli', 'webpage', 'webapp', 'fullstack']);
+export const TemplateTypeSchema = z.enum(['cli', 'web-vanilla', 'web-app', 'web-fullstack']);
 export type TemplateType = z.infer<typeof TemplateTypeSchema>;
 
 export const PackageManagerSchema = z.enum(['npm', 'pnpm', 'yarn']);
@@ -42,6 +42,7 @@ export interface TemplateDefinition {
 	devDependencies: Record<string, string>;
 	files: FileDefinition[];
 	scripts: Record<string, string>;
+	workspaces?: string[];
 	templateDir?: string;
 }
 

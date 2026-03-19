@@ -115,10 +115,10 @@ describe('generateProject', () => {
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('git fail'));
 	});
 
-	it('should scaffold a webpage project correctly', async () => {
-		const projectName = 'test-webpage-project';
+	it('should scaffold a web-vanilla project correctly', async () => {
+		const projectName = 'test-web-vanilla-project';
 		const opts: any = {
-			template: 'webpage' as const,
+			template: 'web-vanilla' as const,
 			projectName,
 			createGithubRepository: false,
 			directory: tmpDir,
@@ -130,10 +130,10 @@ describe('generateProject', () => {
 		expect(await pathExists(path.join(projectPath, 'index.html'))).toBe(true);
 	});
 
-	it('should scaffold a webapp project correctly', async () => {
-		const projectName = 'test-webapp-project';
+	it('should scaffold a web-app project correctly', async () => {
+		const projectName = 'test-web-app-project';
 		const opts: any = {
-			template: 'webapp' as const,
+			template: 'web-app' as const,
 			projectName,
 			createGithubRepository: false,
 			directory: tmpDir,
@@ -142,13 +142,13 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'backend/src/index.ts'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'src/index.tsx'))).toBe(true);
 	});
 
-	it('should scaffold a fullstack project correctly', async () => {
-		const projectName = 'test-fullstack-project';
+	it('should scaffold a web-fullstack project correctly', async () => {
+		const projectName = 'test-web-fullstack-project';
 		const opts: any = {
-			template: 'fullstack' as const,
+			template: 'web-fullstack' as const,
 			projectName,
 			createGithubRepository: false,
 			directory: tmpDir,
@@ -199,7 +199,7 @@ describe('generateProject', () => {
 	it('should handle pnpm workspaces correctly', async () => {
 		const projectName = 'test-pnpm-workspaces';
 		const opts: any = {
-			template: 'fullstack' as const,
+			template: 'web-fullstack' as const,
 			projectName,
 			packageManager: 'pnpm' as const,
 			directory: tmpDir,
@@ -373,10 +373,10 @@ describe('generateProject', () => {
 		expect(execa).not.toHaveBeenCalledWith('git', ['init'], expect.anything());
 	});
 
-	it('should handle webpage with skipBuild', async () => {
-		const projectName = 'test-webpage-skip';
+	it('should handle web-vanilla with skipBuild', async () => {
+		const projectName = 'test-web-vanilla-skip';
 		const opts: any = {
-			template: 'webpage' as const,
+			template: 'web-vanilla' as const,
 			projectName,
 			directory: tmpDir,
 			update: false,
@@ -600,7 +600,7 @@ describe('generateProject', () => {
 			update: false,
 		};
 		await generateProject(opts);
-		expect(p.note).toHaveBeenCalledWith(expect.stringContaining(`Successfully created a new cli project named '${projectName}'.`), 'Project ready');
+		expect(p.note).toHaveBeenCalledWith(expect.stringContaining(`Successfully created a new cli project named '${projectName}'.`));
 	});
 
 	it('should not show summary when silent', async () => {
@@ -619,7 +619,7 @@ describe('generateProject', () => {
 	it('should transform npm scripts to pnpm correctly', async () => {
 		const projectName = 'test-pnpm-scripts';
 		const opts: any = {
-			template: 'fullstack' as const,
+			template: 'web-fullstack' as const,
 			projectName,
 			packageManager: 'pnpm' as const,
 			directory: tmpDir,
@@ -630,7 +630,7 @@ describe('generateProject', () => {
 			dependencies: {},
 			devDependencies: {},
 			scripts: {
-				test: 'npm run lint && npm run test',
+				test: 'npm run test --workspaces',
 				build: 'npm run build --workspaces',
 			},
 			workspaces: ['client', 'server'],

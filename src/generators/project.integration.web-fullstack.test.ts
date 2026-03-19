@@ -12,11 +12,11 @@ const pathExists = (p: string) =>
 
 // This test suite performs real scaffolding and runs real commands.
 // It is intended to catch issues that mocked unit tests miss.
-describe('generateProject (Integration - Fullstack)', () => {
+describe('generateProject (Integration - Web-Fullstack)', () => {
 	let tmpDir: string;
 
 	beforeEach(async () => {
-		tmpDir = path.join(os.tmpdir(), 'cp-integration-fullstack-' + Math.random().toString(36).slice(2));
+		tmpDir = path.join(os.tmpdir(), 'cp-integration-web-fullstack-' + Math.random().toString(36).slice(2));
 		await fs.mkdir(tmpDir, {recursive: true});
 	});
 
@@ -24,10 +24,10 @@ describe('generateProject (Integration - Fullstack)', () => {
 		await fs.rm(tmpDir, {recursive: true, force: true});
 	});
 
-	it('should scaffold and pass CI for fullstack template', async () => {
-		const projectName = 'fullstack-e2e';
+	it('should scaffold and pass CI for web-fullstack template', async () => {
+		const projectName = 'web-fullstack-e2e';
 		const opts: any = {
-			template: 'fullstack' as const,
+			template: 'web-fullstack' as const,
 			projectName,
 			packageManager: 'pnpm',
 			createGithubRepository: false,
@@ -44,7 +44,7 @@ describe('generateProject (Integration - Fullstack)', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
 
-		// In fullstack, check workspace dist files
+		// In web-fullstack, check workspace dist files
 		expect(await pathExists(path.join(projectPath, 'client/dist/index.html'))).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'server/dist/index.js'))).toBe(true);
 	}, 600000); // 10 minute timeout for npm install and build

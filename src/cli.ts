@@ -43,10 +43,10 @@ Commands:
   info        - Show detailed information about available templates and components.
 
 Templates:
-  cli         - Node.js CLI application with commander and cli-progress.
-  webpage     - Standalone web page (modern HTML/JS).
-  webapp      - Web application with TypeScript and an Express backend.
-  fullstack   - Full-stack monorepo with Express server and React/MUI client.
+  cli            - Node.js CLI application with commander and cli-progress.
+  web-vanilla    - Standalone web page (modern HTML/JS).
+  web-app        - React application with MUI and TanStack Query.
+  web-fullstack  - Full-stack monorepo with Express server and React/MUI client.
 `,
 		);
 
@@ -55,7 +55,7 @@ Templates:
 	program
 		.command('info')
 		.description('Show detailed information about available templates and their components')
-		.option('-t, --template <type>', 'Template type (cli, webpage, webapp, fullstack)')
+		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.action((opts) => {
 			debug('Executing "info" command with options: %O', opts);
 			p.intro('Template Information');
@@ -63,7 +63,7 @@ Templates:
 			if (opts.template) {
 				const typeResult = TemplateTypeSchema.safeParse(opts.template);
 				if (!typeResult.success) {
-					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, webpage, webapp, fullstack`);
+					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
 					process.exit(1);
 				}
 				const info = getTemplateInfo(typeResult.data);
@@ -88,7 +88,7 @@ Templates:
 	program
 		.command('create')
 		.description('Create a new project from a template')
-		.option('-t, --template <type>', 'Template type (cli, webpage, webapp, fullstack)')
+		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'npm')
 		.option('--create-github-repository', 'Create GitHub project')
@@ -102,8 +102,8 @@ Templates:
 		.option('--silent', 'Reduce console output', false)
 		.action((opts) => {
 			debug('Executing "create" command with options: %O', opts);
-			if (opts.template === 'webapp' && opts.skipBuild) {
-				p.log.error('The --skip-build option is not allowed for the "webapp" template.');
+			if (opts.template === 'web-app' && opts.skipBuild) {
+				p.log.error('The --skip-build option is not allowed for the "web-app" template.');
 				process.exit(1);
 			}
 			commandResult = {
@@ -123,7 +123,7 @@ Templates:
 	program
 		.command('update')
 		.description('Update an existing project from its template')
-		.option('-t, --template <type>', 'Template type (cli, webpage, webapp, fullstack)')
+		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'npm')
 		.option('--create-github-repository', 'Create GitHub project')
@@ -137,8 +137,8 @@ Templates:
 		.option('--silent', 'Reduce console output', false)
 		.action((opts) => {
 			debug('Executing "update" command with options: %O', opts);
-			if (opts.template === 'webapp' && opts.skipBuild) {
-				p.log.error('The --skip-build option is not allowed for the "webapp" template.');
+			if (opts.template === 'web-app' && opts.skipBuild) {
+				p.log.error('The --skip-build option is not allowed for the "web-app" template.');
 				process.exit(1);
 			}
 			commandResult = {
@@ -231,9 +231,9 @@ Templates:
 					initialValue: template || 'cli',
 					options: [
 						{label: 'CLI Application (Node.js)', value: 'cli'},
-						{label: 'Webpage (Standalone)', value: 'webpage'},
-						{label: 'Webapp (Express Backend)', value: 'webapp'},
-						{label: 'Full-stack (Express + React/MUI Monorepo)', value: 'fullstack'},
+						{label: 'Web-Vanilla (Standalone)', value: 'web-vanilla'},
+						{label: 'Web-App (React + MUI)', value: 'web-app'},
+						{label: 'Web-Fullstack (Express + React Monorepo)', value: 'web-fullstack'},
 					],
 				});
 
@@ -264,7 +264,7 @@ Templates:
 			}
 
 			let skipBuild = false;
-			if (template !== 'webapp') {
+			if (template !== 'web-app') {
 				const res = await p.confirm({
 					message: 'Should we use build tooling? (Enables bundling using tsdown, and uses raw dist/ instead of src/)',
 					initialValue: true,

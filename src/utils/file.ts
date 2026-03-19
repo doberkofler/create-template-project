@@ -28,21 +28,21 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		case 'cli':
 			description = 'A modern Node.js CLI application with TypeScript and automated tooling.';
 			break;
-		case 'webpage':
+		case 'web-vanilla':
 			description = 'A standalone web page/application for modern browsers.';
 			break;
-		case 'fullstack':
+		case 'web-fullstack':
 			description = 'A full-stack monorepo with an Express server and a React/MUI client.';
 			break;
-		case 'webapp':
-			description = 'A classic web application with an Express backend.';
+		case 'web-app':
+			description = 'A React application with MUI and TanStack Query.';
 			break;
 	}
 
 	let processed = content.replaceAll('{{projectName}}', projectName).replaceAll('{{description}}', description);
 
-	// Special logic for webpage template script tag in index.html
-	if (template === 'webpage' && filePath === 'index.html') {
+	// Special logic for web-vanilla template script tag in index.html
+	if (template === 'web-vanilla' && filePath === 'index.html') {
 		processed = processed.replace('{{scriptSrc}}', opts.skipBuild ? './src/index.js' : './dist/index.mjs');
 	}
 
@@ -58,8 +58,8 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		}
 	}
 
-	// Fullstack/Webpage/Webapp tsconfig.json overrides
-	if ((template === 'fullstack' || template === 'webpage' || template === 'webapp') && filePath === 'tsconfig.json') {
+	// Web-Fullstack/Web-Vanilla/Web-App tsconfig.json overrides
+	if ((template === 'web-fullstack' || template === 'web-vanilla' || template === 'web-app') && filePath === 'tsconfig.json') {
 		const webEnv = `/* Language and Environment */
 		"target": "ES2023" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
 		"lib": ["ES2023", "DOM", "DOM.Iterable"] /* Specify a set of bundled library declaration files that describe the target runtime environment. */,
@@ -77,7 +77,7 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		);
 	}
 
-	if (template === 'fullstack' && filePath === 'tsconfig.json') {
+	if (template === 'web-fullstack' && filePath === 'tsconfig.json') {
 		processed = processed.replace(/"include":\s*\[\s*"src\/\*\*\/\*"\s*\]/, '"include": ["client/src/**/*", "server/src/**/*"]');
 	}
 
@@ -101,7 +101,7 @@ export function mergePackageJson(target: any, source: any) {
 
 export function isSeedFile(filePath: string): boolean {
 	const seedDirs = ['src/', 'client/src/', 'server/src/', 'backend/src/', 'frontend/src/'];
-	const seedFiles = ['index.html', 'App.tsx', 'main.tsx'];
+	const seedFiles = ['index.html', 'App.tsx', 'main.tsx', 'index.tsx'];
 	return seedDirs.some((dir) => filePath.startsWith(dir)) || seedFiles.some((file) => filePath === file);
 }
 
