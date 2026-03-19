@@ -34,7 +34,7 @@
 		"test:integration:web-vanilla": "vitest run src/generators/project.integration.web-vanilla.test.ts --testTimeout=600000",
 		"test:integration:web-app": "vitest run src/generators/project.integration.web-app.test.ts --testTimeout=600000",
 		"test:integration:web-fullstack": "vitest run src/generators/project.integration.web-fullstack.test.ts --testTimeout=600000",
-		"test:integration": "pnpm run test:integration:cli && pnpm run test:integration::web-vanilla && pnpm run test:integration:web-app && pnpm run test:integration:web-fullstack",
+		"test:integration": "pnpm run test:integration:cli && pnpm run test:integration:web-vanilla && pnpm run test:integration:web-app && pnpm run test:integration:web-fullstack",
 		"ci": "pnpm run lint && pnpm run build && pnpm run test",
 		"create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
 		"prepare": "husky"
