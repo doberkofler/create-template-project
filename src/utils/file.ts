@@ -41,6 +41,34 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 
 	let processed = content.replaceAll('{{projectName}}', projectName).replaceAll('{{description}}', description);
 
+	// Special logic for GitHub Actions workflow
+	if (filePath.includes('.github/workflows/node.js.yml')) {
+		const pm = opts.packageManager || 'npm';
+		let installCommand = 'npm ci';
+		let pmSetup = '';
+		if (pm === 'pnpm') {
+			installCommand = 'pnpm install --frozen-lockfile';
+			pmSetup = '- uses: pnpm/action-setup@v4\n        with:\n          version: 9';
+		} else if (pm === 'yarn') {
+			installCommand = 'yarn install --frozen-lockfile';
+		}
+
+		let playwrightSetup = '';
+		if (template === 'web-fullstack' || template === 'web-app' || template === 'web-vanilla') {
+			playwrightSetup = '- name: Install Playwright Browsers & Deps\n        run: npx playwright install --with-deps chromium';
+		}
+
+		processed = processed
+			.replaceAll('{{packageManager}}', pm)
+			.replaceAll('{{installCommand}}', installCommand)
+			.replaceAll('# [PM_SETUP]', pmSetup)
+			.replaceAll('# [PLAYWRIGHT_SETUP]', playwrightSetup);
+
+		// Clean up empty lines from empty placeholders
+		processed = processed.replace(/^\s*# \[PM_SETUP\]\s*\n/m, '');
+		processed = processed.replace(/^\s*# \[PLAYWRIGHT_SETUP\]\s*\n/m, '');
+	}
+
 	// Special logic for web-vanilla template script tag in index.html
 	if (template === 'web-vanilla' && filePath === 'index.html') {
 		processed = processed.replace('{{scriptSrc}}', opts.skipBuild ? './src/index.js' : './dist/index.mjs');

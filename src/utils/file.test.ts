@@ -112,6 +112,127 @@ describe('file utils', () => {
 			expect(processed).toContain('"jsx": "react-jsx"');
 			expect(processed).toContain('"include": ["client/src/**/*", "server/src/**/*"]');
 		});
+
+		it('should handle GitHub Actions workflow generation for web-fullstack with pnpm', () => {
+			const content = `
+    steps:
+      - uses: actions/checkout@v4
+      # [PM_SETUP]
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: "{{packageManager}}"
+      - run: "{{installCommand}}"
+      # [PLAYWRIGHT_SETUP]
+      - run: "{{packageManager}} run ci"
+`;
+			const optsFullstack: any = {...opts, template: 'web-fullstack', packageManager: 'pnpm'};
+			const processed = processContent('.github/workflows/node.js.yml', content, optsFullstack, []);
+			expect(processed).toContain('uses: pnpm/action-setup@v4');
+			expect(processed).toContain('cache: "pnpm"');
+			expect(processed).toContain('run: "pnpm install --frozen-lockfile"');
+			expect(processed).toContain('name: Install Playwright Browsers & Deps');
+			expect(processed).toContain('run: "pnpm run ci"');
+		});
+
+		it('should handle GitHub Actions workflow generation for cli with npm', () => {
+			const content = `
+    steps:
+      - uses: actions/checkout@v4
+      # [PM_SETUP]
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ' ESNext'
+          cache: "{{packageManager}}"
+      - run: "{{installCommand}}"
+      # [PLAYWRIGHT_SETUP]
+      - run: "{{packageManager}} run ci"
+`;
+			const optsCli: any = {...opts, template: 'cli', packageManager: 'npm'};
+			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
+			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).not.toContain('# [PM_SETUP]');
+			expect(processed).toContain('cache: "npm"');
+			expect(processed).toContain('run: "npm ci"');
+			expect(processed).not.toContain('name: Install Playwright Browsers & Deps');
+			expect(processed).not.toContain('# [PLAYWRIGHT_SETUP]');
+			expect(processed).toContain('run: "npm run ci"');
+		});
+
+		it('should handle GitHub Actions workflow generation for web-app with yarn', () => {
+			const content = `
+    steps:
+      - uses: actions/checkout@v4
+      # [PM_SETUP]
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: "{{packageManager}}"
+      - run: "{{installCommand}}"
+      # [PLAYWRIGHT_SETUP]
+      - run: "{{packageManager}} run ci"
+`;
+			const optsWebApp: any = {...opts, template: 'web-app', packageManager: 'yarn'};
+			const processed = processContent('.github/workflows/node.js.yml', content, optsWebApp, []);
+			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).toContain('cache: "yarn"');
+			expect(processed).toContain('run: "yarn install --frozen-lockfile"');
+			expect(processed).toContain('name: Install Playwright Browsers & Deps');
+			expect(processed).toContain('run: "yarn run ci"');
+		});
+
+		it('should handle GitHub Actions workflow generation for cli with npm', () => {
+			const content = `
+    steps:
+      - uses: actions/checkout@v4
+      # [PM_SETUP]
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: "{{packageManager}}"
+      - run: "{{installCommand}}"
+      # [PLAYWRIGHT_SETUP]
+      - run: "{{packageManager}} run ci"
+`;
+			const optsCli: any = {...opts, template: 'cli', packageManager: 'npm'};
+			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
+			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).not.toContain('# [PM_SETUP]');
+			expect(processed).toContain('cache: "npm"');
+			expect(processed).toContain('run: "npm ci"');
+			expect(processed).not.toContain('name: Install Playwright Browsers & Deps');
+			expect(processed).not.toContain('# [PLAYWRIGHT_SETUP]');
+			expect(processed).toContain('run: "npm run ci"');
+		});
+
+		it('should handle GitHub Actions workflow generation for cli with npm', () => {
+			const content = `
+    steps:
+      - uses: actions/checkout@v4
+      # [PM_SETUP]
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: "{{packageManager}}"
+      - run: "{{installCommand}}"
+      # [PLAYWRIGHT_SETUP]
+      - run: "{{packageManager}} run ci"
+`;
+			const optsCli: any = {...opts, template: 'cli', packageManager: 'npm'};
+			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
+			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).not.toContain('# [PM_SETUP]');
+			expect(processed).toContain('cache: "npm"');
+			expect(processed).toContain('run: "npm ci"');
+			expect(processed).not.toContain('name: Install Playwright Browsers & Deps');
+			expect(processed).not.toContain('# [PLAYWRIGHT_SETUP]');
+			expect(processed).toContain('run: "npm run ci"');
+		});
 	});
 
 	describe('mergeFile', () => {
