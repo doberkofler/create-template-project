@@ -1,9 +1,10 @@
 import {Command} from 'commander';
 import * as p from '@clack/prompts';
-import {ProjectOptions, ProjectOptionsSchema} from './types.js';
+import {ProjectOptions, ProjectOptionsSchema, TemplateTypeSchema} from './types.js';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import debugLib from 'debug';
+import {getAllTemplatesInfo, getTemplateInfo} from './generators/info.js';
 
 const pathExists = (p: string) =>
 	fs
@@ -35,6 +36,12 @@ export const parseArgs = async (): Promise<ProjectOptions> => {
 		.addHelpText(
 			'after',
 			`
+Commands:
+  create      - Create a new project from a template.
+  update      - Update an existing project from its template.
+  interactive - Start interactive project configuration.
+  info        - Show detailed information about available templates and components.
+
 Templates:
   cli         - Node.js CLI application with commander and cli-progress.
   webpage     - Standalone web page (modern HTML/JS).
@@ -44,6 +51,39 @@ Templates:
 		);
 
 	let commandResult: ProjectOptions | undefined;
+
+	program
+		.command('info')
+		.description('Show detailed information about available templates and their components')
+		.option('-t, --template <type>', 'Template type (cli, webpage, webapp, fullstack)')
+		.action((opts) => {
+			debug('Executing "info" command with options: %O', opts);
+			p.intro('Template Information');
+
+			if (opts.template) {
+				const typeResult = TemplateTypeSchema.safeParse(opts.template);
+				if (!typeResult.success) {
+					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, webpage, webapp, fullstack`);
+					process.exit(1);
+				}
+				const info = getTemplateInfo(typeResult.data);
+				p.note(
+					[`Description: ${info.description}`, '', 'Components:', ...info.components.map((c) => `  ● ${c.name}: ${c.description}`)].join('\n'),
+					`Template: ${info.name}`,
+				);
+			} else {
+				const allInfo = getAllTemplatesInfo();
+				for (const info of allInfo) {
+					p.note(
+						[`Description: ${info.description}`, '', 'Components:', ...info.components.map((c) => `  ● ${c.name}: ${c.description}`)].join('\n'),
+						`Template: ${info.name}`,
+					);
+				}
+			}
+
+			p.outro('Use "create" to scaffold a new project.');
+			process.exit(0);
+		});
 
 	program
 		.command('create')

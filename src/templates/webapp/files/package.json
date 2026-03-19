@@ -1,13 +1,32 @@
 {
 	"dependencies": {
-		"express": ""
+		"express": "",
+		"react": "",
+		"react-dom": "",
+		"@mui/material": "",
+		"@mui/icons-material": "",
+		"@emotion/react": "",
+		"@emotion/styled": "",
+		"@tanstack/react-query": ""
 	},
 	"devDependencies": {
 		"@types/express": "",
-		"tsdown": ""
+		"@types/react": "",
+		"@types/react-dom": "",
+		"vite": "",
+		"@vitejs/plugin-react": "",
+		"vitest": "",
+		"@vitest/browser": "",
+		"playwright": "",
+		"@playwright/test": ""
 	},
 	"scripts": {
-		"build": "tsdown",
+		"dev": "vite",
+		"build": "vite build && vite build -c vite.config.server.ts",
+		"preview": "vite preview",
+		"test": "vitest run",
+		"test:ui": "vitest",
+		"test:e2e": "playwright test",
 		"start": "node dist/server/index.js"
 	}
 }

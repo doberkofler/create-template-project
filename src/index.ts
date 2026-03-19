@@ -15,7 +15,9 @@ export const main = async () => {
 		debug('Starting CLI execution');
 		debug('Parsing arguments');
 		const options = await parseArgs();
-		if (!options) return;
+		if (!options) {
+			return;
+		}
 		const isSilent = !!options.silent;
 
 		if (!isSilent) {

@@ -3,8 +3,8 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"build": "tsdown",
-		"dev": "tsdown --watch",
+		"build": "vite build",
+		"dev": "vite",
 		"test": "vitest run"
 	}
 }

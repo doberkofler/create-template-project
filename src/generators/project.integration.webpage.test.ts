@@ -42,6 +42,6 @@ describe('generateProject (Integration - Webpage)', () => {
 
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'dist/index.mjs'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'dist/index.html'))).toBe(true);
 	}, 300000);
 });

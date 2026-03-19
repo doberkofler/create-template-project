@@ -9,12 +9,13 @@ export default defineConfig({
 	plugins: ['unicorn', 'typescript', 'oxc', 'import', 'react', 'jsdoc', 'promise', 'vitest'],
 	jsPlugins: ['eslint-plugin-regexp'],
 	categories: {
-		correctness: 'warn',
+		correctness: 'error',
 	},
 	rules: {
 		...pluginRegexp.configs.recommended.rules,
+		curly: ['error', 'all'],
 		'typescript/no-unused-vars': [
-			'warn',
+			'error',
 			{
 				caughtErrors: 'none',
 				argsIgnorePattern: '^_',

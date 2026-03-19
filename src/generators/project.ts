@@ -202,9 +202,13 @@ export const generateProject = async (opts: ProjectOptions) => {
 					const existingContent = await fs.readFile(finalTargetPath, 'utf8');
 					if (existingContent.trim() !== content.trim()) {
 						const result = await mergeFile(finalTargetPath, existingContent, content, log);
-						if (result === 'merged') log.info(`ℹ Merged: ${relativePath}`);
-						else if (result === 'conflict') log.warn(`⚠ Conflict: ${relativePath}`);
-						else if (result === 'updated') log.info(`✔ Updated: ${relativePath}`);
+						if (result === 'merged') {
+							log.info(`ℹ Merged: ${relativePath}`);
+						} else if (result === 'conflict') {
+							log.warn(`⚠ Conflict: ${relativePath}`);
+						} else if (result === 'updated') {
+							log.info(`✔ Updated: ${relativePath}`);
+						}
 					} else {
 						debug('Content identical, skipping: %s', finalTargetPath);
 					}
@@ -233,9 +237,13 @@ export const generateProject = async (opts: ProjectOptions) => {
 				const existingContent = await fs.readFile(targetPath, 'utf8');
 				if (existingContent.trim() !== content.trim()) {
 					const result = await mergeFile(targetPath, existingContent, content, log);
-					if (result === 'merged') log.info(`ℹ Merged: ${file.path}`);
-					else if (result === 'conflict') log.warn(`⚠ Conflict: ${file.path}`);
-					else if (result === 'updated') log.info(`✔ Updated: ${file.path}`);
+					if (result === 'merged') {
+						log.info(`ℹ Merged: ${file.path}`);
+					} else if (result === 'conflict') {
+						log.warn(`⚠ Conflict: ${file.path}`);
+					} else if (result === 'updated') {
+						log.info(`✔ Updated: ${file.path}`);
+					}
 				} else {
 					debug('Content identical, skipping programmatic: %s', targetPath);
 				}
@@ -264,8 +272,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 		delete finalPkg.workspaces;
 
 		for (const [key, value] of Object.entries(finalPkg.scripts)) {
-			if (typeof value === 'string' && value.includes('--workspaces')) {
-				finalPkg.scripts[key] = (value as string).replace('run ', '-r run ').replace(' --workspaces', '');
+			if (typeof value === 'string' && (value as string).includes('--workspaces')) {
+				finalPkg.scripts[key] = (value as string).replace(' run ', ' -r run ').replace(' --workspaces', '');
 			}
 		}
 	}
@@ -276,15 +284,19 @@ export const generateProject = async (opts: ProjectOptions) => {
 		delete finalPkg.scripts.dev;
 		if (finalPkg.devDependencies) {
 			delete finalPkg.devDependencies.tsdown;
+			delete finalPkg.devDependencies.vite;
+			delete finalPkg.devDependencies['@vitejs/plugin-react'];
 		}
 		if (finalPkg.scripts.ci) {
 			finalPkg.scripts.ci = finalPkg.scripts.ci.replace(' && npm run build', '').replace(` && ${pm} run build`, '');
 		}
-		// Remove tsdown.config.ts if it was copied
-		debug('Removing tsdown configs due to skipBuild');
+		// Remove build tool configs if they were copied
+		debug('Removing build tool configs due to skipBuild');
 		await fs.rm(path.join(projectDir, 'tsdown.config.ts'), {force: true});
-		await fs.rm(path.join(projectDir, 'client/tsdown.config.ts'), {force: true});
-		await fs.rm(path.join(projectDir, 'server/tsdown.config.ts'), {force: true});
+		await fs.rm(path.join(projectDir, 'vite.config.ts'), {force: true});
+		await fs.rm(path.join(projectDir, 'vite.config.server.ts'), {force: true});
+		await fs.rm(path.join(projectDir, 'client/vite.config.ts'), {force: true});
+		await fs.rm(path.join(projectDir, 'server/vite.config.ts'), {force: true});
 	}
 
 	// Write final package.json

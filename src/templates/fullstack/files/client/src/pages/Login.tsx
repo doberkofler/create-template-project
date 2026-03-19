@@ -1,15 +1,5 @@
 import {useState, FormEvent} from 'react';
-import {
-	Button,
-	TextField,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	Typography,
-	Alert,
-	Box,
-} from '@mui/material';
+import {Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Alert, Box} from '@mui/material';
 import {useAuth} from '../contexts/AuthContext.js';
 import {trpc} from '../trpc.js';
 import {useNavigate} from 'react-router-dom';
@@ -47,31 +37,12 @@ export const Login = () => {
 						<Typography variant="body2" color="textSecondary">
 							Use <b>demo@example.com</b> / <b>password</b> to login.
 						</Typography>
-						<TextField
-							label="Email"
-							type="email"
-							fullWidth
-							required
-							value={email}
-							onChange={(e) => setEmail(e.currentTarget.value)}
-						/>
-						<TextField
-							label="Password"
-							type="password"
-							fullWidth
-							required
-							value={password}
-							onChange={(e) => setPassword(e.currentTarget.value)}
-						/>
+						<TextField label="Email" type="email" fullWidth required value={email} onChange={(e) => setEmail(e.currentTarget.value)} />
+						<TextField label="Password" type="password" fullWidth required value={password} onChange={(e) => setPassword(e.currentTarget.value)} />
 					</Box>
 				</DialogContent>
 				<DialogActions>
-					<Button
-						type="submit"
-						variant="contained"
-						fullWidth
-						disabled={loginMutation.isPending}
-					>
+					<Button type="submit" variant="contained" fullWidth disabled={loginMutation.isPending}>
 						{loginMutation.isPending ? 'Logging in...' : 'Login'}
 					</Button>
 				</DialogActions>

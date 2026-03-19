@@ -105,10 +105,10 @@ describe('file utils', () => {
 		});
 
 		it('should handle fullstack tsconfig.json overrides', () => {
-			const content = '"lib": ["ESNext"], "module": "NodeNext", "include": ["src/**/*"]';
+			const content = '/* Language and Environment */ "lib": ["ESNext"], "module": "NodeNext" /* Strict Type-Checking Options */, "include": ["src/**/*"]';
 			const optsFullstack: any = {...opts, template: 'fullstack'};
 			const processed = processContent('tsconfig.json', content, optsFullstack, []);
-			expect(processed).toContain('"lib": ["ESNext", "DOM"]');
+			expect(processed).toContain('"lib": ["ES2023", "DOM", "DOM.Iterable"]');
 			expect(processed).toContain('"jsx": "react-jsx"');
 			expect(processed).toContain('"include": ["client/src/**/*", "server/src/**/*"]');
 		});

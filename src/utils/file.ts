@@ -60,11 +60,24 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 
 	// Fullstack/Webpage/Webapp tsconfig.json overrides
 	if ((template === 'fullstack' || template === 'webpage' || template === 'webapp') && filePath === 'tsconfig.json') {
-		processed = processed.replace(/"lib":\s*\["ESNext"\]/, '"lib": ["ESNext", "DOM"]');
+		const webEnv = `/* Language and Environment */
+		"target": "ES2023" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+		"lib": ["ES2023", "DOM", "DOM.Iterable"] /* Specify a set of bundled library declaration files that describe the target runtime environment. */,
+		"module": "ESNext" /* Specify what module code is generated. */,
+		"moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
+		"esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. */,
+		"resolveJsonModule": true /* Enable importing .json files. */,
+		"allowImportingTsExtensions": true /* Allow imports to include TypeScript file extensions. */,
+		"noEmit": true /* Disable emitting files from a compilation. */,
+		"jsx": "react-jsx" /* Specify what JSX code is generated. */,`;
+
+		processed = processed.replace(
+			/\/\* Language and Environment \*\/[\s\S]*?\/\* Strict Type-Checking Options \*\//,
+			webEnv + '\n\n\t\t/* Strict Type-Checking Options */',
+		);
 	}
 
 	if (template === 'fullstack' && filePath === 'tsconfig.json') {
-		processed = processed.replace(/"module":\s*"NodeNext"/, '"module": "NodeNext",\n\t\t"jsx": "react-jsx"');
 		processed = processed.replace(/"include":\s*\[\s*"src\/\*\*\/\*"\s*\]/, '"include": ["client/src/**/*", "server/src/**/*"]');
 	}
 
@@ -72,10 +85,18 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 }
 
 export function mergePackageJson(target: any, source: any) {
-	if (source.scripts) target.scripts = {...target.scripts, ...source.scripts};
-	if (source.dependencies) target.dependencies = {...target.dependencies, ...source.dependencies};
-	if (source.devDependencies) target.devDependencies = {...target.devDependencies, ...source.devDependencies};
-	if (source.workspaces) target.workspaces = source.workspaces;
+	if (source.scripts) {
+		target.scripts = {...target.scripts, ...source.scripts};
+	}
+	if (source.dependencies) {
+		target.dependencies = {...target.dependencies, ...source.dependencies};
+	}
+	if (source.devDependencies) {
+		target.devDependencies = {...target.devDependencies, ...source.devDependencies};
+	}
+	if (source.workspaces) {
+		target.workspaces = source.workspaces;
+	}
 }
 
 export function isSeedFile(filePath: string): boolean {

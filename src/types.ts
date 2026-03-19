@@ -29,8 +29,15 @@ export interface FileDefinition {
 	content: string | (() => string);
 }
 
+export interface TemplateComponent {
+	name: string;
+	description: string;
+}
+
 export interface TemplateDefinition {
 	name: string;
+	description: string;
+	components: TemplateComponent[];
 	dependencies: Record<string, string>;
 	devDependencies: Record<string, string>;
 	files: FileDefinition[];

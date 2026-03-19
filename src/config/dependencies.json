@@ -1,155 +1,175 @@
 {
 	"dependencies": {
+		"vite": {
+			"version": "8.0.1",
+			"description": "Native-ESM powered web dev build tool"
+		},
+		"@vitejs/plugin-react": {
+			"version": "6.0.1",
+			"description": "The default Vite plugin for React projects."
+		},
+		"@vitest/browser": {
+			"version": "4.1.0",
+			"description": "Run Vitest in the browser."
+		},
+		"@vitest/browser-playwright": {
+			"version": "4.1.0",
+			"description": "Playwright provider for Vitest browser mode."
+		},
+		"playwright": {
+			"version": "1.58.2",
+			"description": "Framework for Web-browser automation."
+		},
 		"debug": {
-			"version": "^4.4.3",
+			"version": "4.4.3",
 			"description": "A tiny JavaScript debugging utility modelled after Node.js core debugging technique."
 		},
 		"@commitlint/cli": {
-			"version": "^20.5.0",
+			"version": "20.5.0",
 			"description": "Lint commit messages to ensure they follow conventional commits."
 		},
 		"@commitlint/config-conventional": {
-			"version": "^20.5.0",
+			"version": "20.5.0",
 			"description": "Shareable commitlint config enforcing conventional commits."
 		},
 		"@types/debug": {
-			"version": "^4.1.12",
+			"version": "^4.1.13",
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "^25.5.0",
+			"version": "25.5.0",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "^4.1.0",
+			"version": "4.1.0",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
-			"version": "^7.2.0",
+			"version": "7.2.0",
 			"description": "Generate a changelog from git metadata."
 		},
 		"husky": {
-			"version": "^9.1.7",
+			"version": "9.1.7",
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "^1.56.0",
+			"version": "1.56.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "^0.17.0",
+			"version": "0.17.0",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"prettier": {
-			"version": "^3.8.1",
+			"version": "3.8.1",
 			"description": "An opinionated code formatter."
 		},
 		"typescript": {
-			"version": "^5.9.3",
+			"version": "5.9.3",
 			"description": "A superset of JavaScript that compiles to clean JavaScript output."
 		},
 		"vitest": {
-			"version": "^4.1.0",
+			"version": "4.1.0",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
-			"version": "^14.0.3",
+			"version": "14.0.3",
 			"description": "The complete solution for node.js command-line interfaces."
 		},
 		"cli-progress": {
-			"version": "^3.12.0",
+			"version": "3.12.0",
 			"description": "Easy to use progress-bar for command-line/terminal applications."
 		},
 		"@types/cli-progress": {
-			"version": "^3.11.6",
+			"version": "3.11.6",
 			"description": "TypeScript definitions for cli-progress."
 		},
 		"tsdown": {
-			"version": "^0.21.4",
+			"version": "0.21.4",
 			"description": "A zero-config bundler for TypeScript."
 		},
 		"express": {
-			"version": "^5.2.1",
+			"version": "5.2.1",
 			"description": "Fast, unopinionated, minimalist web framework for Node.js."
 		},
 		"@types/express": {
-			"version": "^5.0.6",
+			"version": "5.0.6",
 			"description": "TypeScript definitions for Express."
 		},
 		"react": {
-			"version": "^19.2.4",
+			"version": "19.2.4",
 			"description": "A JavaScript library for building user interfaces."
 		},
 		"react-dom": {
-			"version": "^19.2.4",
+			"version": "19.2.4",
 			"description": "React package for working with the DOM."
 		},
 		"@mui/material": {
-			"version": "^7.3.9",
+			"version": "7.3.9",
 			"description": "Material UI components."
 		},
 		"@mui/icons-material": {
-			"version": "^7.3.9",
+			"version": "7.3.9",
 			"description": "Material Design icons distributed as SVG React components."
 		},
 		"@emotion/react": {
-			"version": "^11.14.0",
+			"version": "11.14.0",
 			"description": "CSS-in-JS library designed for high performance."
 		},
 		"@emotion/styled": {
-			"version": "^11.14.1",
+			"version": "11.14.1",
 			"description": "Styled components for Emotion."
 		},
 		"@types/react": {
-			"version": "^19.2.14",
+			"version": "19.2.14",
 			"description": "TypeScript definitions for React."
 		},
 		"@types/react-dom": {
-			"version": "^19.2.3",
+			"version": "19.2.3",
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
-			"version": "^1.58.2",
+			"version": "1.58.2",
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
-			"version": "^11.13.4",
+			"version": "11.13.4",
 			"description": "tRPC server library."
 		},
 		"@trpc/client": {
-			"version": "^11.13.4",
+			"version": "11.13.4",
 			"description": "tRPC client library."
 		},
 		"@trpc/react-query": {
-			"version": "^11.13.4",
+			"version": "11.13.4",
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "^5.90.21",
+			"version": "^5.91.2",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
-			"version": "^4.3.6",
+			"version": "4.3.6",
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"tinyexec": {
-			"version": "^1.0.4",
-			"description": "A minimal library for executing processes in Node (pinned to 1.0.2 due to broken 1.0.3 release)."
+			"version": "1.0.4",
+			"description": "A minimal library for executing processes in Node."
 		},
 		"react-router-dom": {
-			"version": "^7.13.1",
+			"version": "7.13.1",
 			"description": "Declarative routing for React web applications."
 		},
 		"cors": {
-			"version": "^2.8.6",
+			"version": "2.8.6",
 			"description": "Node.js CORS middleware."
 		},
 		"@types/cors": {
-			"version": "^2.8.19",
+			"version": "2.8.19",
 			"description": "TypeScript definitions for cors."
 		},
 		"eslint-plugin-regexp": {
-			"version": "^3.1.0",
+			"version": "3.1.0",
 			"description": "ESLint plugin for finding regexp mistakes and style guide violations."
 		}
 	}

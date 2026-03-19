@@ -1,50 +1,40 @@
-import { defineConfig } from 'oxlint';
+import {defineConfig} from 'oxlint';
 import pluginRegexp from 'eslint-plugin-regexp';
 
 export default defineConfig({
 	options: {
 		typeAware: true,
-		typeCheck: true
+		typeCheck: true,
 	},
-	plugins: [
-		'unicorn',
-		'typescript',
-		'oxc',
-		'import',
-		'react',
-		'jsdoc',
-		'promise',
-		'vitest'
-	],
-	jsPlugins: [
-		'eslint-plugin-regexp'
-	],
+	plugins: ['unicorn', 'typescript', 'oxc', 'import', 'react', 'jsdoc', 'promise', 'vitest'],
+	jsPlugins: ['eslint-plugin-regexp'],
 	categories: {
-		correctness: 'error'
+		correctness: 'error',
 	},
 	rules: {
 		...pluginRegexp.configs.recommended.rules,
+		curly: ['error', 'all'],
 		'typescript/no-unused-vars': [
 			'error',
 			{
 				caughtErrors: 'none',
-				argsIgnorePattern: '^_'
-			}
-		]
+				argsIgnorePattern: '^_',
+			},
+		],
 	},
 	settings: {
 		'jsx-a11y': {
 			polymorphicPropName: undefined,
 			components: {},
-			attributes: {}
+			attributes: {},
 		},
 		next: {
-			rootDir: []
+			rootDir: [],
 		},
 		react: {
 			formComponents: [],
 			linkComponents: [],
-			version: undefined
+			version: undefined,
 		},
 		jsdoc: {
 			ignorePrivate: false,
@@ -54,21 +44,15 @@ export default defineConfig({
 			augmentsExtendsReplacesDocs: false,
 			implementsReplacesDocs: false,
 			exemptDestructuredRootsFromChecks: false,
-			tagNamePreference: {}
+			tagNamePreference: {},
 		},
 		vitest: {
-			typecheck: false
-		}
+			typecheck: false,
+		},
 	},
 	env: {
-		builtin: true
+		builtin: true,
 	},
 	globals: {},
-	ignorePatterns: [
-		'**/.*',
-		'node_modules/**',
-		'dist/**',
-		'coverage/**',
-		'public/**'
-	]
+	ignorePatterns: ['**/.*', 'node_modules/**', 'dist/**', 'coverage/**', 'public/**'],
 });

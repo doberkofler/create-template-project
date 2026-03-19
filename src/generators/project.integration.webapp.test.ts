@@ -42,7 +42,7 @@ describe('generateProject (Integration - Webapp)', () => {
 
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'dist/server.mjs'))).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'dist/client.mjs'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'dist/client/index.html'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'dist/server/index.js'))).toBe(true);
 	}, 300000);
 });

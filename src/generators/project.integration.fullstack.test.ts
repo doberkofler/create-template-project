@@ -45,7 +45,7 @@ describe('generateProject (Integration - Fullstack)', () => {
 		expect(await pathExists(projectPath)).toBe(true);
 
 		// In fullstack, check workspace dist files
-		expect(await pathExists(path.join(projectPath, 'client/dist/main.mjs'))).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'server/dist/index.mjs'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'client/dist/index.html'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'server/dist/index.js'))).toBe(true);
 	}, 600000); // 10 minute timeout for npm install and build
 });

@@ -84,6 +84,9 @@ describe('generateProject', () => {
 		expect(pkg.name).toBe(projectName);
 		expect(pkg.dependencies).toHaveProperty('commander');
 
+		// Verify .prettierignore exists
+		expect(await pathExists(path.join(projectPath, '.prettierignore'))).toBe(true);
+
 		// Verify README.md contains project name
 		const readme = await fs.readFile(path.join(projectPath, 'README.md'), 'utf8');
 		expect(readme).toContain(projectName);
@@ -154,7 +157,7 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'client/tsdown.config.ts'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'client/vite.config.ts'))).toBe(true);
 
 		// Verify package.json content
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
@@ -166,7 +169,7 @@ describe('generateProject', () => {
 
 		// Verify tsconfig.json content
 		const tsconfig = await fs.readFile(path.join(projectPath, 'tsconfig.json'), 'utf8');
-		expect(tsconfig).toContain('"lib": ["ESNext", "DOM"]');
+		expect(tsconfig).toContain('"lib": ["ES2023", "DOM", "DOM.Iterable"]');
 		expect(tsconfig).toContain('"jsx": "react-jsx"');
 		expect(tsconfig).toContain('"include": ["client/src/**/*", "server/src/**/*"]');
 
@@ -236,11 +239,11 @@ describe('generateProject', () => {
 		expect(await pathExists(path.join(projectPath, 'old-file.txt'))).toBe(false);
 	});
 
-	it('should handle --skip-build flag and remove tsdown configs', async () => {
+	it('should handle --skip-build flag and remove build tool configs', async () => {
 		const projectName = 'test-skip-build-cleanup';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
-		await fs.writeFile(path.join(projectPath, 'tsdown.config.ts'), 'content');
+		await fs.writeFile(path.join(projectPath, 'vite.config.ts'), 'content');
 
 		const opts: any = {
 			template: 'cli' as const,
@@ -254,7 +257,7 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.scripts.build).toBeUndefined();
-		expect(await pathExists(path.join(projectPath, 'tsdown.config.ts'))).toBe(false);
+		expect(await pathExists(path.join(projectPath, 'vite.config.ts'))).toBe(false);
 	});
 
 	it('should handle --update flag', async () => {
@@ -277,7 +280,9 @@ describe('generateProject', () => {
 	it('should handle gh repo create failure', async () => {
 		const projectName = 'test-github-fail';
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'gh' && args?.[0] === 'repo') throw new Error('GH failed');
+			if (cmd === 'gh' && args?.[0] === 'repo') {
+				throw new Error('GH failed');
+			}
 			return {stdout: '', stderr: ''};
 		});
 		const opts: any = {
@@ -320,7 +325,9 @@ describe('generateProject', () => {
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'README.md'), 'old');
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'git' && args?.[0] === 'merge-file') throw new Error('fatal');
+			if (cmd === 'git' && args?.[0] === 'merge-file') {
+				throw new Error('fatal');
+			}
 			return {stdout: '', stderr: ''};
 		});
 		const opts: any = {
@@ -336,7 +343,9 @@ describe('generateProject', () => {
 	it('should handle ci script failure', async () => {
 		const projectName = 'test-ci-fail';
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'ci') throw new Error('fail');
+			if (cmd === 'npm' && args?.[1] === 'ci') {
+				throw new Error('fail');
+			}
 			return {stdout: '', stderr: ''};
 		});
 		const opts: any = {
@@ -432,7 +441,9 @@ describe('generateProject', () => {
 	it('should handle npm install failure', async () => {
 		const projectName = 'test-inst-fail';
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string) => {
-			if (cmd === 'npm') throw new Error('inst fail');
+			if (cmd === 'npm') {
+				throw new Error('inst fail');
+			}
 			return {stdout: '', stderr: ''};
 		});
 		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false, installDependencies: true};
@@ -443,7 +454,9 @@ describe('generateProject', () => {
 	it('should handle prettier-write failure', async () => {
 		const projectName = 'test-prettier-fail';
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'prettier-write') throw new Error('prettier fail');
+			if (cmd === 'npm' && args?.[1] === 'prettier-write') {
+				throw new Error('prettier fail');
+			}
 			return {stdout: '', stderr: ''};
 		});
 		const opts: any = {
@@ -500,7 +513,9 @@ describe('generateProject', () => {
 	it('should handle dev server failure without open', async () => {
 		const projectName = 'test-dev-fail-no-open';
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'dev') throw new Error('dev fail');
+			if (cmd === 'npm' && args?.[1] === 'dev') {
+				throw new Error('dev fail');
+			}
 			return {stdout: '', stderr: ''};
 		});
 		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false, dev: true, open: false};
@@ -624,7 +639,7 @@ describe('generateProject', () => {
 		} as any);
 		await generateProject(opts);
 		const pkg = JSON.parse(await fs.readFile(path.join(tmpDir, projectName, 'package.json'), 'utf8'));
-		expect(pkg.scripts.test).toBe('pnpm run lint && pnpm run test');
+		expect(pkg.scripts.test).toBe('pnpm -r run test');
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
 		expect(pkg.workspaces).toBeUndefined(); // Deleted for pnpm
 	});

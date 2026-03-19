@@ -30,6 +30,15 @@ vi.mock('@clack/prompts', async (importOriginal) => {
 	};
 });
 
+vi.mock('./generators/info.js', () => ({
+	getAllTemplatesInfo: vi.fn(() => [{name: 'cli', description: 'desc', components: [{name: 'c1', description: 'd1'}]}]),
+	getTemplateInfo: vi.fn(() => ({
+		name: 'cli',
+		description: 'desc',
+		components: [{name: 'c1', description: 'd1'}],
+	})),
+}));
+
 describe('cli', () => {
 	const originalArgv = process.argv;
 	let exitSpy: MockInstance<any>;
@@ -45,6 +54,26 @@ describe('cli', () => {
 			throw err;
 		});
 		vi.mocked(p.isCancel).mockReturnValue(false);
+	});
+
+	it('should handle info command', async () => {
+		process.argv.push('info');
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 0');
+		expect(p.intro).toHaveBeenCalled();
+		expect(p.note).toHaveBeenCalled();
+		expect(p.outro).toHaveBeenCalled();
+	});
+
+	it('should handle info command with specific template', async () => {
+		process.argv.push('info', '-t', 'cli');
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 0');
+		expect(p.note).toHaveBeenCalledWith(expect.any(String), 'Template: cli');
+	});
+
+	it('should exit if invalid template type used in info', async () => {
+		process.argv.push('info', '-t', 'invalid');
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
+		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('Invalid template type'));
 	});
 
 	it('should parse create command arguments', async () => {
