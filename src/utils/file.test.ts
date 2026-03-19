@@ -132,7 +132,7 @@ describe('file utils', () => {
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
 			expect(result).toBe('merged');
-			expect(execa).toHaveBeenCalledWith('git', ['merge-file', filePath, expect.any(String), expect.any(String)], {preferLocal: true});
+			expect(execa).toHaveBeenCalledWith('git', ['merge-file', filePath, expect.any(String), expect.any(String)], {preferLocal: true, stdio: 'pipe'});
 		});
 
 		it('should return conflict if git merge-file returns exit code 1', async () => {

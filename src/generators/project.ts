@@ -317,15 +317,18 @@ export const generateProject = async (opts: ProjectOptions) => {
 	await fs.writeFile(pkgPath, JSON.stringify(finalPkg, null, '\t'));
 
 	// Initialize Git
+	const stdio = debug.enabled ? 'inherit' : 'pipe';
 	const isGit = await pathExists(path.join(projectDir, '.git'));
 	if (!isGit) {
 		debug('Initializing Git repository');
 		try {
-			await execa('git', ['init'], {cwd: projectDir, preferLocal: true});
+			debug('Executing: git init');
+			await execa('git', ['init'], {cwd: projectDir, stdio, preferLocal: true});
 			log.success('Initialized Git repository (git init).');
-		} catch (e) {
+		} catch (e: any) {
 			debug('Failed to initialize Git: %O', e);
-			log.error('Failed to initialize Git: ' + e);
+			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
+			log.error(`Failed to initialize Git: ${e.message}${detail}`);
 		}
 	}
 
@@ -333,14 +336,17 @@ export const generateProject = async (opts: ProjectOptions) => {
 	if (opts.createGithubRepository && !isUpdate) {
 		debug('Creating GitHub repository');
 		try {
+			debug('Executing: gh repo create %s --public --source=. --remote=origin', projectName);
 			await execa('gh', ['repo', 'create', projectName, '--public', '--source=.', '--remote=origin'], {
 				cwd: projectDir,
+				stdio,
 				preferLocal: true,
 			});
 			log.success('Created GitHub repository (gh repo create).');
-		} catch (e) {
+		} catch (e: any) {
 			debug('Failed to create GitHub repository: %O', e);
-			log.warn('Failed to create GitHub repository. Ensure "gh" CLI is installed and authenticated.');
+			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
+			log.warn(`Failed to create GitHub repository: ${e.message}${detail}\nEnsure "gh" CLI is installed and authenticated.`);
 		}
 	}
 
@@ -350,13 +356,15 @@ export const generateProject = async (opts: ProjectOptions) => {
 		const s = spinner();
 		s.start(`Installing dependencies using ${pm}...`);
 		try {
-			await execa(pm, ['install'], {cwd: projectDir, preferLocal: true});
+			debug('Executing: %s install', pm);
+			await execa(pm, ['install'], {cwd: projectDir, stdio, preferLocal: true});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Dependencies installed (${pm} install).`);
-		} catch (e) {
+		} catch (e: any) {
 			debug('Failed to install dependencies: %O', e);
 			s.stop('Failed to install dependencies.');
-			log.error(String(e));
-			throw new Error('Failed to install dependencies.');
+			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
+			log.error(`${e.message}${detail}`);
+			throw new Error(`Failed to install dependencies: ${e.message}${detail}`);
 		}
 	}
 
@@ -367,23 +375,28 @@ export const generateProject = async (opts: ProjectOptions) => {
 		if (finalPkg.scripts['prettier-write']) {
 			s.start(`Formatting files with Prettier (${pm} run prettier-write)...`);
 			try {
-				await execa(pm, ['run', 'prettier-write'], {cwd: projectDir, preferLocal: true});
+				debug('Executing: %s run prettier-write', pm);
+				await execa(pm, ['run', 'prettier-write'], {cwd: projectDir, stdio, preferLocal: true});
 				s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Files formatted (${pm} run prettier-write).`);
-			} catch (e) {
+			} catch (e: any) {
 				debug('Failed to format files: %O', e);
 				s.stop('Failed to format files.');
+				const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
+				log.error(`${e.message}${detail}`);
 			}
 		}
 
 		s.start(`Running CI script (lint, build, test) (${pm} run ci)...`);
 		try {
-			await execa(pm, ['run', 'ci'], {cwd: projectDir, preferLocal: true});
+			debug('Executing: %s run ci', pm);
+			await execa(pm, ['run', 'ci'], {cwd: projectDir, stdio, preferLocal: true});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  CI script completed (${pm} run ci).`);
-		} catch (e) {
+		} catch (e: any) {
 			debug('Failed to run CI script: %O', e);
 			s.stop('Failed to run CI script.');
-			log.error(String(e));
-			throw new Error('Failed to run CI script.');
+			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
+			log.error(`${e.message}${detail}`);
+			throw new Error(`Failed to run CI script: ${e.message}${detail}`);
 		}
 	}
 
@@ -394,12 +407,14 @@ export const generateProject = async (opts: ProjectOptions) => {
 		log.info('Starting dev server...');
 		if (opts.open) {
 			try {
+				debug('Executing: %s run dev -- --open', pm);
 				await execa(pm, ['run', 'dev', '--', '--open'], {cwd: projectDir, stdio: 'inherit', preferLocal: true});
 			} catch (e) {
 				log.error('Dev server failed: ' + e);
 			}
 		} else {
 			try {
+				debug('Executing: %s run dev', pm);
 				await execa(pm, ['run', 'dev'], {cwd: projectDir, stdio: 'inherit', preferLocal: true});
 			} catch (e) {
 				log.error('Dev server failed: ' + e);

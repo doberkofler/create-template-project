@@ -31,6 +31,7 @@ export const parseArgs = async (): Promise<ProjectOptions> => {
 		.version('0.1.0')
 		.option('--debug', 'Enable debug output')
 		.on('option:debug', () => {
+			process.env['DEBUG'] = 'create-template-project:*';
 			debugLib.enable('create-template-project:*');
 		})
 		.addHelpText(

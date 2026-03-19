@@ -5,7 +5,8 @@ import {intro, outro, cancel} from '@clack/prompts';
 import debugLib from 'debug';
 
 if (process.argv.includes('--debug')) {
-	debugLib.enable('*');
+	process.env['DEBUG'] = 'create-template-project:*';
+	debugLib.enable('create-template-project:*');
 }
 
 const debug = debugLib('create-template-project:main');

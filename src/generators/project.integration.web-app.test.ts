@@ -25,6 +25,7 @@ describe('generateProject (Integration - Web-App)', () => {
 	});
 
 	it('should scaffold and pass CI for web-app template', async () => {
+		process.env['DEBUG'] = 'create-template-project:*';
 		const projectName = 'web-app-e2e';
 		const opts: any = {
 			template: 'web-app' as const,
@@ -38,7 +39,16 @@ describe('generateProject (Integration - Web-App)', () => {
 			silent: true,
 		};
 
-		await generateProject(opts);
+		try {
+			await generateProject(opts);
+		} catch (e: any) {
+			console.error('\n' + '='.repeat(80));
+			console.error('INTEGRATION TEST FAILURE: web-app');
+			console.error('='.repeat(80));
+			console.error(e.message);
+			console.error('='.repeat(80) + '\n');
+			throw e;
+		}
 
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);

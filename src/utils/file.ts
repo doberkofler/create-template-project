@@ -120,7 +120,9 @@ export async function mergeFile(
 		await fs.writeFile(tempBase, '');
 
 		try {
-			await execa('git', ['merge-file', filePath, tempBase, tempNew], {preferLocal: true});
+			const stdio = debug.enabled ? 'inherit' : 'pipe';
+			debug('Executing: git merge-file %s %s %s', filePath, tempBase, tempNew);
+			await execa('git', ['merge-file', filePath, tempBase, tempNew], {stdio, preferLocal: true});
 			const postMergeContent = await fs.readFile(filePath, 'utf8');
 			return postMergeContent.trim() !== template.trim() ? 'merged' : 'updated';
 		} catch (e: any) {
@@ -128,7 +130,8 @@ export async function mergeFile(
 				return 'conflict';
 			} else {
 				debug('Git merge-file failed: %O', e);
-				log.error(`Failed to merge ${filePath}: ${e.message}`);
+				const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
+				log.error(`Failed to merge ${filePath}: ${e.message}${detail}`);
 				return 'error';
 			}
 		}

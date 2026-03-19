@@ -355,7 +355,7 @@ describe('generateProject', () => {
 			update: false,
 			build: true,
 		};
-		await expect(generateProject(opts)).rejects.toThrow('Failed to run CI script.');
+		await expect(generateProject(opts)).rejects.toThrow(/Failed to run CI script:?/);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('fail'));
 	});
 
@@ -447,7 +447,7 @@ describe('generateProject', () => {
 			return {stdout: '', stderr: ''};
 		});
 		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false, installDependencies: true};
-		await expect(generateProject(opts)).rejects.toThrow('Failed to install dependencies.');
+		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
 	});
 

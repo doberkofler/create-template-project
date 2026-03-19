@@ -25,6 +25,7 @@ describe('generateProject (Integration - Web-Fullstack)', () => {
 	});
 
 	it('should scaffold and pass CI for web-fullstack template', async () => {
+		process.env['DEBUG'] = 'create-template-project:*';
 		const projectName = 'web-fullstack-e2e';
 		const opts: any = {
 			template: 'web-fullstack' as const,
@@ -39,7 +40,13 @@ describe('generateProject (Integration - Web-Fullstack)', () => {
 		};
 
 		// We don't mock execa here. It will run real npm install and npm run ci.
-		await generateProject(opts);
+		try {
+			await generateProject(opts);
+		} catch (e: any) {
+			console.error('Integration test failed!');
+			console.error(e.message);
+			throw e;
+		}
 
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);

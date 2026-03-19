@@ -25,6 +25,7 @@ describe('generateProject (Integration - CLI)', () => {
 	});
 
 	it('should scaffold and pass CI for cli template', async () => {
+		process.env['DEBUG'] = 'create-template-project:*';
 		const projectName = 'cli-e2e';
 		const opts: any = {
 			template: 'cli' as const,
@@ -38,7 +39,16 @@ describe('generateProject (Integration - CLI)', () => {
 			silent: true,
 		};
 
-		await generateProject(opts);
+		try {
+			await generateProject(opts);
+		} catch (e: any) {
+			console.error('\n' + '='.repeat(80));
+			console.error('INTEGRATION TEST FAILURE: cli');
+			console.error('='.repeat(80));
+			console.error(e.message);
+			console.error('='.repeat(80) + '\n');
+			throw e;
+		}
 
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
