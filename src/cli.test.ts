@@ -89,10 +89,17 @@ describe('cli', () => {
 	});
 
 	it('should parse update command arguments', async () => {
-		process.argv.push('update', '-t', 'web-vanilla', '-n', 'existing-project');
+		const tempDir = path.resolve('./temp-update-test');
+		await fs.mkdir(tempDir, {recursive: true});
+		await fs.writeFile(path.join(tempDir, 'package.json'), JSON.stringify({name: 'temp-project'}));
+
+		process.argv.push('update', '-t', 'web-vanilla', '-d', tempDir);
 		const result = await parseArgs();
 		expect(result.update).toBe(true);
+		expect(result.projectName).toBe('temp-project');
 		expect(result.packageManager).toBe('pnpm');
+
+		await fs.rm(tempDir, {recursive: true, force: true});
 	});
 
 	it('should handle interactive mode', async () => {
@@ -231,11 +238,41 @@ describe('cli', () => {
 	});
 
 	it('should handle update command with specific options', async () => {
-		process.argv.push('update', '-t', 'web-app', '-n', 'upd-test', '--no-progress');
+		const tempDir = path.resolve('./temp-update-opts-test');
+		await fs.mkdir(tempDir, {recursive: true});
+		await fs.writeFile(path.join(tempDir, 'package.json'), JSON.stringify({name: 'upd-test'}));
+
+		process.argv.push('update', '-t', 'web-app', '-d', tempDir, '--no-progress');
 		const result = await parseArgs();
 		expect(result.update).toBe(true);
 		expect(result.template).toBe('web-app');
 		expect(result.progress).toBe(false);
+		expect(result.projectName).toBe('upd-test');
+
+		await fs.rm(tempDir, {recursive: true, force: true});
+	});
+
+	it('should exit if update run in directory without package.json', async () => {
+		const tempDir = path.resolve('./temp-no-pkg');
+		await fs.mkdir(tempDir, {recursive: true});
+
+		process.argv.push('update', '-t', 'cli', '-d', tempDir);
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
+		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('No package.json found'));
+
+		await fs.rm(tempDir, {recursive: true, force: true});
+	});
+
+	it('should exit if update run in directory with package.json missing name', async () => {
+		const tempDir = path.resolve('./temp-no-name');
+		await fs.mkdir(tempDir, {recursive: true});
+		await fs.writeFile(path.join(tempDir, 'package.json'), JSON.stringify({version: '1.0.0'}));
+
+		process.argv.push('update', '-t', 'cli', '-d', tempDir);
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
+		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('No name property found'));
+
+		await fs.rm(tempDir, {recursive: true, force: true});
 	});
 
 	it('should validate project name in interactive mode', async () => {

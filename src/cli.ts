@@ -134,7 +134,6 @@ Restrictions & Behavior:
 `,
 		)
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
-		.option('-n, --name <name>', 'Project name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
@@ -144,15 +143,37 @@ Restrictions & Behavior:
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
 		.option('--no-progress', 'Do not show progress indicators')
-		.action((opts) => {
+		.action(async (opts) => {
 			debug('Executing "update" command with options: %O', opts);
+
+			const directory = path.resolve(opts.directory);
+			const pkgPath = path.join(directory, 'package.json');
+
+			if (!(await pathExists(pkgPath))) {
+				p.log.error(`No package.json found in ${directory}. The update command must be run in a project directory.`);
+				process.exit(1);
+			}
+
+			let pkg: any;
+			try {
+				pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+			} catch (e: any) {
+				p.log.error(`Failed to read or parse package.json at ${pkgPath}: ${e.message}`);
+				process.exit(1);
+			}
+
+			if (!pkg.name) {
+				p.log.error(`No name property found in ${pkgPath}.`);
+				process.exit(1);
+			}
+
 			commandResult = {
 				...opts,
 				update: true,
 				template: opts.template as ProjectOptions['template'],
-				projectName: opts.name,
+				projectName: pkg.name,
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
-				directory: path.resolve(opts.directory),
+				directory: directory,
 				createGithubRepository: !!opts.createGithubRepository,
 				overwrite: !!opts.overwrite,
 				progress: !!opts.progress,

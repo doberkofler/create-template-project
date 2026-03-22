@@ -17,9 +17,9 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 - **Check dependencies:** `pnpm run dependencies-check` (verifies template dependencies)
 
 ### Targeted Testing
-- **Run a single test file:** `npx vitest src/generators/project.test.ts`
-- **Run tests matching a pattern:** `npx vitest -t "scaffold"`
-- **Watch mode:** `npx vitest`
+- **Run a single test file:** `pnpm exec vitest src/generators/project.test.ts`
+- **Run tests matching a pattern:** `pnpm exec vitest -t "scaffold"`
+- **Watch mode:** `pnpm exec vitest`
 
 ### CLI Execution (Development)
 - **Run interactive wizard:** `pnpm run run-interactive`
@@ -36,7 +36,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 - **Built-ins:** Use the `node:` prefix for built-in modules (e.g., `import path from 'node:path';`).
 
 ### Formatting
-- **Tooling:** Prettier is enforced via `npm run lint`.
+- **Tooling:** Prettier is enforced via `pnpm run lint`.
 - **Indentation:** Tabs are used for indentation.
 - **Quotes:** Single quotes for strings, except when double quotes prevent escaping.
 
@@ -80,12 +80,12 @@ Every generated project MUST include:
 
 ## Git Workflow
 - **Conventional Commits:** Adhere to the specification (e.g., `feat:`, `fix:`, `chore:`, `test:`).
-- **Hooks:** Husky runs `npm run ci` on pre-commit. Do not bypass hooks.
+- **Hooks:** Husky runs `pnpm run ci` on pre-commit. Do not bypass hooks.
 - **Branches:** Use descriptive branch names like `feat/new-template` or `fix/cli-args`.
 
 ## AI Agent Interaction Rules
 - **Proactiveness:** When adding a new template, also add a corresponding test case in `src/generators/project.test.ts`.
-- **Verification:** Always run `npm run lint` before submitting changes to ensure compliance with the strict rules.
+- **Verification:** Always run `pnpm run lint` before submitting changes to ensure compliance with the strict rules.
 - **Documentation:** Update this `AGENTS.md` if significant architectural changes are made.
 - **AI/Agent Interaction:** Always use the `--no-progress` flag when running the CLI in agent/automated environments to ensure clean output without interactive progress indicators.
 - **Templates:** When modifying a template, ensure that the `base.ts` template remains the source of truth for common files.

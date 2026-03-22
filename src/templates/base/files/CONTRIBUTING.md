@@ -21,11 +21,11 @@ We follow the **Conventional Commits** specification. This is **enforced** by `c
 
 ## Release Process
 
-1. **Verify**: `npm run ci`
-2. **Bump Version**: `npm version <patch|minor|major> --no-git-tag-version`
-3. **Update Changelog**: `npm run create-changelog`
+1. **Verify**: `pnpm run ci`
+2. **Bump Version**: `pnpm version <patch|minor|major> --no-git-tag-version`
+3. **Update Changelog**: `pnpm run create-changelog`
 4. **Commit**: `git add . && git commit -m "chore(release): $(node -p 'require("./package.json").version')"`
 5. **Tag & Push**: `git tag v$(node -p 'require("./package.json").version') && git push && git push --tags`
 6. **Create GitHub Release**: `gh release create v$(node -p 'require("./package.json").version') --generate-notes`
-7. **Publish**: `npm publish`
+7. **Publish**: `pnpm publish`
 

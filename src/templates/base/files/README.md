@@ -11,28 +11,28 @@ This project is built using **Vite 8** for high-performance development and bund
 
 ### Available Scripts
 
-- `npm run dev`: Starts the development server.
-- `npm run build`: Builds the project for production.
-- `npm run preview`: Previews the production build.
-- `npm run test`: Runs the unit test suite (browser-based for web targets using **Vitest** and **Playwright**).
-- `npm run test:e2e`: Runs E2E tests using **Playwright**.
-- `npm run lint`: Lints and formats the codebase using **oxlint** and **prettier**.
-- `npm run ci`: Full CI pipeline (lint, build, test).
+- `pnpm run dev`: Starts the development server.
+- `pnpm run build`: Builds the project for production.
+- `pnpm run preview`: Previews the production build.
+- `pnpm run test`: Runs the unit test suite (browser-based for web targets using **Vitest** and **Playwright**).
+- `pnpm run test:e2e`: Runs E2E tests using **Playwright**.
+- `pnpm run lint`: Lints and formats the codebase using **oxlint** and **prettier**.
+- `pnpm run ci`: Full CI pipeline (lint, build, test).
 
 ## Getting Started
 
 1. **Install dependencies**:
    ```bash
-   npm install
+   pnpm install
    ```
 2. **Start development server**:
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 3. **Run tests**:
    ```bash
-   npm run test
-   npm run test:e2e
+   pnpm run test
+   pnpm run test:e2e
    ```
 
 ## Tooling

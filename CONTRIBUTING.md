@@ -38,8 +38,8 @@ When working in this repository, please:
 ### Running Specific Tests
 
 To run a specific test file or test case:
-- **By file path:** `npx vitest src/generators/project.test.ts`
-- **By test name:** `npx vitest -t "scaffold"`
+- **By file path:** `pnpm exec vitest src/generators/project.test.ts`
+- **By test name:** `pnpm exec vitest -t "scaffold"`
 
 ## Code Style Guidelines
 
@@ -107,5 +107,5 @@ We follow the **Conventional Commits** specification. This is **enforced** by `c
 1.  **Analyze:** Understand the task and the existing code.
 2.  **Plan:** Break down the implementation steps.
 3.  **Implement:** Write clean, type-safe code following the guidelines.
-4.  **Verify:** Run `npm run lint` and `npm run test`.
+4.  **Verify:** Run `pnpm run lint` and `pnpm run test`.
 5.  **Document:** Update `AGENTS.md` or `README.md` if necessary.

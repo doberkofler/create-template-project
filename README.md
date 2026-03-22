@@ -19,12 +19,16 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 ## Installation
 
 ```bash
+pnpm add -g create-template-project
+# or
 npm install -g create-template-project
 ```
 
-Or run directly using npx:
+Or run directly using pnpm dlx or npx:
 
 ```bash
+pnpm dlx create-template-project
+# or
 npx create-template-project
 ```
 
@@ -53,7 +57,7 @@ create-template-project create --template cli --name my-cool-tool --github
 #### Update an existing project
 
 ```bash
-create-template-project update --template cli --name existing-project
+create-template-project update --template cli
 ```
 
 #### Global Options:
@@ -64,7 +68,7 @@ create-template-project update --template cli --name existing-project
 #### Command Options (create/update):
 
 - `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
-- `-n, --name <name>`: Project name
+- `-n, --name <name>`: Project name (for `create` only)
 - `--github`: Create GitHub project (requires `gh` CLI authenticated)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
 - `--overwrite`: Overwrite existing directory by removing it first (create & update)
