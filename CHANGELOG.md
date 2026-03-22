@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/doberkofler/create-template-project/compare/v0.3.0...v0.4.0) (2026-03-22)
+
+
+### Bug Fixes
+
+* improved update ([6a4a0a7](https://github.com/doberkofler/create-template-project/commit/6a4a0a7d2cf97ff0f709756169adee58c5176a4d))
+
 # [0.3.0](https://github.com/doberkofler/create-template-project/compare/v0.2.0...v0.3.0) (2026-03-22)
 
 
