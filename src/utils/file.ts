@@ -49,11 +49,11 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 			break;
 	}
 
-	let processed = content.replaceAll('{{projectName}}', projectName).replaceAll('{{description}}', description);
+	const pm = opts.packageManager || 'npm';
+	let processed = content.replaceAll('{{projectName}}', projectName).replaceAll('{{description}}', description).replaceAll('{{packageManager}}', pm);
 
 	// Special logic for GitHub Actions workflow
 	if (filePath.includes('.github/workflows/node.js.yml')) {
-		const pm = opts.packageManager || 'npm';
 		let installCommand = 'npm ci';
 		let pmSetup = '';
 		if (pm === 'pnpm') {
@@ -69,7 +69,6 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		}
 
 		processed = processed
-			.replaceAll('{{packageManager}}', pm)
 			.replaceAll('{{installCommand}}', installCommand)
 			.replaceAll('# [PM_SETUP]', pmSetup)
 			.replaceAll('# [PLAYWRIGHT_SETUP]', playwrightSetup);
@@ -81,7 +80,7 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 
 	// Special logic for web-vanilla template script tag in index.html
 	if (template === 'web-vanilla' && filePath === 'index.html') {
-		processed = processed.replace('{{scriptSrc}}', opts.skipBuild ? './src/index.js' : '/src/index.ts');
+		processed = processed.replace('{{scriptSrc}}', '/src/index.ts');
 	}
 
 	// Append dependencies to CONTRIBUTING.md

@@ -14,7 +14,6 @@ export const ProjectOptionsSchema = z.object({
 	directory: z.string(),
 	overwrite: z.boolean().optional().default(false),
 	update: z.boolean().optional().default(false),
-	skipBuild: z.boolean().optional().default(false),
 	installDependencies: z.boolean().optional().default(false),
 	build: z.boolean().optional().default(false),
 	dev: z.boolean().optional().default(false),

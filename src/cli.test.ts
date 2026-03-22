@@ -94,7 +94,7 @@ describe('cli', () => {
 
 	it('should handle interactive mode', async () => {
 		process.argv.push('interactive');
-		// Order: ProjectName (text), Directory (text), Template (select), PM (select), Tooling (confirm), Deps (confirm), CI (confirm), GH (confirm)
+		// Order: ProjectName (text), Directory (text), Template (select), PM (select), Deps (confirm), CI (confirm), GH (confirm)
 		vi.mocked(p.text).mockResolvedValueOnce('my-web-fullstack-app').mockResolvedValueOnce('./out');
 		vi.mocked(p.select).mockResolvedValueOnce('web-fullstack').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
@@ -103,11 +103,6 @@ describe('cli', () => {
 			template: 'web-fullstack',
 			projectName: 'my-web-fullstack-app',
 		});
-	});
-
-	it('should exit if skip-build is used with web-app', async () => {
-		process.argv.push('create', '-t', 'web-app', '-n', 'wa', '--skip-build');
-		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
 	});
 
 	it('should exit if no arguments provided', async () => {
@@ -129,7 +124,7 @@ describe('cli', () => {
 		const projectDir = path.resolve('.', projectName);
 		await fs.mkdir(projectDir, {recursive: true});
 
-		// Order: ProjectName (text), Directory (text), Action (select), Template (select), Tooling (confirm), Deps (confirm), CI (confirm), GH (confirm)
+		// Order: ProjectName (text), Directory (text), Action (select), Template (select), Deps (confirm), CI (confirm), GH (confirm)
 		vi.mocked(p.text).mockResolvedValueOnce(projectName).mockResolvedValueOnce('.');
 		vi.mocked(p.select).mockResolvedValueOnce('update').mockResolvedValueOnce('cli');
 		vi.mocked(p.confirm).mockResolvedValue(false);
@@ -146,7 +141,6 @@ describe('cli', () => {
 		vi.mocked(p.confirm).mockResolvedValue(false);
 		const result = await parseArgs();
 		expect(result.template).toBe('web-app');
-		expect(result.skipBuild).toBe(false);
 	});
 
 	it('should handle full interactive flow', async () => {
@@ -199,7 +193,7 @@ describe('cli', () => {
 		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 
-	it.each([0, 1, 2, 3, 4, 5, 6, 7])('should handle cancel at prompt stage %i', async (stage) => {
+	it.each([0, 1, 2, 3, 4, 5, 6])('should handle cancel at prompt stage %i', async (stage) => {
 		vi.resetAllMocks();
 		process.argv = [...originalArgv.slice(0, 2), 'interactive'];
 		const exitSpyLocal = vi.spyOn(process, 'exit').mockImplementation((code) => {

@@ -54,7 +54,7 @@ const showNote = (msg: string, title?: string, silent?: boolean) => {
 };
 
 export const generateProject = async (opts: ProjectOptions) => {
-	const {template: type, projectName, directory, update, overwrite, skipBuild, silent} = opts;
+	const {template: type, projectName, directory, update, overwrite, silent} = opts;
 	const isSilent = !!silent;
 	const log = getLog(isSilent);
 	const spinner = () => getSpinner(isSilent);
@@ -206,12 +206,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 				}
 
 				// Specific logic for web-vanilla template index.ts/js
-				let finalTargetPath = targetPath;
-				let finalRelativePath = relativePath;
-				if (type === 'web-vanilla' && skipBuild && relativePath === 'src/index.ts') {
-					finalRelativePath = 'src/index.js';
-					finalTargetPath = path.join(projectDir, finalRelativePath);
-				}
+				const finalTargetPath = targetPath;
+				const finalRelativePath = relativePath;
 
 				const content = processContent(relativePath, await fs.readFile(file, 'utf8'), opts, addedDeps);
 				const exists = await pathExists(finalTargetPath);
@@ -237,6 +233,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 					pendingOperations.push(async () => {
 						await fs.mkdir(path.dirname(finalTargetPath), {recursive: true});
 						await fs.writeFile(finalTargetPath, content);
+						const normalizedPath = finalRelativePath.split(path.sep).join('/');
+						if (normalizedPath.startsWith('.husky/') && !normalizedPath.endsWith('/')) {
+							await fs.chmod(finalTargetPath, 0o755);
+						}
 					});
 				}
 			}
@@ -306,30 +306,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 	}
 
-	if (skipBuild) {
-		debug('Applying skipBuild overrides');
-		delete finalPkg.scripts.build;
-		delete finalPkg.scripts.dev;
-		if (finalPkg.devDependencies) {
-			delete finalPkg.devDependencies.vite;
-			delete finalPkg.devDependencies['@vitejs/plugin-react'];
-		}
-		if (finalPkg.scripts.ci) {
-			finalPkg.scripts.ci = finalPkg.scripts.ci.replace(' && npm run build', '').replace(` && ${pm} run build`, '');
-		}
-		// Remove build tool configs if they were copied
-		debug('Removing build tool configs due to skipBuild');
-		const filesToDelete = ['tsdown.config.ts', 'vite.config.ts', 'vite.config.server.ts', 'client/vite.config.ts', 'server/vite.config.ts', 'vitest.config.ts'];
-		for (const f of filesToDelete) {
-			const fullPath = path.join(projectDir, f);
-			pendingOperations.push(async () => {
-				await fs.rm(fullPath, {force: true});
-			});
-			if (isUpdate && (await pathExists(fullPath))) {
-				actions.push({type: 'DELETE', path: f});
-			}
-		}
-	} else if (type === 'cli') {
+	if (type === 'cli') {
 		// For CLI template, if build is NOT skipped, vitest.config.ts is merged into vite.config.ts
 		const fullPath = path.join(projectDir, 'vitest.config.ts');
 		pendingOperations.push(async () => {

@@ -99,9 +99,9 @@ describe('file utils', () => {
 
 		it('should handle web-vanilla script tag index.html', () => {
 			const content = '<script src="{{scriptSrc}}"></script>';
-			const optsWebpage: any = {...opts, template: 'web-vanilla', skipBuild: true};
+			const optsWebpage: any = {...opts, template: 'web-vanilla'};
 			const processed = processContent('index.html', content, optsWebpage, []);
-			expect(processed).toContain('./src/index.js');
+			expect(processed).toContain('/src/index.ts');
 		});
 
 		it('should handle web-fullstack tsconfig.json overrides', () => {

@@ -97,6 +97,13 @@ describe('generateProject', () => {
 		const readme = await fs.readFile(path.join(projectPath, 'README.md'), 'utf8');
 		expect(readme).toContain(projectName);
 
+		// Verify Husky hooks exist and are executable (simulated by checking if chmod was called or just if file exists in test)
+		expect(await pathExists(path.join(projectPath, '.husky/pre-commit'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, '.husky/commit-msg'))).toBe(true);
+
+		const preCommit = await fs.readFile(path.join(projectPath, '.husky/pre-commit'), 'utf8');
+		expect(preCommit).toContain('npm run ci');
+
 		expect(execa).toHaveBeenCalledWith('git', ['init'], expect.anything());
 		expect(execa).toHaveBeenCalledWith('gh', expect.anything(), expect.anything());
 		expect(execa).toHaveBeenCalledWith('npm', ['install'], expect.anything());
@@ -224,6 +231,10 @@ describe('generateProject', () => {
 		expect(workspaceYaml).toContain("- 'client'");
 		expect(workspaceYaml).toContain("- 'server'");
 
+		// Verify Husky pre-commit uses pnpm
+		const preCommit = await fs.readFile(path.join(projectPath, '.husky/pre-commit'), 'utf8');
+		expect(preCommit).toContain('pnpm run ci');
+
 		// Verify scripts are updated
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
 		expect(pkg.scripts.dev).toBe('pnpm -r run dev');
@@ -244,27 +255,6 @@ describe('generateProject', () => {
 		};
 		await generateProject(opts);
 		expect(await pathExists(path.join(projectPath, 'old-file.txt'))).toBe(false);
-	});
-
-	it('should handle --skip-build flag and remove build tool configs', async () => {
-		const projectName = 'test-skip-build-cleanup';
-		const projectPath = path.join(tmpDir, projectName);
-		await fs.mkdir(projectPath, {recursive: true});
-		await fs.writeFile(path.join(projectPath, 'vite.config.ts'), 'content');
-
-		const opts: any = {
-			template: 'cli' as const,
-			projectName,
-			createGithubRepository: false,
-			directory: tmpDir,
-			update: false,
-			overwrite: true,
-			skipBuild: true,
-		};
-		await generateProject(opts);
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
-		expect(pkg.scripts.build).toBeUndefined();
-		expect(await pathExists(path.join(projectPath, 'vite.config.ts'))).toBe(false);
 	});
 
 	it('should handle --update flag', async () => {
@@ -378,20 +368,6 @@ describe('generateProject', () => {
 		};
 		await generateProject(opts);
 		expect(execa).not.toHaveBeenCalledWith('git', ['init'], expect.anything());
-	});
-
-	it('should handle web-vanilla with skipBuild', async () => {
-		const projectName = 'test-web-vanilla-skip';
-		const opts: any = {
-			template: 'web-vanilla' as const,
-			projectName,
-			directory: tmpDir,
-			update: false,
-			skipBuild: true,
-		};
-		await generateProject(opts);
-		const projectPath = path.join(tmpDir, projectName);
-		expect(await pathExists(path.join(projectPath, 'src/index.js'))).toBe(true);
 	});
 
 	it('should handle programmatic files', async () => {

@@ -12,7 +12,6 @@ const MOCK_OPTS: ProjectOptions = {
 	packageManager: 'npm',
 	overwrite: false,
 	update: false,
-	skipBuild: false,
 	installDependencies: false,
 	build: false,
 	dev: false,

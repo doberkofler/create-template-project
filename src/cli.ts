@@ -95,7 +95,6 @@ Templates:
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
 		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
-		.option('--skip-build', 'Skip build tooling (disables bundling and uses raw source files)', false)
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
@@ -103,10 +102,6 @@ Templates:
 		.option('--silent', 'Reduce console output', false)
 		.action((opts) => {
 			debug('Executing "create" command with options: %O', opts);
-			if (opts.template === 'web-app' && opts.skipBuild) {
-				p.log.error('The --skip-build option is not allowed for the "web-app" template.');
-				process.exit(1);
-			}
 			commandResult = {
 				...opts,
 				update: false,
@@ -144,7 +139,6 @@ Restrictions & Behavior:
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
 		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
-		.option('--skip-build', 'Skip build tooling (disables bundling and uses raw source files)', false)
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after updating', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
@@ -152,10 +146,6 @@ Restrictions & Behavior:
 		.option('--silent', 'Reduce console output', false)
 		.action((opts) => {
 			debug('Executing "update" command with options: %O', opts);
-			if (opts.template === 'web-app' && opts.skipBuild) {
-				p.log.error('The --skip-build option is not allowed for the "web-app" template.');
-				process.exit(1);
-			}
 			commandResult = {
 				...opts,
 				update: true,
@@ -278,20 +268,6 @@ Restrictions & Behavior:
 				}
 			}
 
-			let skipBuild = false;
-			if (template !== 'web-app') {
-				const res = await p.confirm({
-					message: 'Should we use build tooling? (Enables bundling using Vite, and uses raw dist/ instead of src/)',
-					initialValue: true,
-				});
-
-				if (p.isCancel(res)) {
-					p.cancel('Operation cancelled.');
-					process.exit(0);
-				}
-				skipBuild = !res;
-			}
-
 			const installDependenciesRes = await p.confirm({
 				message: 'Should we install dependencies?',
 				initialValue: true,
@@ -336,7 +312,6 @@ Restrictions & Behavior:
 				directory: path.resolve(directory as string),
 				update,
 				overwrite,
-				skipBuild,
 				installDependencies,
 				build,
 				dev: false,
