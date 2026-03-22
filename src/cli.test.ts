@@ -1,9 +1,20 @@
 import {describe, it, expect, vi, beforeEach, type MockInstance} from 'vitest';
-import {parseArgs} from './cli.js';
 import * as p from '@clack/prompts';
+import debugLib from 'debug';
+
+vi.mock('debug', () => {
+	const debugMock = vi.fn(() => vi.fn());
+	return {
+		default: Object.assign(debugMock, {
+			enable: vi.fn(),
+			disable: vi.fn(),
+		}),
+	};
+});
+
+import {parseArgs} from './cli.js';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import debugLib from 'debug';
 
 vi.mock('@clack/prompts', async (importOriginal) => {
 	const actual = (await importOriginal()) as any;
@@ -304,10 +315,9 @@ describe('cli', () => {
 
 	it('should handle --debug option', async () => {
 		process.argv.push('create', '-t', 'cli', '-n', 'debug-test', '--debug');
-		const debugSpy = vi.spyOn(debugLib, 'enable');
 		await parseArgs();
 		expect(process.env['DEBUG']).toContain('create-template-project:*');
-		expect(debugSpy).toHaveBeenCalledWith('create-template-project:*');
+		expect(debugLib.enable).toHaveBeenCalledWith('create-template-project:*');
 	});
 
 	it('should handle overwrite choice in interactive mode', async () => {
