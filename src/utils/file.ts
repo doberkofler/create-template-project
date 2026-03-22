@@ -10,6 +10,9 @@ export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) 
 	const files = await fs.readdir(dirPath);
 
 	for (const file of files) {
+		if (file === '.DS_Store') {
+			continue;
+		}
 		if ((await fs.stat(path.join(dirPath, file))).isDirectory()) {
 			arrayOfFiles = await getAllFiles(path.join(dirPath, file), arrayOfFiles);
 		} else {
