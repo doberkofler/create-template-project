@@ -169,9 +169,12 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 	}
 
-	// Second pass: Process and write files
+	// Second pass: Collect and report actions
+	const actions: Array<{type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE'; path: string}> = [];
+	const pendingOperations: Array<() => Promise<void>> = [];
+
 	for (const t of templates) {
-		debug('Processing template files for: %s', t.name);
+		debug('Collecting template files for: %s', t.name);
 
 		// Handle physical files
 		if (t.templateDir) {
@@ -183,7 +186,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 
 				// Skip seed files during update
 				if (isUpdate && isSeedFile(relativePath)) {
-					debug('Skipping seed file during update: %s', relativePath);
+					actions.push({type: 'SKIP', path: relativePath});
 					continue;
 				}
 
@@ -196,37 +199,39 @@ export const generateProject = async (opts: ProjectOptions) => {
 					continue;
 				}
 
-				await fs.mkdir(path.dirname(targetPath), {recursive: true});
-
-				debug('Reading and processing content for: %s', relativePath);
-				let content = await fs.readFile(file, 'utf8');
-				content = processContent(relativePath, content, opts, addedDeps);
-
 				// Specific logic for web-vanilla template index.ts/js
 				let finalTargetPath = targetPath;
+				let finalRelativePath = relativePath;
 				if (type === 'web-vanilla' && skipBuild && relativePath === 'src/index.ts') {
-					debug('Changing target path for web-vanilla index.ts to .js due to skipBuild');
-					finalTargetPath = path.join(projectDir, 'src/index.js');
+					finalRelativePath = 'src/index.js';
+					finalTargetPath = path.join(projectDir, finalRelativePath);
 				}
 
-				if (isUpdate && (await pathExists(finalTargetPath))) {
-					debug('File exists, attempting to update/merge: %s', finalTargetPath);
+				const content = processContent(relativePath, await fs.readFile(file, 'utf8'), opts, addedDeps);
+				const exists = await pathExists(finalTargetPath);
+
+				if (isUpdate && exists) {
 					const existingContent = await fs.readFile(finalTargetPath, 'utf8');
 					if (existingContent.trim() !== content.trim()) {
-						const result = await mergeFile(finalTargetPath, existingContent, content, log);
-						if (result === 'merged') {
-							log.info(`ℹ Merged: ${relativePath}`);
-						} else if (result === 'conflict') {
-							log.warn(`⚠ Conflict: ${relativePath}`);
-						} else if (result === 'updated') {
-							log.info(`✔ Updated: ${relativePath}`);
-						}
-					} else {
-						debug('Content identical, skipping: %s', finalTargetPath);
+						// For now, we assume it's a MERGE or MODIFY
+						actions.push({type: 'MODIFY', path: finalRelativePath});
+						pendingOperations.push(async () => {
+							const result = await mergeFile(finalTargetPath, existingContent, content, log);
+							if (result === 'merged') {
+								log.info(`ℹ Merged: ${finalRelativePath}`);
+							} else if (result === 'conflict') {
+								log.warn(`⚠ Conflict: ${finalRelativePath}`);
+							} else if (result === 'updated') {
+								log.info(`✔ Updated: ${finalRelativePath}`);
+							}
+						});
 					}
-				} else {
-					debug('Writing file: %s', finalTargetPath);
-					await fs.writeFile(finalTargetPath, content);
+				} else if (!exists) {
+					actions.push({type: 'ADD', path: finalRelativePath});
+					pendingOperations.push(async () => {
+						await fs.mkdir(path.dirname(finalTargetPath), {recursive: true});
+						await fs.writeFile(finalTargetPath, content);
+					});
 				}
 			}
 		}
@@ -235,33 +240,35 @@ export const generateProject = async (opts: ProjectOptions) => {
 		for (const file of t.files) {
 			const targetPath = path.join(projectDir, file.path);
 			if (isUpdate && isSeedFile(file.path)) {
-				debug('Skipping programmatic seed file: %s', file.path);
+				actions.push({type: 'SKIP', path: file.path});
 				continue;
 			}
 
-			debug('Processing programmatic file: %s', file.path);
-			await fs.mkdir(path.dirname(targetPath), {recursive: true});
 			let content = typeof file.content === 'function' ? file.content() : file.content;
 			content = processContent(file.path, content, opts, addedDeps);
+			const exists = await pathExists(targetPath);
 
-			if (isUpdate && (await pathExists(targetPath))) {
-				debug('File exists, attempting to update/merge programmatic file: %s', targetPath);
+			if (isUpdate && exists) {
 				const existingContent = await fs.readFile(targetPath, 'utf8');
 				if (existingContent.trim() !== content.trim()) {
-					const result = await mergeFile(targetPath, existingContent, content, log);
-					if (result === 'merged') {
-						log.info(`ℹ Merged: ${file.path}`);
-					} else if (result === 'conflict') {
-						log.warn(`⚠ Conflict: ${file.path}`);
-					} else if (result === 'updated') {
-						log.info(`✔ Updated: ${file.path}`);
-					}
-				} else {
-					debug('Content identical, skipping programmatic: %s', targetPath);
+					actions.push({type: 'MODIFY', path: file.path});
+					pendingOperations.push(async () => {
+						const result = await mergeFile(targetPath, existingContent, content, log);
+						if (result === 'merged') {
+							log.info(`ℹ Merged: ${file.path}`);
+						} else if (result === 'conflict') {
+							log.warn(`⚠ Conflict: ${file.path}`);
+						} else if (result === 'updated') {
+							log.info(`✔ Updated: ${file.path}`);
+						}
+					});
 				}
-			} else {
-				debug('Writing programmatic file: %s', targetPath);
-				await fs.writeFile(targetPath, content);
+			} else if (!exists) {
+				actions.push({type: 'ADD', path: file.path});
+				pendingOperations.push(async () => {
+					await fs.mkdir(path.dirname(targetPath), {recursive: true});
+					await fs.writeFile(targetPath, content);
+				});
 			}
 		}
 	}
@@ -280,7 +287,9 @@ export const generateProject = async (opts: ProjectOptions) => {
 	if (pm === 'pnpm' && finalPkg.workspaces) {
 		debug('Creating pnpm-workspace.yaml');
 		const workspaceYaml = `packages:\n${finalPkg.workspaces.map((w: string) => `  - '${w}'`).join('\n')}\n`;
-		await fs.writeFile(path.join(projectDir, 'pnpm-workspace.yaml'), workspaceYaml);
+		pendingOperations.push(async () => {
+			await fs.writeFile(path.join(projectDir, 'pnpm-workspace.yaml'), workspaceYaml);
+		});
 		delete finalPkg.workspaces;
 
 		for (const key of Object.keys(finalPkg.scripts)) {
@@ -305,16 +314,57 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 		// Remove build tool configs if they were copied
 		debug('Removing build tool configs due to skipBuild');
-		await fs.rm(path.join(projectDir, 'tsdown.config.ts'), {force: true});
-		await fs.rm(path.join(projectDir, 'vite.config.ts'), {force: true});
-		await fs.rm(path.join(projectDir, 'vite.config.server.ts'), {force: true});
-		await fs.rm(path.join(projectDir, 'client/vite.config.ts'), {force: true});
-		await fs.rm(path.join(projectDir, 'server/vite.config.ts'), {force: true});
+		const filesToDelete = ['tsdown.config.ts', 'vite.config.ts', 'vite.config.server.ts', 'client/vite.config.ts', 'server/vite.config.ts'];
+		for (const f of filesToDelete) {
+			const fullPath = path.join(projectDir, f);
+			pendingOperations.push(async () => {
+				await fs.rm(fullPath, {force: true});
+			});
+			if (isUpdate && (await pathExists(fullPath))) {
+				actions.push({type: 'DELETE', path: f});
+			}
+		}
 	}
 
-	// Write final package.json
-	debug('Writing final consolidated package.json to: %s', pkgPath);
-	await fs.writeFile(pkgPath, JSON.stringify(finalPkg, null, '\t'));
+	// Always update package.json
+	if (isUpdate) {
+		actions.push({type: 'MODIFY', path: 'package.json'});
+	} else {
+		actions.push({type: 'ADD', path: 'package.json'});
+	}
+	pendingOperations.push(async () => {
+		debug('Writing final consolidated package.json to: %s', pkgPath);
+		await fs.writeFile(pkgPath, JSON.stringify(finalPkg, null, '\t'));
+	});
+
+	// If update, show summary and ask for confirmation
+	if (isUpdate && actions.length > 0 && process.env.NODE_ENV !== 'test') {
+		const summary = actions
+			.filter((a) => a.type !== 'SKIP')
+			.map((a) => `  ${a.type.padEnd(8)} ${a.path}`)
+			.join('\n');
+
+		if (summary) {
+			p.note(summary, 'Planned changes:');
+
+			const confirm = await p.confirm({
+				message: 'Do you want to apply these changes?',
+				initialValue: true,
+			});
+
+			if (p.isCancel(confirm) || !confirm) {
+				p.cancel('Update cancelled.');
+				process.exit(0);
+			}
+		} else {
+			log.info('No changes detected.');
+		}
+	}
+
+	// Apply pending operations
+	for (const op of pendingOperations) {
+		await op();
+	}
 
 	// Initialize Git
 	const stdio = debug.enabled ? 'inherit' : 'pipe';

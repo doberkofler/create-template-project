@@ -82,7 +82,13 @@ describe('generateProject', () => {
 		expect(await pathExists(projectPath)).toBe(true);
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.name).toBe(projectName);
+		expect(pkg.bin).toBe('./dist/index.mjs');
 		expect(pkg.dependencies).toHaveProperty('commander');
+		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
+
+		// Verify index.ts has hashbang
+		const indexContent = await fs.readFile(path.join(projectPath, 'src/index.ts'), 'utf8');
+		expect(indexContent).toContain('#!/usr/bin/env node');
 
 		// Verify .prettierignore exists
 		expect(await pathExists(path.join(projectPath, '.prettierignore'))).toBe(true);
@@ -166,6 +172,7 @@ describe('generateProject', () => {
 		expect(pkg.dependencies).not.toHaveProperty('@trpc/tanstack-react-query');
 		expect(pkg.workspaces).toContain('client');
 		expect(pkg.workspaces).toContain('server');
+		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
 
 		// Verify tsconfig.json content
 		const tsconfig = await fs.readFile(path.join(projectPath, 'tsconfig.json'), 'utf8');

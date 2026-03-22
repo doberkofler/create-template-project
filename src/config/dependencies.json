@@ -33,7 +33,7 @@
 			"description": "Shareable commitlint config enforcing conventional commits."
 		},
 		"@types/debug": {
-			"version": "^4.1.13",
+			"version": "4.1.13",
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
@@ -145,16 +145,12 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "^5.91.2",
+			"version": "5.91.2",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
 			"version": "4.3.6",
 			"description": "TypeScript-first schema validation with static type inference."
-		},
-		"tinyexec": {
-			"version": "1.0.4",
-			"description": "A minimal library for executing processes in Node."
 		},
 		"react-router-dom": {
 			"version": "7.13.1",

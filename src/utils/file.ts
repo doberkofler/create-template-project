@@ -125,6 +125,9 @@ export function mergePackageJson(target: any, source: any) {
 	if (source.workspaces) {
 		target.workspaces = source.workspaces;
 	}
+	if (source.bin) {
+		target.bin = source.bin;
+	}
 }
 
 export function isSeedFile(filePath: string): boolean {

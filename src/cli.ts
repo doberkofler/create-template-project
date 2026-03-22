@@ -124,6 +124,20 @@ Templates:
 	program
 		.command('update')
 		.description('Update an existing project from its template')
+		.addHelpText(
+			'after',
+			`
+Details:
+  The update command syncs your project with the latest template changes.
+  It intelligently merges changes into your existing files using 'git merge-file'.
+
+Restrictions & Behavior:
+  - Seed Files: Files in 'src/', 'client/src/', etc., are considered "seed" files and are NEVER overwritten or modified during an update to protect your application logic.
+  - package.json: Dependencies and scripts are merged. Existing versions are preserved unless they are missing.
+  - Merging: For non-seed files, the tool attempts to merge template changes. If a conflict occurs, it will be marked with standard git conflict markers.
+  - Confirmation: The command will always show a summary of proposed changes (ADD, MODIFY) and ask for your confirmation before applying them.
+`,
+		)
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'npm')

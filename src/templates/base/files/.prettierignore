@@ -48,3 +48,6 @@ Thumbs.db
 # misc
 tmp/
 temp/
+
+# md
+**/*.md
