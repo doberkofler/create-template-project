@@ -5,9 +5,9 @@ This guide provides instructions for developers and agentic coding assistants wo
 ## Instructions for AI Agents
 
 When working in this repository, please:
-1.  **Always run tests:** Before submitting any change, run `npm run test` and ensure all tests pass.
+1.  **Always run tests:** Before submitting any change, run `pnpm run test` and ensure all tests pass.
 2.  **Verify coverage:** Maintain high test coverage for all new logic.
-3.  **Lint your changes:** Run `npm run lint` to ensure your code follows the project's style.
+3.  **Lint your changes:** Run `pnpm run lint` to ensure your code follows the project's style.
 4.  **Follow Conventions:** Use **Tabs** for indentation and **Single Quotes** for strings.
 5.  **ESM Imports:** Always use `.js` extensions in relative imports (e.g., `import { x } from './y.js'`).
 6.  **Conventional Commits:** Use the `type(scope): subject` format for commits.
@@ -29,11 +29,11 @@ When working in this repository, please:
 
 ## Build and Development Commands
 
-- **Build project:** `npm run build`
-- **Development mode (watch):** `npm run dev`
-- **Lint and type-check:** `npm run lint`
-- **Run all tests with coverage:** `npm run test`
-- **Run CI checks:** `npm run ci` (lint + build + test)
+- **Build project:** `pnpm run build`
+- **Lint and type-check:** `pnpm run lint`
+- **Run all tests with coverage:** `pnpm run test`
+- **Run CI checks:** `pnpm run ci` (lint + build + test)
+- **Run integration tests:** `pnpm run test:integration` (builds and scaffolds all templates)
 
 ### Running Specific Tests
 
@@ -86,13 +86,13 @@ We follow the **Conventional Commits** specification. This is **enforced** by `c
 
 ## Release Process
 
-1. **Verify**: `npm run ci`
-2. **Bump Version**: `npm version <patch|minor|major> --no-git-tag-version`
-3. **Update Changelog**: `npm run create-changelog`
+1. **Verify**: `pnpm run ci`
+2. **Bump Version**: `pnpm version <patch|minor|major> --no-git-tag-version`
+3. **Update Changelog**: `pnpm run create-changelog`
 4. **Commit**: `git add . && git commit -m "chore(release): $(node -p 'require("./package.json").version')"`
 5. **Tag & Push**: `git tag v$(node -p 'require("./package.json").version') && git push && git push --tags`
 6. **Create GitHub Release**: `gh release create v$(node -p 'require("./package.json").version') --generate-notes`
-7. **Publish**: `npm publish`
+7. **Publish**: `pnpm publish`
 
 ## Project Structure
 

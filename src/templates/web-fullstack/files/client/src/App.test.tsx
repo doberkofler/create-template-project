@@ -1,12 +1,11 @@
 import {describe, it, expect} from 'vitest';
 import {render} from 'vitest-browser-react';
-import {page} from '@vitest/browser/context';
+import {page} from 'vitest/browser';
 import {App} from './App.js';
-import React from 'react';
 
 describe('App', () => {
 	it('should render in the browser', async () => {
-		render(<App />);
-		await expect.element(page.getByRole('main').or(page.getByText(/Dashboard/i))).toBeDefined();
+		await render(<App />);
+		await expect.element(page.getByRole('heading', {name: /Login/i}).or(page.getByRole('heading', {name: /Dashboard/i}))).toBeVisible();
 	});
 });

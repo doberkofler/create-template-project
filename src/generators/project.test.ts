@@ -586,16 +586,31 @@ describe('generateProject', () => {
 		expect(p.note).toHaveBeenCalledWith(expect.stringContaining(`Successfully created a new cli project named '${projectName}'.`));
 	});
 
-	it('should not show summary when silent', async () => {
-		const projectName = 'test-silent';
+	it('should not show summary when progress is false', async () => {
+		const projectName = 'test-no-summary-no-progress';
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
 			directory: tmpDir,
 			update: false,
-			silent: true,
+			progress: false,
 		};
 		await generateProject(opts);
+		expect(p.note).not.toHaveBeenCalled();
+	});
+
+	it('should not show progress when progress is false', async () => {
+		const projectName = 'test-no-progress';
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: tmpDir,
+			update: false,
+			progress: false,
+			installDependencies: true,
+		};
+		await generateProject(opts);
+		expect(spinnerMock.start).not.toHaveBeenCalled();
 		expect(p.note).not.toHaveBeenCalled();
 	});
 

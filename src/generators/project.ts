@@ -27,24 +27,24 @@ const pathExists = (p: string) =>
 		.then(() => true)
 		.catch(() => false);
 
-const getLog = (silent: boolean) => ({
-	info: (msg: string) => (!silent ? p.log.info(msg) : undefined),
-	success: (msg: string) => (!silent ? p.log.success(msg) : undefined),
-	warn: (msg: string) => (!silent ? p.log.warn(msg) : undefined),
-	error: (msg: string) => (!silent ? p.log.error(msg) : undefined),
+const getLog = (progress: boolean) => ({
+	info: (msg: string) => (progress ? p.log.info(msg) : undefined),
+	success: (msg: string) => (progress ? p.log.success(msg) : undefined),
+	warn: (msg: string) => p.log.warn(msg),
+	error: (msg: string) => p.log.error(msg),
 });
 
-const getSpinner = (silent: boolean) => {
+const getSpinner = (progress: boolean) => {
 	const s = p.spinner();
 	return {
-		start: (msg: string) => (!silent ? s.start(msg) : undefined),
-		stop: (msg: string) => (!silent ? s.stop(msg) : undefined),
-		message: (msg: string) => (!silent ? s.message(msg) : undefined),
+		start: (msg: string) => (progress ? s.start(msg) : undefined),
+		stop: (msg: string) => (progress ? s.stop(msg) : undefined),
+		message: (msg: string) => (progress ? s.message(msg) : undefined),
 	};
 };
 
-const showNote = (msg: string, title?: string, silent?: boolean) => {
-	if (silent) {
+const showNote = (msg: string, title?: string, progress?: boolean) => {
+	if (progress !== undefined && !progress) {
 		return;
 	}
 	if (title) {
@@ -54,10 +54,10 @@ const showNote = (msg: string, title?: string, silent?: boolean) => {
 };
 
 export const generateProject = async (opts: ProjectOptions) => {
-	const {template: type, projectName, directory, update, overwrite, silent} = opts;
-	const isSilent = !!silent;
-	const log = getLog(isSilent);
-	const spinner = () => getSpinner(isSilent);
+	const {template: type, projectName, directory, update, overwrite, progress} = opts;
+	const isProgress = progress !== false;
+	const log = getLog(isProgress);
+	const spinner = () => getSpinner(isProgress);
 	const projectDir = path.join(directory, projectName);
 	debug('Project generation started for: %s', projectName);
 	debug('Options: %O', opts);
@@ -306,8 +306,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 	}
 
-	if (type === 'cli') {
-		// For CLI template, if build is NOT skipped, vitest.config.ts is merged into vite.config.ts
+	if (type === 'cli' || type === 'web-vanilla' || type === 'web-app' || type === 'web-fullstack') {
+		// For these templates, vitest.config.ts is either merged into vite.config.ts or handled per workspace
 		const fullPath = path.join(projectDir, 'vitest.config.ts');
 		pendingOperations.push(async () => {
 			await fs.rm(fullPath, {force: true});
@@ -442,7 +442,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 	}
 
 	log.success(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
-	showSummary(opts, pm, isSilent);
+	showSummary(opts, pm, isProgress);
 
 	if (opts.dev && finalPkg.scripts.dev) {
 		log.info('Starting dev server...');
@@ -464,7 +464,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 	}
 };
 
-function showSummary(opts: ProjectOptions, pm: string, isSilent: boolean) {
+function showSummary(opts: ProjectOptions, pm: string, isProgress: boolean) {
 	debug('Showing summary for options: %O', opts);
 	const {projectName, template} = opts;
 
@@ -478,5 +478,5 @@ function showSummary(opts: ProjectOptions, pm: string, isSilent: boolean) {
 		`${pm} run ci     - Runs lint, build, and test (used by CI/CD)`,
 	];
 
-	showNote([...summary, ...commands.map((c) => `  ${c}`)].join('\n'), 'Project ready', isSilent);
+	showNote([...summary, ...commands.map((c) => `  ${c}`)].join('\n'), 'Project ready', isProgress);
 }

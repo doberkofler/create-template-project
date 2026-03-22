@@ -228,11 +228,11 @@ describe('cli', () => {
 	});
 
 	it('should handle update command with specific options', async () => {
-		process.argv.push('update', '-t', 'web-app', '-n', 'upd-test', '--silent');
+		process.argv.push('update', '-t', 'web-app', '-n', 'upd-test', '--no-progress');
 		const result = await parseArgs();
 		expect(result.update).toBe(true);
 		expect(result.template).toBe('web-app');
-		expect(result.silent).toBe(true);
+		expect(result.progress).toBe(false);
 	});
 
 	it('should validate project name in interactive mode', async () => {

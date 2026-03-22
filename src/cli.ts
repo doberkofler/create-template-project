@@ -99,7 +99,7 @@ Templates:
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
-		.option('--silent', 'Reduce console output', false)
+		.option('--no-progress', 'Do not show progress indicators')
 		.action((opts) => {
 			debug('Executing "create" command with options: %O', opts);
 			commandResult = {
@@ -111,7 +111,7 @@ Templates:
 				directory: path.resolve(opts.directory),
 				createGithubRepository: !!opts.createGithubRepository,
 				overwrite: !!opts.overwrite,
-				silent: !!opts.silent,
+				progress: !!opts.progress,
 			};
 			debug('Processed "create" options: %O', commandResult);
 		});
@@ -143,7 +143,7 @@ Restrictions & Behavior:
 		.option('--build', 'Run the CI script (lint, build, test) after updating', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
-		.option('--silent', 'Reduce console output', false)
+		.option('--no-progress', 'Do not show progress indicators')
 		.action((opts) => {
 			debug('Executing "update" command with options: %O', opts);
 			commandResult = {
@@ -155,7 +155,7 @@ Restrictions & Behavior:
 				directory: path.resolve(opts.directory),
 				createGithubRepository: !!opts.createGithubRepository,
 				overwrite: !!opts.overwrite,
-				silent: !!opts.silent,
+				progress: !!opts.progress,
 			};
 			debug('Processed "update" options: %O', commandResult);
 		});
@@ -316,7 +316,7 @@ Restrictions & Behavior:
 				build,
 				dev: false,
 				open: false,
-				silent: false,
+				progress: true,
 			};
 		});
 

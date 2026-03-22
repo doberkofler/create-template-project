@@ -16,7 +16,7 @@ const MOCK_OPTS: ProjectOptions = {
 	build: false,
 	dev: false,
 	open: false,
-	silent: true,
+	progress: true,
 	createGithubRepository: false,
 };
 

@@ -19,9 +19,9 @@ export const main = async () => {
 		if (!options) {
 			return;
 		}
-		const isSilent = !!options.silent;
+		const isProgress = options.progress !== false;
 
-		if (!isSilent) {
+		if (isProgress) {
 			intro('create-template-project');
 		}
 
@@ -30,7 +30,7 @@ export const main = async () => {
 		await generateProject(options);
 		debug('Project generation complete');
 
-		if (!isSilent) {
+		if (isProgress) {
 			outro('Done!');
 		}
 	} catch (error: any) {

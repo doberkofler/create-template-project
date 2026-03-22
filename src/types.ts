@@ -18,7 +18,7 @@ export const ProjectOptionsSchema = z.object({
 	build: z.boolean().optional().default(false),
 	dev: z.boolean().optional().default(false),
 	open: z.boolean().optional().default(false),
-	silent: z.boolean().optional().default(false),
+	progress: z.boolean().optional().default(true),
 });
 
 export type ProjectOptions = z.infer<typeof ProjectOptionsSchema>;

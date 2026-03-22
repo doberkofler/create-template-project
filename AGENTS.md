@@ -8,16 +8,21 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 ## Build, Lint, and Test Commands
 
 ### Core Commands
-- **Install dependencies:** `npm install`
-- **Build project:** `npm run build` (uses `vite` to bundle into `dist/`)
-- **Lint code:** `npm run lint` (runs `tsc`, `oxlint`, and `prettier`)
-- **Run all tests:** `npm run test` (uses `vitest` with coverage)
-- **Run CI suite:** `npm run ci` (lint + build + test)
+- **Install dependencies:** `pnpm install`
+- **Build project:** `pnpm run build` (uses `vite` and copies templates)
+- **Lint code:** `pnpm run lint` (runs `tsc`, `oxlint`, and `prettier`)
+- **Run all tests:** `pnpm run test` (uses `vitest` with coverage)
+- **Run CI suite:** `pnpm run ci` (lint + build + test)
+- **Run integration tests:** `pnpm run test:integration` (builds and scaffolds all templates)
+- **Check dependencies:** `pnpm run dependencies-check` (verifies template dependencies)
 
 ### Targeted Testing
 - **Run a single test file:** `npx vitest src/generators/project.test.ts`
 - **Run tests matching a pattern:** `npx vitest -t "scaffold"`
 - **Watch mode:** `npx vitest`
+
+### CLI Execution (Development)
+- **Run interactive wizard:** `pnpm run run-interactive`
 
 ## Code Style & Conventions
 
@@ -82,6 +87,7 @@ Every generated project MUST include:
 - **Proactiveness:** When adding a new template, also add a corresponding test case in `src/generators/project.test.ts`.
 - **Verification:** Always run `npm run lint` before submitting changes to ensure compliance with the strict rules.
 - **Documentation:** Update this `AGENTS.md` if significant architectural changes are made.
+- **AI/Agent Interaction:** Always use the `--no-progress` flag when running the CLI in agent/automated environments to ensure clean output without interactive progress indicators.
 - **Templates:** When modifying a template, ensure that the `base.ts` template remains the source of truth for common files.
 - **Paths:** Always use `path.join` and `path.resolve` for cross-platform compatibility when handling file generation.
 - **Placeholders:** Use dynamic placeholders in template files (like `projectName`) to ensure generated files are customized.

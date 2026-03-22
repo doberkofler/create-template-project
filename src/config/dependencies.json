@@ -165,7 +165,7 @@
 			"description": "ESLint plugin for finding regexp mistakes and style guide violations."
 		},
 		"vitest-browser-react": {
-			"version": "0.1.0",
+			"version": "2.1.0",
 			"description": "Native React testing utilities for Vitest browser mode."
 		}
 	}

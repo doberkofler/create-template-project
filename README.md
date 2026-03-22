@@ -69,7 +69,7 @@ create-template-project update --template cli --name existing-project
 - `-d, --directory <path>`: Output directory (defaults to `.`)
 - `--overwrite`: Overwrite existing directory by removing it first (create & update)
 - `--no-build`: Create a project without a build step (not allowed for `web-app`)
-- `--silent`: Reduce console output (useful for CI and scripts)
+- `--no-progress`: Do not show progress indicators (useful for AI environments)
 
 ## Project Templates
 

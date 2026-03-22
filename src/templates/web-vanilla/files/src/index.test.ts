@@ -1,5 +1,5 @@
 import {expect, test} from 'vitest';
-import {page} from '@vitest/browser/context';
+import {page} from 'vitest/browser';
 import {formatMessage, createHeading} from './lib.js';
 
 test('formatMessage returns correct string', () => {
