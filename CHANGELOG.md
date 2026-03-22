@@ -1,3 +1,19 @@
+# [0.3.0](https://github.com/doberkofler/create-template-project/compare/v0.2.0...v0.3.0) (2026-03-22)
+
+
+### Bug Fixes
+
+* activate the husky workflow, remove the obsolete --skip-build flag ([6344b09](https://github.com/doberkofler/create-template-project/commit/6344b0939ba34bb1f48efbcaeb3ab716675031fa))
+* exclude .DS_Store files from generated projects ([17fece9](https://github.com/doberkofler/create-template-project/commit/17fece9d0f60ce6fa3c8c805f48d5332f84bfff9))
+
+
+### Features
+
+* dependencies script no longer uses ^ version ([2755cda](https://github.com/doberkofler/create-template-project/commit/2755cda89ba904ef55b4a2174d6001b871f34582))
+* improve update command with detailed summary and interactive confirmation ([faf0f08](https://github.com/doberkofler/create-template-project/commit/faf0f08f58998a951c41ccc9dce10d4ac24405f9))
+* improved testing templates ([6a28651](https://github.com/doberkofler/create-template-project/commit/6a2865106e7643c5dfd0ecb8968c11ccff7c644d))
+* migrate from tsdoiwn to vite ([1447290](https://github.com/doberkofler/create-template-project/commit/14472901cde071328a8c5be85817988b8e28a58d))
+
 # [0.2.0](https://github.com/doberkofler/create-template-project/compare/v0.1.0...v0.2.0) (2026-03-19)
 
 
