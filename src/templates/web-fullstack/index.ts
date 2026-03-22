@@ -45,6 +45,7 @@ export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefiniti
 			'@vitest/browser': '@vitest/browser',
 			'@vitest/browser-playwright': '@vitest/browser-playwright',
 			playwright: 'playwright',
+			'vitest-browser-react': 'vitest-browser-react',
 		},
 		scripts: {
 			build: 'npm run build --workspaces',

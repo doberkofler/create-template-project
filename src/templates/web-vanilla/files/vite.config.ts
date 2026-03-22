@@ -5,6 +5,10 @@ import {playwright} from '@vitest/browser-playwright';
 export default defineConfig({
 	test: {
 		include: ['src/**/*.test.ts'],
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'json', 'html'],
+		},
 		browser: {
 			enabled: true,
 			headless: true,

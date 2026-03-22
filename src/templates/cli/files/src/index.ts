@@ -11,4 +11,6 @@ bar.start(100, 0);
 bar.update(50);
 bar.stop();
 
-console.log('Hello from CLI template!');
+import {greet} from './lib.js';
+
+console.log(greet('Developer'));

@@ -36,6 +36,7 @@ export const getWebAppTemplate = (_opts: ProjectOptions): TemplateDefinition => 
 			'@vitest/browser-playwright': '@vitest/browser-playwright',
 			playwright: 'playwright',
 			'@playwright/test': '@playwright/test',
+			'vitest-browser-react': 'vitest-browser-react',
 		},
 		scripts: {
 			dev: 'vite',
