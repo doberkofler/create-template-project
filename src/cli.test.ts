@@ -91,7 +91,7 @@ describe('cli', () => {
 	});
 
 	it('should parse create command arguments', async () => {
-		process.argv.push('create', '-t', 'cli', '-n', 'my-test-project', '-d', './test-dir');
+		process.argv.push('create', '-t', 'cli', '-n', 'my-test-project', '--path', './test-dir');
 		const result = await parseArgs();
 		expect(result).toMatchObject({
 			template: 'cli',
@@ -179,7 +179,7 @@ describe('cli', () => {
 	it('should exit if mandatory options missing in create', async () => {
 		process.argv.push('create', '-n', 'no-template');
 		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
-		expect(p.cancel).toHaveBeenCalledWith(expect.stringContaining('template: Invalid option'));
+		expect(p.cancel).toHaveBeenCalledWith(expect.stringContaining("error: required option '--path <path>' not specified"));
 	});
 
 	it('should use existing template from package.json during interactive update', async () => {
@@ -243,11 +243,12 @@ describe('cli', () => {
 	});
 
 	it('should handle --open flag correctly', async () => {
-		process.argv.push('create', '-t', 'cli', '-n', 'open-test', '--open');
+		process.argv.push('create', '-t', 'cli', '-n', 'open-test', '--path', './open-test-dir', '--open');
 		const result = await parseArgs();
 		expect(result.open).toBe(true);
 		expect(result.dev).toBe(true);
 		expect(result.installDependencies).toBe(true);
+		expect(result.directory).toBe(path.resolve('./open-test-dir'));
 	});
 
 	it('should handle update command with specific options', async () => {
@@ -261,6 +262,7 @@ describe('cli', () => {
 		expect(result.template).toBe('web-app');
 		expect(result.progress).toBe(false);
 		expect(result.projectName).toBe('upd-test');
+		expect(result.directory).toBe(tempDir);
 
 		await fs.rm(tempDir, {recursive: true, force: true});
 	});
@@ -309,12 +311,12 @@ describe('cli', () => {
 		expect(capturedValidate).toBeDefined();
 		expect(capturedValidate('')).toBe('Project name is required');
 		expect(result.projectName).toBe('valid-name');
-		expect(result.directory).toBe(path.resolve('test-dir'));
+		expect(result.directory).toBe(path.resolve('test-dir', 'valid-name'));
 		expect(result.packageManager).toBe('npm');
 	});
 
 	it('should handle --debug option', async () => {
-		process.argv.push('create', '-t', 'cli', '-n', 'debug-test', '--debug');
+		process.argv.push('create', '-t', 'cli', '-n', 'debug-test', '--path', './debug-test-dir', '--debug');
 		await parseArgs();
 		expect(process.env['DEBUG']).toContain('create-template-project:*');
 		expect(debugLib.enable).toHaveBeenCalledWith('create-template-project:*');

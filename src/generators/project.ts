@@ -64,7 +64,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 	const isProgress = progress !== false;
 	const log = getLog(isProgress);
 	const spinner = () => getSpinner(isProgress);
-	const projectDir = path.join(directory, projectName);
+	const projectDir = directory;
 	debug('Project generation started for: %s', projectName);
 	debug('Options: %O', opts);
 	debug('Project directory: %s', projectDir);

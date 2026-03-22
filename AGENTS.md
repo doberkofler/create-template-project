@@ -60,7 +60,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 
 ### Project Structure
 - `src/index.ts`: Entry point. Orchestrates the CLI flow.
-- `src/cli.ts`: Argument parsing (using `commander` subcommands: `interactive`, `create`, `update`) and interactive user prompts (using `@clack/prompts`).
+- `src/cli.ts`: Argument parsing (using `commander` subcommands: `interactive`, `create`, `update`, `info`) and interactive user prompts (using `@clack/prompts`).
 - `src/templates/`: Individual template definitions (e.g., `base/index.ts`, `cli/index.ts`). Each exports a `TemplateDefinition` getter.
 - `src/generators/`: Functions that write files and perform side effects like `git init` or `gh repo create`.
 - `src/types.ts`: Shared type definitions and Zod schemas.

@@ -69,17 +69,17 @@ describe('generateProject', () => {
 
 	it('should scaffold a cli project correctly', async () => {
 		const projectName = 'test-cli-project';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
 			createGithubRepository: true,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 			installDependencies: true,
 			build: true,
 		};
 		await generateProject(opts);
-		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.name).toBe(projectName);
@@ -113,6 +113,7 @@ describe('generateProject', () => {
 
 	it('should handle git init failure', async () => {
 		const projectName = 'test-git-fail';
+		const projectPath = path.join(tmpDir, projectName);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
 			if (cmd === 'git' && args?.[0] === 'init') {
 				throw new Error('git fail');
@@ -122,7 +123,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		await generateProject(opts);
@@ -131,45 +132,45 @@ describe('generateProject', () => {
 
 	it('should scaffold a web-vanilla project correctly', async () => {
 		const projectName = 'test-web-vanilla-project';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'web-vanilla' as const,
 			projectName,
 			createGithubRepository: false,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		await generateProject(opts);
-		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'index.html'))).toBe(true);
 	});
 
 	it('should scaffold a web-app project correctly', async () => {
 		const projectName = 'test-web-app-project';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'web-app' as const,
 			projectName,
 			createGithubRepository: false,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		await generateProject(opts);
-		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'src/index.tsx'))).toBe(true);
 	});
 
 	it('should scaffold a web-fullstack project correctly', async () => {
 		const projectName = 'test-web-fullstack-project';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'web-fullstack' as const,
 			projectName,
 			createGithubRepository: false,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		await generateProject(opts);
-		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'client/vite.config.ts'))).toBe(true);
 
@@ -196,6 +197,7 @@ describe('generateProject', () => {
 
 	it('should warn and use empty version if dependency is missing in config', async () => {
 		const projectName = 'test-missing-dep';
+		const projectPath = path.join(tmpDir, projectName);
 		vi.mocked(getBaseTemplate).mockReturnValue({
 			name: 'base',
 			dependencies: {'missing-dep': ''},
@@ -204,24 +206,24 @@ describe('generateProject', () => {
 			files: [],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false};
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Dependency "missing-dep" not found'));
-		const pkg = JSON.parse(await fs.readFile(path.join(tmpDir, projectName, 'package.json'), 'utf8'));
+		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.dependencies).toHaveProperty('missing-dep', '');
 	});
 
 	it('should handle pnpm workspaces correctly', async () => {
 		const projectName = 'test-pnpm-workspaces';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'web-fullstack' as const,
 			projectName,
 			packageManager: 'pnpm' as const,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		await generateProject(opts);
-		const projectPath = path.join(tmpDir, projectName);
 
 		// Verify package.json does NOT have workspaces
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
@@ -250,7 +252,7 @@ describe('generateProject', () => {
 			template: 'cli' as const,
 			projectName,
 			createGithubRepository: false,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 			overwrite: true,
 		};
@@ -267,7 +269,7 @@ describe('generateProject', () => {
 			template: 'cli' as const,
 			projectName,
 			createGithubRepository: false,
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 		};
 		await generateProject(opts);
@@ -277,6 +279,7 @@ describe('generateProject', () => {
 
 	it('should handle gh repo create failure', async () => {
 		const projectName = 'test-github-fail';
+		const projectPath = path.join(tmpDir, projectName);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
 			if (cmd === 'gh' && args?.[0] === 'repo') {
 				throw new Error('GH failed');
@@ -287,7 +290,7 @@ describe('generateProject', () => {
 			template: 'cli' as const,
 			projectName,
 			createGithubRepository: true,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		await generateProject(opts);
@@ -310,7 +313,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 		};
 		await generateProject(opts);
@@ -331,7 +334,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 		};
 		await generateProject(opts);
@@ -340,6 +343,7 @@ describe('generateProject', () => {
 
 	it('should handle ci script failure', async () => {
 		const projectName = 'test-ci-fail';
+		const projectPath = path.join(tmpDir, projectName);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
 			if (cmd === 'npm' && args?.[1] === 'ci') {
 				throw new Error('fail');
@@ -349,7 +353,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 			build: true,
 		};
@@ -364,7 +368,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 		};
 		await generateProject(opts);
@@ -373,6 +377,7 @@ describe('generateProject', () => {
 
 	it('should handle programmatic files', async () => {
 		const projectName = 'test-prog';
+		const projectPath = path.join(tmpDir, projectName);
 		vi.mocked(getBaseTemplate).mockReturnValue({
 			name: 'base',
 			dependencies: {},
@@ -381,9 +386,9 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'hello'}],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false};
 		await generateProject(opts);
-		expect(await fs.readFile(path.join(tmpDir, projectName, 'p.txt'), 'utf8')).toBe('hello');
+		expect(await fs.readFile(path.join(projectPath, 'p.txt'), 'utf8')).toBe('hello');
 	});
 
 	it('should handle programmatic update merge', async () => {
@@ -399,7 +404,7 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'new'}],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: true};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
 		await generateProject(opts);
 		expect(execa).toHaveBeenCalledWith('git', ['merge-file', path.join(projectPath, 'p.txt'), expect.anything(), expect.anything()], expect.anything());
 	});
@@ -417,26 +422,28 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'same'}],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: true};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
 		await generateProject(opts);
 		expect(execa).not.toHaveBeenCalledWith('git', ['merge-file', expect.anything(), expect.anything(), expect.anything()]);
 	});
 
 	it('should handle npm install failure', async () => {
 		const projectName = 'test-inst-fail';
+		const projectPath = path.join(tmpDir, projectName);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string) => {
 			if (cmd === 'npm') {
 				throw new Error('inst fail');
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false, installDependencies: true};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false, installDependencies: true};
 		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
 	});
 
 	it('should handle prettier-write failure', async () => {
 		const projectName = 'test-prettier-fail';
+		const projectPath = path.join(tmpDir, projectName);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
 			if (cmd === 'npm' && args?.[1] === 'prettier-write') {
 				throw new Error('prettier fail');
@@ -446,7 +453,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 			build: true,
 		};
@@ -489,20 +496,21 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: true};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Conflict: p.txt'));
 	});
 
 	it('should handle dev server failure without open', async () => {
 		const projectName = 'test-dev-fail-no-open';
+		const projectPath = path.join(tmpDir, projectName);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
 			if (cmd === 'npm' && args?.[1] === 'dev') {
 				throw new Error('dev fail');
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false, dev: true, open: false};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false, dev: true, open: false};
 		vi.mocked(getBaseTemplate).mockReturnValue({
 			name: 'base',
 			dependencies: {},
@@ -538,7 +546,7 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: true};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
 		await generateProject(opts);
 		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Updated: p.txt'));
 	});
@@ -547,17 +555,18 @@ describe('generateProject', () => {
 		const projectName = 'test-exists-error';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
-		const opts: any = {template: 'cli' as const, projectName, directory: tmpDir, update: false};
+		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false};
 		await expect(generateProject(opts)).rejects.toThrow('already exists');
 	});
 
 	it('should transform npm scripts to yarn correctly', async () => {
 		const projectName = 'test-yarn-scripts';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
 			packageManager: 'yarn' as const,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		vi.mocked(getBaseTemplate).mockReturnValue({
@@ -571,16 +580,17 @@ describe('generateProject', () => {
 			templateDir: undefined,
 		} as any);
 		await generateProject(opts);
-		const pkg = JSON.parse(await fs.readFile(path.join(tmpDir, projectName, 'package.json'), 'utf8'));
+		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.scripts.test).toBe('yarn run lint && yarn run test');
 	});
 
 	it('should show the correct summary message', async () => {
 		const projectName = 'test-summary';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		await generateProject(opts);
@@ -589,10 +599,11 @@ describe('generateProject', () => {
 
 	it('should not show summary when progress is false', async () => {
 		const projectName = 'test-no-summary-no-progress';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 			progress: false,
 		};
@@ -602,10 +613,11 @@ describe('generateProject', () => {
 
 	it('should not show progress when progress is false', async () => {
 		const projectName = 'test-no-progress';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 			progress: false,
 			installDependencies: true,
@@ -617,11 +629,12 @@ describe('generateProject', () => {
 
 	it('should transform npm scripts to pnpm correctly', async () => {
 		const projectName = 'test-pnpm-scripts';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'web-fullstack' as const,
 			projectName,
 			packageManager: 'pnpm' as const,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 		vi.mocked(getBaseTemplate).mockReturnValue({
@@ -637,7 +650,7 @@ describe('generateProject', () => {
 			templateDir: undefined,
 		} as any);
 		await generateProject(opts);
-		const pkg = JSON.parse(await fs.readFile(path.join(tmpDir, projectName, 'package.json'), 'utf8'));
+		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.scripts.test).toBe('pnpm -r run test');
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
 		expect(pkg.workspaces).toBeUndefined(); // Deleted for pnpm
@@ -653,7 +666,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli',
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 			progress: false,
 		};
@@ -681,7 +694,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli',
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 			progress: false,
 		};
@@ -709,7 +722,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli',
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 			progress: false,
 		};
@@ -729,7 +742,7 @@ describe('generateProject', () => {
 			template: 'web-fullstack',
 			projectName,
 			packageManager: 'pnpm',
-			directory: tmpDir,
+			directory: projectPath,
 			update: true,
 			progress: false,
 		};
@@ -742,10 +755,11 @@ describe('generateProject', () => {
 
 	it('should handle dev server with --open', async () => {
 		const projectName = 'dev-open-test';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli',
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 			dev: true,
 			open: true,

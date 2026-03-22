@@ -51,7 +51,7 @@ You can skip the wizard by using the `create` or `update` commands with the appr
 #### Create a new project
 
 ```bash
-create-template-project create --template cli --name my-cool-tool --github
+create-template-project create --template cli --name my-cool-tool --path ./my-cool-tool --github
 ```
 
 #### Update an existing project
@@ -65,15 +65,23 @@ create-template-project update --template cli
 - `-h, --help`: Show help
 - `-V, --version`: Show version
 
-#### Command Options (create/update):
+#### Command Options (create):
 
 - `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
-- `-n, --name <name>`: Project name (for `create` only)
+- `-n, --name <name>`: Project name
+- `--path <path>`: Output directory (mandatory)
 - `--github`: Create GitHub project (requires `gh` CLI authenticated)
+- `--overwrite`: Overwrite existing directory by removing it first
+- `--no-progress`: Do not show progress indicators
+
+#### Command Options (update):
+
+- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
-- `--overwrite`: Overwrite existing directory by removing it first (create & update)
-- `--no-build`: Create a project without a build step (not allowed for `web-app`)
-- `--no-progress`: Do not show progress indicators (useful for AI environments)
+- `--github`: Create GitHub project (requires `gh` CLI authenticated)
+- `--overwrite`: Overwrite existing directory by removing it first
+- `--no-progress`: Do not show progress indicators
+
 
 ## Project Templates
 

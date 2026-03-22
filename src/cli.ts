@@ -93,7 +93,7 @@ Templates:
 		.option('-n, --name <name>', 'Project name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
-		.option('-d, --directory <path>', 'Output directory', '.')
+		.requiredOption('--path <path>', 'Output directory')
 		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
@@ -108,7 +108,7 @@ Templates:
 				template: opts.template as ProjectOptions['template'],
 				projectName: opts.name,
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
-				directory: path.resolve(opts.directory),
+				directory: path.resolve(opts.path),
 				createGithubRepository: !!opts.createGithubRepository,
 				overwrite: !!opts.overwrite,
 				progress: !!opts.progress,
@@ -330,7 +330,7 @@ Restrictions & Behavior:
 				projectName: projectName as string,
 				packageManager: packageManager as ProjectOptions['packageManager'],
 				createGithubRepository,
-				directory: path.resolve(directory as string),
+				directory: projectDir,
 				update,
 				overwrite,
 				installDependencies,
@@ -376,7 +376,7 @@ Restrictions & Behavior:
 
 	commandResult = validationResult.data;
 
-	const projectDir = path.resolve(commandResult.directory, commandResult.projectName);
+	const projectDir = commandResult.directory;
 	const exists = await pathExists(projectDir);
 
 	if (exists && !commandResult.update && !commandResult.overwrite) {

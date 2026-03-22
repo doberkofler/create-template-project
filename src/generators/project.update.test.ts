@@ -45,10 +45,11 @@ describe('generateProject Update Logic', () => {
 
 	it('should run a clean update with no changes and report nothing', async () => {
 		const projectName = 'clean-update-test';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 
@@ -73,10 +74,11 @@ describe('generateProject Update Logic', () => {
 
 	it('should report Merged when a managed file is modified locally', async () => {
 		const projectName = 'merge-update-test';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 
@@ -84,7 +86,7 @@ describe('generateProject Update Logic', () => {
 		await generateProject(opts);
 
 		// 2. Modify a managed file (e.g., README.md)
-		const readmePath = path.join(tmpDir, projectName, 'README.md');
+		const readmePath = path.join(projectPath, 'README.md');
 		await fs.writeFile(readmePath, '# My Custom Title\n\nSome custom content.');
 
 		const logInfo = vi.mocked(p.log.info);
@@ -100,10 +102,11 @@ describe('generateProject Update Logic', () => {
 
 	it('should NOT touch seed files during update', async () => {
 		const projectName = 'seed-update-test';
+		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
-			directory: tmpDir,
+			directory: projectPath,
 			update: false,
 		};
 
@@ -111,7 +114,7 @@ describe('generateProject Update Logic', () => {
 		await generateProject(opts);
 
 		// 2. Modify a seed file (src/index.ts)
-		const indexPath = path.join(tmpDir, projectName, 'src/index.ts');
+		const indexPath = path.join(projectPath, 'src/index.ts');
 		const customCode = 'console.log("user code");';
 		await fs.writeFile(indexPath, customCode);
 
