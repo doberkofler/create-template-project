@@ -84,6 +84,7 @@ describe('cli', () => {
 			template: 'cli',
 			projectName: 'my-test-project',
 			directory: path.resolve('./test-dir'),
+			packageManager: 'pnpm',
 		});
 	});
 
@@ -91,6 +92,7 @@ describe('cli', () => {
 		process.argv.push('update', '-t', 'web-vanilla', '-n', 'existing-project');
 		const result = await parseArgs();
 		expect(result.update).toBe(true);
+		expect(result.packageManager).toBe('pnpm');
 	});
 
 	it('should handle interactive mode', async () => {

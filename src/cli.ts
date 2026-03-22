@@ -91,7 +91,7 @@ Templates:
 		.description('Create a new project from a template')
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
-		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'npm')
+		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
 		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
@@ -135,7 +135,7 @@ Restrictions & Behavior:
 		)
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
-		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'npm')
+		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
 		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
@@ -250,11 +250,11 @@ Restrictions & Behavior:
 				p.log.info(`Using existing template type: ${template}`);
 			}
 
-			let packageManager = 'npm';
+			let packageManager = 'pnpm';
 			if (!update) {
 				packageManager = (await p.select({
 					message: 'Select package manager:',
-					initialValue: 'npm',
+					initialValue: 'pnpm',
 					options: [
 						{label: 'npm', value: 'npm'},
 						{label: 'pnpm', value: 'pnpm'},
