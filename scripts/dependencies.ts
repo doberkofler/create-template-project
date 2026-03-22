@@ -81,7 +81,7 @@ async function main() {
 	if (updateMode) {
 		console.log(`Updating ${updates.length} dependencies...`);
 		for (const update of updates) {
-			const newVersion = `^${update.latestVersion}`;
+			const newVersion = `${update.latestVersion}`;
 			console.log(`Updating ${update.pkg}: ${update.currentVersion} -> ${newVersion}`);
 			dependencies[update.pkg].version = newVersion;
 		}

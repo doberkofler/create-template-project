@@ -57,7 +57,7 @@
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "0.17.0",
+			"version": "0.17.1",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"prettier": {
@@ -133,19 +133,19 @@
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
-			"version": "11.13.4",
+			"version": "11.14.1",
 			"description": "tRPC server library."
 		},
 		"@trpc/client": {
-			"version": "11.13.4",
+			"version": "11.14.1",
 			"description": "tRPC client library."
 		},
 		"@trpc/react-query": {
-			"version": "11.13.4",
+			"version": "11.14.1",
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.91.2",
+			"version": "5.94.5",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
