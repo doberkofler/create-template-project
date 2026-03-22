@@ -88,6 +88,6 @@ Every generated project MUST include:
 - **Verification:** Always run `pnpm run lint` before submitting changes to ensure compliance with the strict rules.
 - **Documentation:** Update this `AGENTS.md` if significant architectural changes are made.
 - **AI/Agent Interaction:** Always use the `--no-progress` flag when running the CLI in agent/automated environments to ensure clean output without interactive progress indicators.
-- **Templates:** When modifying a template, ensure that the `base.ts` template remains the source of truth for common files.
+- **Templates:** When modifying a template, ensure that the `base.ts` template remains the source of truth for common files. Note that `*.md` files are treated as seed files and are never modified during an `update`.
 - **Paths:** Always use `path.join` and `path.resolve` for cross-platform compatibility when handling file generation.
 - **Placeholders:** Use dynamic placeholders in template files (like `projectName`) to ensure generated files are customized.

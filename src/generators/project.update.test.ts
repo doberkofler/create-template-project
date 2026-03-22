@@ -85,9 +85,9 @@ describe('generateProject Update Logic', () => {
 		// 1. Initial Scaffold
 		await generateProject(opts);
 
-		// 2. Modify a managed file (e.g., README.md)
-		const readmePath = path.join(projectPath, 'README.md');
-		await fs.writeFile(readmePath, '# My Custom Title\n\nSome custom content.');
+		// 2. Modify a managed file (e.g., tsconfig.json)
+		const configPath = path.join(projectPath, 'tsconfig.json');
+		await fs.writeFile(configPath, '{\n  "compilerOptions": {\n    "target": "ESNext"\n  }\n}');
 
 		const logInfo = vi.mocked(p.log.info);
 		logInfo.mockClear();
@@ -95,9 +95,9 @@ describe('generateProject Update Logic', () => {
 		// 3. Run Update
 		await generateProject({...opts, update: true});
 
-		// 4. Verify: README.md should be reported as merged
+		// 4. Verify: tsconfig.json should be reported as merged
 		const infoLogs = logInfo.mock.calls.map((call) => call[0]);
-		expect(infoLogs.some((log) => log.includes('Merged: README.md'))).toBe(true);
+		expect(infoLogs.some((log) => log.includes('Merged: tsconfig.json'))).toBe(true);
 	});
 
 	it('should NOT touch seed files during update', async () => {

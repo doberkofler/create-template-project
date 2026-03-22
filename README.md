@@ -11,7 +11,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 
 - **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `prettier`, and `typescript` (strict mode).
 - **Interactive CLI:** Prompts you for project details if CLI arguments are missing, using `@clack/prompts`.
-- **Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`.
+- **Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`. Files in `src/` and all `*.md` files are skipped to protect your application logic and documentation.
 - **No-Build Option:** Supports creating simple projects without a build step (strips Vite).
 - **GitHub Integration:** Automatically initializes a Git repository and can create a GitHub repository using the `gh` CLI.
 - **CI Ready:** Generates GitHub Actions workflows for automated testing and linting.

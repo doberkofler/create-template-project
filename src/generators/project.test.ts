@@ -284,7 +284,7 @@ describe('generateProject', () => {
 		const projectName = 'test-merge-conflict';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
-		await fs.writeFile(path.join(projectPath, 'README.md'), 'old');
+		await fs.writeFile(path.join(projectPath, 'tsconfig.json'), 'old');
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
 			if (cmd === 'git' && args?.[0] === 'merge-file') {
 				const err = new Error('conflict');
@@ -300,14 +300,14 @@ describe('generateProject', () => {
 			update: true,
 		};
 		await generateProject(opts);
-		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Conflict: README.md'));
+		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Conflict: tsconfig.json'));
 	});
 
 	it('should handle other merge errors', async () => {
 		const projectName = 'test-merge-error';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
-		await fs.writeFile(path.join(projectPath, 'README.md'), 'old');
+		await fs.writeFile(path.join(projectPath, 'tsconfig.json'), 'old');
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
 			if (cmd === 'git' && args?.[0] === 'merge-file') {
 				throw new Error('fatal');
@@ -662,19 +662,23 @@ describe('generateProject', () => {
 		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).toBe(false);
 	});
 
-	it('should handle skipping seed files during update', async () => {
+	it('should handle skipping seed files and markdown files during update', async () => {
 		const projectName = 'skip-seed-test';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.mkdir(path.join(projectPath, 'src'), {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'src/main.ts'), 'my code');
+		await fs.writeFile(path.join(projectPath, 'README.md'), 'my readme');
 
 		vi.mocked(getBaseTemplate).mockReturnValue({
 			name: 'base',
 			dependencies: {},
 			devDependencies: {},
 			scripts: {},
-			files: [{path: 'src/main.ts', content: 'template code'}],
+			files: [
+				{path: 'src/main.ts', content: 'template code'},
+				{path: 'README.md', content: 'template readme'},
+			],
 			templateDir: undefined,
 		} as any);
 
@@ -689,6 +693,24 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		const content = await fs.readFile(path.join(projectPath, 'src/main.ts'), 'utf8');
 		expect(content).toBe('my code');
+
+		const readme = await fs.readFile(path.join(projectPath, 'README.md'), 'utf8');
+		expect(readme).toBe('my readme');
+	});
+
+	it('should cover isSeedFile branches', () => {
+		expect(isSeedFile('src/index.ts')).toBe(true);
+		expect(isSeedFile('client/src/main.ts')).toBe(true);
+		expect(isSeedFile('server/src/main.ts')).toBe(true);
+		expect(isSeedFile('backend/src/main.ts')).toBe(true);
+		expect(isSeedFile('frontend/src/main.ts')).toBe(true);
+		expect(isSeedFile('index.html')).toBe(true);
+		expect(isSeedFile('App.tsx')).toBe(true);
+		expect(isSeedFile('main.tsx')).toBe(true);
+		expect(isSeedFile('index.tsx')).toBe(true);
+		expect(isSeedFile('README.md')).toBe(true);
+		expect(isSeedFile('package.json')).toBe(false);
+		expect(isSeedFile('src.ts')).toBe(false);
 	});
 
 	it('should handle updating pnpm-workspace.yaml when content changes', async () => {

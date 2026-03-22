@@ -43,7 +43,7 @@ describe('file utils', () => {
 			expect(isSeedFile('client/src/App.tsx')).toBe(true);
 			expect(isSeedFile('index.html')).toBe(true);
 			expect(isSeedFile('package.json')).toBe(false);
-			expect(isSeedFile('README.md')).toBe(false);
+			expect(isSeedFile('README.md')).toBe(true);
 		});
 	});
 

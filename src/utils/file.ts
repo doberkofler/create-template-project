@@ -142,7 +142,7 @@ export function mergePackageJson(target: any, source: any) {
 export function isSeedFile(filePath: string): boolean {
 	const seedDirs = ['src/', 'client/src/', 'server/src/', 'backend/src/', 'frontend/src/'];
 	const seedFiles = ['index.html', 'App.tsx', 'main.tsx', 'index.tsx'];
-	return seedDirs.some((dir) => filePath.startsWith(dir)) || seedFiles.some((file) => filePath === file);
+	return seedDirs.some((dir) => filePath.startsWith(dir)) || seedFiles.some((file) => filePath === file) || filePath.toLowerCase().endsWith('.md');
 }
 
 export async function mergeFile(
