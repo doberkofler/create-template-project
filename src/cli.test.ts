@@ -47,6 +47,8 @@ describe('cli', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 		process.argv = originalArgv.slice(0, 2);
+		delete process.env['DEBUG'];
+		debugLib.disable();
 
 		exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
 			const err: any = new Error(`Process exited with code ${code}`);
