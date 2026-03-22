@@ -39,7 +39,6 @@ const getSpinner = (progress: boolean) => {
 	return {
 		start: (msg: string) => (progress ? s.start(msg) : undefined),
 		stop: (msg: string) => (progress ? s.stop(msg) : undefined),
-		message: (msg: string) => (progress ? s.message(msg) : undefined),
 	};
 };
 
@@ -51,6 +50,13 @@ const showNote = (msg: string, title?: string, progress?: boolean) => {
 		p.log.success(title);
 	}
 	p.note(msg);
+};
+
+const isFileRequired = (relativePath: string, type: string) => {
+	if (relativePath === 'vitest.config.ts') {
+		return !['cli', 'web-vanilla', 'web-app', 'web-fullstack'].includes(type);
+	}
+	return true;
 };
 
 export const generateProject = async (opts: ProjectOptions) => {
@@ -196,6 +202,16 @@ export const generateProject = async (opts: ProjectOptions) => {
 					continue;
 				}
 
+				if (!isFileRequired(relativePath, type)) {
+					if (isUpdate && (await pathExists(targetPath))) {
+						actions.push({type: 'DELETE', path: relativePath});
+						pendingOperations.push(async () => {
+							await fs.rm(targetPath, {force: true});
+						});
+					}
+					continue;
+				}
+
 				if (relativePath === '_oxlint.config.ts') {
 					relativePath = 'oxlint.config.ts';
 					targetPath = path.join(projectDir, relativePath);
@@ -250,6 +266,16 @@ export const generateProject = async (opts: ProjectOptions) => {
 				continue;
 			}
 
+			if (!isFileRequired(file.path, type)) {
+				if (isUpdate && (await pathExists(targetPath))) {
+					actions.push({type: 'DELETE', path: file.path});
+					pendingOperations.push(async () => {
+						await fs.rm(targetPath, {force: true});
+					});
+				}
+				continue;
+			}
+
 			let content = typeof file.content === 'function' ? file.content() : file.content;
 			content = processContent(file.path, content, opts, addedDeps);
 			const exists = await pathExists(targetPath);
@@ -293,9 +319,21 @@ export const generateProject = async (opts: ProjectOptions) => {
 	if (pm === 'pnpm' && finalPkg.workspaces) {
 		debug('Creating pnpm-workspace.yaml');
 		const workspaceYaml = `packages:\n${finalPkg.workspaces.map((w: string) => `  - '${w}'`).join('\n')}\n`;
-		pendingOperations.push(async () => {
-			await fs.writeFile(path.join(projectDir, 'pnpm-workspace.yaml'), workspaceYaml);
-		});
+		const workspacePath = path.join(projectDir, 'pnpm-workspace.yaml');
+		const workspaceExists = await pathExists(workspacePath);
+
+		let workspaceChanged = true;
+		if (workspaceExists) {
+			const existingWorkspaceContent = await fs.readFile(workspacePath, 'utf8');
+			workspaceChanged = existingWorkspaceContent.trim() !== workspaceYaml.trim();
+		}
+
+		if (workspaceChanged) {
+			actions.push({type: workspaceExists ? 'MODIFY' : 'ADD', path: 'pnpm-workspace.yaml'});
+			pendingOperations.push(async () => {
+				await fs.writeFile(workspacePath, workspaceYaml);
+			});
+		}
 		delete finalPkg.workspaces;
 
 		for (const key of Object.keys(finalPkg.scripts)) {
@@ -306,27 +344,25 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 	}
 
-	if (type === 'cli' || type === 'web-vanilla' || type === 'web-app' || type === 'web-fullstack') {
-		// For these templates, vitest.config.ts is either merged into vite.config.ts or handled per workspace
-		const fullPath = path.join(projectDir, 'vitest.config.ts');
-		pendingOperations.push(async () => {
-			await fs.rm(fullPath, {force: true});
-		});
-		if (isUpdate && (await pathExists(fullPath))) {
-			actions.push({type: 'DELETE', path: 'vitest.config.ts'});
-		}
+	// Always update package.json
+	const newPkgContent = JSON.stringify(finalPkg, null, '\t');
+	let pkgChanged = true;
+	if (isUpdate && (await pathExists(pkgPath))) {
+		const existingPkgContent = await fs.readFile(pkgPath, 'utf8');
+		pkgChanged = existingPkgContent.trim() !== newPkgContent.trim();
 	}
 
-	// Always update package.json
-	if (isUpdate) {
-		actions.push({type: 'MODIFY', path: 'package.json'});
-	} else {
-		actions.push({type: 'ADD', path: 'package.json'});
+	if (pkgChanged) {
+		if (isUpdate) {
+			actions.push({type: 'MODIFY', path: 'package.json'});
+		} else {
+			actions.push({type: 'ADD', path: 'package.json'});
+		}
+		pendingOperations.push(async () => {
+			debug('Writing final consolidated package.json to: %s', pkgPath);
+			await fs.writeFile(pkgPath, newPkgContent);
+		});
 	}
-	pendingOperations.push(async () => {
-		debug('Writing final consolidated package.json to: %s', pkgPath);
-		await fs.writeFile(pkgPath, JSON.stringify(finalPkg, null, '\t'));
-	});
 
 	// If update, show summary and ask for confirmation
 	if (isUpdate && actions.length > 0 && process.env.NODE_ENV !== 'test') {
@@ -336,7 +372,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 			.join('\n');
 
 		if (summary) {
-			p.note(summary, 'Planned changes:');
+			const relativeProjectDir = path.relative(process.cwd(), projectDir) || '.';
+			p.note(summary, `Planned changes in ${relativeProjectDir}:`);
 
 			const confirm = await p.confirm({
 				message: 'Do you want to apply these changes?',

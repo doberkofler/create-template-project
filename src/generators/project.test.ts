@@ -12,6 +12,7 @@ import path from 'node:path';
 import os from 'node:os';
 import * as p from '@clack/prompts';
 import {getBaseTemplate} from '../templates/base/index.js';
+import {isSeedFile} from '../utils/file.js';
 
 const spinnerMock = {
 	start: vi.fn(),
@@ -640,5 +641,141 @@ describe('generateProject', () => {
 		expect(pkg.scripts.test).toBe('pnpm -r run test');
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
 		expect(pkg.workspaces).toBeUndefined(); // Deleted for pnpm
+	});
+
+	it('should handle deleting files during update if no longer required', async () => {
+		const projectName = 'delete-update-test';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		// Create a file that should be deleted (e.g., vitest.config.ts for cli template)
+		await fs.writeFile(path.join(projectPath, 'vitest.config.ts'), 'content');
+
+		const opts: any = {
+			template: 'cli',
+			projectName,
+			directory: tmpDir,
+			update: true,
+			progress: false,
+		};
+
+		await generateProject(opts);
+		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).toBe(false);
+	});
+
+	it('should handle deleting programmatic files during update if no longer required', async () => {
+		const projectName = 'delete-prog-update-test';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		// vitest.config.ts is NOT required for cli
+		await fs.writeFile(path.join(projectPath, 'vitest.config.ts'), 'content');
+
+		vi.mocked(getBaseTemplate).mockReturnValue({
+			name: 'base',
+			dependencies: {},
+			devDependencies: {},
+			scripts: {},
+			files: [{path: 'vitest.config.ts', content: 'test'}],
+			templateDir: undefined,
+		} as any);
+
+		const opts: any = {
+			template: 'cli',
+			projectName,
+			directory: tmpDir,
+			update: true,
+			progress: false,
+		};
+
+		await generateProject(opts);
+		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).toBe(false);
+	});
+
+	it('should handle skipping seed files during update', async () => {
+		const projectName = 'skip-seed-test';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.mkdir(path.join(projectPath, 'src'), {recursive: true});
+		await fs.writeFile(path.join(projectPath, 'src/main.ts'), 'my code');
+
+		vi.mocked(getBaseTemplate).mockReturnValue({
+			name: 'base',
+			dependencies: {},
+			devDependencies: {},
+			scripts: {},
+			files: [{path: 'src/main.ts', content: 'template code'}],
+			templateDir: undefined,
+		} as any);
+
+		const opts: any = {
+			template: 'cli',
+			projectName,
+			directory: tmpDir,
+			update: true,
+			progress: false,
+		};
+
+		await generateProject(opts);
+		const content = await fs.readFile(path.join(projectPath, 'src/main.ts'), 'utf8');
+		expect(content).toBe('my code');
+	});
+
+	it('should handle updating pnpm-workspace.yaml when content changes', async () => {
+		const projectName = 'pnpm-ws-update-test';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'old content');
+
+		const opts: any = {
+			template: 'web-fullstack',
+			projectName,
+			packageManager: 'pnpm',
+			directory: tmpDir,
+			update: true,
+			progress: false,
+		};
+
+		await generateProject(opts);
+		const content = await fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8');
+		expect(content).toContain('packages:');
+		expect(content).not.toBe('old content');
+	});
+
+	it('should handle dev server with --open', async () => {
+		const projectName = 'dev-open-test';
+		const opts: any = {
+			template: 'cli',
+			projectName,
+			directory: tmpDir,
+			update: false,
+			dev: true,
+			open: true,
+			progress: false,
+		};
+
+		vi.mocked(getBaseTemplate).mockReturnValue({
+			name: 'base',
+			dependencies: {},
+			devDependencies: {},
+			scripts: {dev: 'node index.js'},
+			files: [],
+			templateDir: undefined,
+		} as any);
+
+		await generateProject(opts);
+		expect(execa).toHaveBeenCalledWith('npm', ['run', 'dev', '--', '--open'], expect.anything());
+	});
+
+	it('should cover isSeedFile branches', () => {
+		expect(isSeedFile('src/index.ts')).toBe(true);
+		expect(isSeedFile('client/src/main.ts')).toBe(true);
+		expect(isSeedFile('server/src/main.ts')).toBe(true);
+		expect(isSeedFile('backend/src/main.ts')).toBe(true);
+		expect(isSeedFile('frontend/src/main.ts')).toBe(true);
+		expect(isSeedFile('index.html')).toBe(true);
+		expect(isSeedFile('App.tsx')).toBe(true);
+		expect(isSeedFile('main.tsx')).toBe(true);
+		expect(isSeedFile('index.tsx')).toBe(true);
+		expect(isSeedFile('package.json')).toBe(false);
+		expect(isSeedFile('src.ts')).toBe(false);
 	});
 });

@@ -3,6 +3,7 @@ import {parseArgs} from './cli.js';
 import * as p from '@clack/prompts';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import debugLib from 'debug';
 
 vi.mock('@clack/prompts', async (importOriginal) => {
 	const actual = (await importOriginal()) as any;
@@ -258,5 +259,47 @@ describe('cli', () => {
 		expect(result.projectName).toBe('valid-name');
 		expect(result.directory).toBe(path.resolve('test-dir'));
 		expect(result.packageManager).toBe('npm');
+	});
+
+	it('should handle --debug option', async () => {
+		process.argv.push('create', '-t', 'cli', '-n', 'debug-test', '--debug');
+		const debugSpy = vi.spyOn(debugLib, 'enable');
+		await parseArgs();
+		expect(process.env['DEBUG']).toContain('create-template-project:*');
+		expect(debugSpy).toHaveBeenCalledWith('create-template-project:*');
+	});
+
+	it('should handle overwrite choice in interactive mode', async () => {
+		process.argv.push('interactive');
+		const projectName = 'overwrite-interactive-test';
+		const projectDir = path.resolve('.', projectName);
+		await fs.mkdir(projectDir, {recursive: true});
+
+		vi.mocked(p.text).mockResolvedValueOnce(projectName).mockResolvedValueOnce('.');
+		vi.mocked(p.select).mockResolvedValueOnce('overwrite').mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
+		vi.mocked(p.confirm).mockResolvedValue(true);
+
+		const result = await parseArgs();
+		expect(result.overwrite).toBe(true);
+		expect(result.update).toBe(false);
+
+		await fs.rm(projectDir, {recursive: true, force: true});
+	});
+
+	it('should handle error reading existing package.json in interactive mode', async () => {
+		process.argv.push('interactive');
+		const projectName = 'pkg-error-test';
+		const projectDir = path.resolve('.', projectName);
+		await fs.mkdir(projectDir, {recursive: true});
+		await fs.writeFile(path.join(projectDir, 'package.json'), 'invalid json');
+
+		vi.mocked(p.text).mockResolvedValueOnce(projectName).mockResolvedValueOnce('.');
+		vi.mocked(p.select).mockResolvedValueOnce('update').mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
+		vi.mocked(p.confirm).mockResolvedValue(true);
+
+		const result = await parseArgs();
+		expect(result.projectName).toBe(projectName);
+
+		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 });
