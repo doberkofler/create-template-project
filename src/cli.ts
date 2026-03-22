@@ -94,11 +94,8 @@ Templates:
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.requiredOption('--path <path>', 'Output directory')
-		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
-		.option('--dev', 'Run the dev server after scaffolding', false)
-		.option('--open', 'Open the browser after scaffolding', false)
 		.option('--no-progress', 'Do not show progress indicators')
 		.action((opts) => {
 			debug('Executing "create" command with options: %O', opts);
@@ -110,7 +107,6 @@ Templates:
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: path.resolve(opts.path),
 				createGithubRepository: !!opts.createGithubRepository,
-				overwrite: !!opts.overwrite,
 				progress: !!opts.progress,
 			};
 			debug('Processed "create" options: %O', commandResult);
@@ -137,7 +133,6 @@ Restrictions & Behavior:
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
-		.option('--overwrite', 'Overwrite existing directory by removing it first', false)
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after updating', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
@@ -175,7 +170,6 @@ Restrictions & Behavior:
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: directory,
 				createGithubRepository: !!opts.createGithubRepository,
-				overwrite: !!opts.overwrite,
 				progress: !!opts.progress,
 			};
 			debug('Processed "update" options: %O', commandResult);
@@ -226,14 +220,11 @@ Restrictions & Behavior:
 			}
 
 			let update = false;
-			let overwrite = false;
-
 			if (exists) {
 				const action = await p.select({
 					message: `Directory "${projectDir}" already exists. What would you like to do?`,
 					options: [
 						{label: 'Run an update', value: 'update'},
-						{label: 'Overwrite existing directory by removing it first', value: 'overwrite'},
 						{label: 'Cancel', value: 'cancel'},
 					],
 				});
@@ -245,8 +236,6 @@ Restrictions & Behavior:
 
 				if (action === 'update') {
 					update = true;
-				} else if (action === 'overwrite') {
-					overwrite = true;
 				}
 			}
 
@@ -332,11 +321,8 @@ Restrictions & Behavior:
 				createGithubRepository,
 				directory: projectDir,
 				update,
-				overwrite,
 				installDependencies,
 				build,
-				dev: false,
-				open: false,
 				progress: true,
 			};
 		});
@@ -379,16 +365,12 @@ Restrictions & Behavior:
 	const projectDir = commandResult.directory;
 	const exists = await pathExists(projectDir);
 
-	if (exists && !commandResult.update && !commandResult.overwrite) {
-		p.cancel(`Directory "${projectDir}" already exists. Use --overwrite to overwrite or "update" command.`);
+	if (exists && !commandResult.update) {
+		p.cancel(`Directory "${projectDir}" already exists. Use the "update" command to update.`);
 		process.exit(1);
 	}
 
-	if (commandResult.open) {
-		commandResult.dev = true;
-		commandResult.installDependencies = true;
-	}
-	if (commandResult.dev || commandResult.build) {
+	if (commandResult.build) {
 		commandResult.installDependencies = true;
 	}
 

@@ -242,15 +242,6 @@ describe('cli', () => {
 		exitSpyLocal.mockRestore();
 	});
 
-	it('should handle --open flag correctly', async () => {
-		process.argv.push('create', '-t', 'cli', '-n', 'open-test', '--path', './open-test-dir', '--open');
-		const result = await parseArgs();
-		expect(result.open).toBe(true);
-		expect(result.dev).toBe(true);
-		expect(result.installDependencies).toBe(true);
-		expect(result.directory).toBe(path.resolve('./open-test-dir'));
-	});
-
 	it('should handle update command with specific options', async () => {
 		const tempDir = path.resolve('./temp-update-opts-test');
 		await fs.mkdir(tempDir, {recursive: true});
@@ -320,23 +311,6 @@ describe('cli', () => {
 		await parseArgs();
 		expect(process.env['DEBUG']).toContain('create-template-project:*');
 		expect(debugLib.enable).toHaveBeenCalledWith('create-template-project:*');
-	});
-
-	it('should handle overwrite choice in interactive mode', async () => {
-		process.argv.push('interactive');
-		const projectName = 'overwrite-interactive-test';
-		const projectDir = path.resolve('.', projectName);
-		await fs.mkdir(projectDir, {recursive: true});
-
-		vi.mocked(p.text).mockResolvedValueOnce(projectName).mockResolvedValueOnce('.');
-		vi.mocked(p.select).mockResolvedValueOnce('overwrite').mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
-		vi.mocked(p.confirm).mockResolvedValue(true);
-
-		const result = await parseArgs();
-		expect(result.overwrite).toBe(true);
-		expect(result.update).toBe(false);
-
-		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 
 	it('should handle error reading existing package.json in interactive mode', async () => {

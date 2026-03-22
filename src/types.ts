@@ -12,12 +12,9 @@ export const ProjectOptionsSchema = z.object({
 	packageManager: PackageManagerSchema.optional().default('npm'),
 	createGithubRepository: z.boolean().optional().default(false),
 	directory: z.string(),
-	overwrite: z.boolean().optional().default(false),
 	update: z.boolean().optional().default(false),
 	installDependencies: z.boolean().optional().default(false),
 	build: z.boolean().optional().default(false),
-	dev: z.boolean().optional().default(false),
-	open: z.boolean().optional().default(false),
 	progress: z.boolean().optional().default(true),
 });
 

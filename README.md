@@ -71,7 +71,6 @@ create-template-project update --template cli
 - `-n, --name <name>`: Project name
 - `--path <path>`: Output directory (mandatory)
 - `--github`: Create GitHub project (requires `gh` CLI authenticated)
-- `--overwrite`: Overwrite existing directory by removing it first
 - `--no-progress`: Do not show progress indicators
 
 #### Command Options (update):
@@ -79,7 +78,6 @@ create-template-project update --template cli
 - `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
 - `--github`: Create GitHub project (requires `gh` CLI authenticated)
-- `--overwrite`: Overwrite existing directory by removing it first
 - `--no-progress`: Do not show progress indicators
 
 

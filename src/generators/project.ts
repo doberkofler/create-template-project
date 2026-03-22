@@ -60,7 +60,7 @@ const isFileRequired = (relativePath: string, type: string) => {
 };
 
 export const generateProject = async (opts: ProjectOptions) => {
-	const {template: type, projectName, directory, update, overwrite, progress} = opts;
+	const {template: type, projectName, directory, update, progress} = opts;
 	const isProgress = progress !== false;
 	const log = getLog(isProgress);
 	const spinner = () => getSpinner(isProgress);
@@ -72,11 +72,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 	let isUpdate = !!update;
 
 	if (await pathExists(projectDir)) {
-		if (overwrite) {
-			await fs.rm(projectDir, {recursive: true, force: true});
-			isUpdate = false; // Directory wiped, treat as fresh creation
-		} else if (!isUpdate) {
-			throw new Error(`Directory "${projectDir}" already exists. Use --overwrite to replace it or --update to update.`);
+		if (!isUpdate) {
+			throw new Error(`Directory "${projectDir}" already exists. Use the "update" command to update.`);
 		}
 	}
 
@@ -480,25 +477,6 @@ export const generateProject = async (opts: ProjectOptions) => {
 
 	log.success(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
 	showSummary(opts, pm, isProgress);
-
-	if (opts.dev && finalPkg.scripts.dev) {
-		log.info('Starting dev server...');
-		if (opts.open) {
-			try {
-				debug('Executing: %s run dev -- --open', pm);
-				await execa(pm, ['run', 'dev', '--', '--open'], {cwd: projectDir, stdio: 'inherit', preferLocal: true});
-			} catch (e) {
-				log.error('Dev server failed: ' + e);
-			}
-		} else {
-			try {
-				debug('Executing: %s run dev', pm);
-				await execa(pm, ['run', 'dev'], {cwd: projectDir, stdio: 'inherit', preferLocal: true});
-			} catch (e) {
-				log.error('Dev server failed: ' + e);
-			}
-		}
-	}
 };
 
 function showSummary(opts: ProjectOptions, pm: string, isProgress: boolean) {

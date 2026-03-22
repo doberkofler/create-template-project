@@ -243,23 +243,6 @@ describe('generateProject', () => {
 		expect(pkg.scripts.dev).toBe('pnpm -r run dev');
 	});
 
-	it('should handle --overwrite flag', async () => {
-		const projectName = 'test-overwrite-project';
-		const projectPath = path.join(tmpDir, projectName);
-		await fs.mkdir(projectPath, {recursive: true});
-		await fs.writeFile(path.join(projectPath, 'old-file.txt'), 'old');
-		const opts: any = {
-			template: 'cli' as const,
-			projectName,
-			createGithubRepository: false,
-			directory: projectPath,
-			update: false,
-			overwrite: true,
-		};
-		await generateProject(opts);
-		expect(await pathExists(path.join(projectPath, 'old-file.txt'))).toBe(false);
-	});
-
 	it('should handle --update flag', async () => {
 		const projectName = 'test-update-project';
 		const projectPath = path.join(tmpDir, projectName);
@@ -501,30 +484,6 @@ describe('generateProject', () => {
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Conflict: p.txt'));
 	});
 
-	it('should handle dev server failure without open', async () => {
-		const projectName = 'test-dev-fail-no-open';
-		const projectPath = path.join(tmpDir, projectName);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'dev') {
-				throw new Error('dev fail');
-			}
-			return {stdout: '', stderr: ''};
-		});
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false, dev: true, open: false};
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {
-				dev: 'node index.js',
-			},
-			files: [],
-			templateDir: undefined,
-		} as any);
-		await generateProject(opts);
-		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('dev fail'));
-	});
-
 	it('should handle programmatic update returning updated', async () => {
 		const projectName = 'test-prog-updated';
 		const projectPath = path.join(tmpDir, projectName);
@@ -551,7 +510,7 @@ describe('generateProject', () => {
 		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Updated: p.txt'));
 	});
 
-	it('should throw if directory exists and no update/overwrite', async () => {
+	it('should throw if directory exists and no update', async () => {
 		const projectName = 'test-exists-error';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
@@ -751,32 +710,6 @@ describe('generateProject', () => {
 		const content = await fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8');
 		expect(content).toContain('packages:');
 		expect(content).not.toBe('old content');
-	});
-
-	it('should handle dev server with --open', async () => {
-		const projectName = 'dev-open-test';
-		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli',
-			projectName,
-			directory: projectPath,
-			update: false,
-			dev: true,
-			open: true,
-			progress: false,
-		};
-
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {dev: 'node index.js'},
-			files: [],
-			templateDir: undefined,
-		} as any);
-
-		await generateProject(opts);
-		expect(execa).toHaveBeenCalledWith('npm', ['run', 'dev', '--', '--open'], expect.anything());
 	});
 
 	it('should cover isSeedFile branches', () => {
