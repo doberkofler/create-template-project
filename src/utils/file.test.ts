@@ -267,6 +267,17 @@ describe('file utils', () => {
 			expect(result).toBe('conflict');
 		});
 
+		it('should return conflict if git merge-file returns exit code 2 (multiple conflicts)', async () => {
+			const filePath = path.join(tmpDir, 'file.txt');
+			const err: any = new Error('conflict');
+			err.exitCode = 2;
+			(vi.mocked(execa) as any).mockRejectedValue(err);
+			const log = {error: vi.fn()};
+
+			const result = await mergeFile(filePath, 'old content', 'template content', log);
+			expect(result).toBe('conflict');
+		});
+
 		it('should return error and log message on other git failures', async () => {
 			const filePath = path.join(tmpDir, 'file.txt');
 			const err: any = new Error('fatal error');

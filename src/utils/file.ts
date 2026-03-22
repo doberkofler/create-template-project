@@ -166,7 +166,7 @@ export async function mergeFile(
 			const postMergeContent = await fs.readFile(filePath, 'utf8');
 			return postMergeContent.trim() !== template.trim() ? 'merged' : 'updated';
 		} catch (e: any) {
-			if (e.exitCode === 1) {
+			if (e.exitCode >= 1 && e.exitCode < 128) {
 				return 'conflict';
 			} else {
 				debug('Git merge-file failed: %O', e);
