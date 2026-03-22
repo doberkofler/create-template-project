@@ -47,6 +47,6 @@ export const main = async () => {
 };
 
 // Only run main if this file is executed directly
-if (import.meta.url.endsWith('src/index.ts') || import.meta.url.endsWith('dist/index.mjs')) {
+if (import.meta.url.endsWith('src/index.ts') || import.meta.url.endsWith('dist/index.js')) {
 	await main();
 }

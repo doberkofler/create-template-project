@@ -1,10 +1,17 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import {existsSync} from 'node:fs';
 import {execa} from 'execa';
 import debugLib from 'debug';
 import {ProjectOptions} from '../types.js';
 
 const debug = debugLib('create-template-project:utils:file');
+
+export function getTemplateDir(dirname: string, templateName: string): string {
+	const sourcePath = path.resolve(dirname, 'files');
+	const distPath = path.resolve(dirname, 'templates', templateName, 'files');
+	return existsSync(distPath) ? distPath : sourcePath;
+}
 
 export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) {
 	const files = await fs.readdir(dirPath);
@@ -74,7 +81,7 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 
 	// Special logic for web-vanilla template script tag in index.html
 	if (template === 'web-vanilla' && filePath === 'index.html') {
-		processed = processed.replace('{{scriptSrc}}', opts.skipBuild ? './src/index.js' : './dist/index.mjs');
+		processed = processed.replace('{{scriptSrc}}', opts.skipBuild ? './src/index.js' : '/src/index.ts');
 	}
 
 	// Append dependencies to CONTRIBUTING.md

@@ -14,7 +14,12 @@ import {getAllFiles, isSeedFile, mergeFile, mergePackageJson, processContent} fr
 
 const debug = debugLib('create-template-project:generator');
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEPENDENCY_CONFIG_PATH = path.resolve(__dirname, '../config/dependencies.json');
+
+const getDependencyConfigPath = async () => {
+	const sourcePath = path.resolve(__dirname, '../config/dependencies.json');
+	const distPath = path.resolve(__dirname, 'config/dependencies.json');
+	return (await pathExists(distPath)) ? distPath : sourcePath;
+};
 
 const pathExists = (p: string) =>
 	fs
@@ -96,7 +101,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 
 	// Load dependency configuration early
 	debug('Loading dependency configuration');
-	const depConfig = JSON.parse(await fs.readFile(DEPENDENCY_CONFIG_PATH, 'utf8')) as DependencyConfig;
+	const depConfigPath = await getDependencyConfigPath();
+	const depConfig = JSON.parse(await fs.readFile(depConfigPath, 'utf8')) as DependencyConfig;
 	const addedDeps: Array<{name: string; description: string}> = [];
 
 	const resolveDeps = (deps: Record<string, string> = {}) => {
@@ -305,7 +311,6 @@ export const generateProject = async (opts: ProjectOptions) => {
 		delete finalPkg.scripts.build;
 		delete finalPkg.scripts.dev;
 		if (finalPkg.devDependencies) {
-			delete finalPkg.devDependencies.tsdown;
 			delete finalPkg.devDependencies.vite;
 			delete finalPkg.devDependencies['@vitejs/plugin-react'];
 		}
@@ -314,7 +319,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 		// Remove build tool configs if they were copied
 		debug('Removing build tool configs due to skipBuild');
-		const filesToDelete = ['tsdown.config.ts', 'vite.config.ts', 'vite.config.server.ts', 'client/vite.config.ts', 'server/vite.config.ts'];
+		const filesToDelete = ['tsdown.config.ts', 'vite.config.ts', 'vite.config.server.ts', 'client/vite.config.ts', 'server/vite.config.ts', 'vitest.config.ts'];
 		for (const f of filesToDelete) {
 			const fullPath = path.join(projectDir, f);
 			pendingOperations.push(async () => {
@@ -323,6 +328,15 @@ export const generateProject = async (opts: ProjectOptions) => {
 			if (isUpdate && (await pathExists(fullPath))) {
 				actions.push({type: 'DELETE', path: f});
 			}
+		}
+	} else if (type === 'cli') {
+		// For CLI template, if build is NOT skipped, vitest.config.ts is merged into vite.config.ts
+		const fullPath = path.join(projectDir, 'vitest.config.ts');
+		pendingOperations.push(async () => {
+			await fs.rm(fullPath, {force: true});
+		});
+		if (isUpdate && (await pathExists(fullPath))) {
+			actions.push({type: 'DELETE', path: 'vitest.config.ts'});
 		}
 	}
 

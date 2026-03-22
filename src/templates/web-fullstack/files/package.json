@@ -24,8 +24,7 @@
 		"@types/react-dom": "",
 		"@types/express": "",
 		"@types/cors": "",
-		"@playwright/test": "",
-		"tsdown": ""
+		"@playwright/test": ""
 	},
 	"scripts": {
 		"build": "npm run build --workspaces",

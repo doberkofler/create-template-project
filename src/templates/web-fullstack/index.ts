@@ -1,6 +1,7 @@
 import {ProjectOptions, TemplateDefinition} from '../../types.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {getTemplateDir} from '../../utils/file.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -52,6 +53,6 @@ export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefiniti
 			'test:e2e': 'playwright test',
 		},
 		files: [],
-		templateDir: path.resolve(__dirname, 'files'),
+		templateDir: getTemplateDir(__dirname, 'web-fullstack'),
 	};
 };

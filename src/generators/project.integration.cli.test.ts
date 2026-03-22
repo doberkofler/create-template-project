@@ -52,6 +52,6 @@ describe('generateProject (Integration - CLI)', () => {
 
 		const projectPath = path.join(tmpDir, projectName);
 		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'dist/index.mjs'))).toBe(true);
+		expect(await pathExists(path.join(projectPath, 'dist/index.js'))).toBe(true);
 	}, 300000);
 });

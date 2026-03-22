@@ -84,10 +84,6 @@
 			"version": "3.11.6",
 			"description": "TypeScript definitions for cli-progress."
 		},
-		"tsdown": {
-			"version": "0.21.4",
-			"description": "A zero-config bundler for TypeScript."
-		},
 		"express": {
 			"version": "5.2.1",
 			"description": "Fast, unopinionated, minimalist web framework for Node.js."

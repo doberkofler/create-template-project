@@ -9,7 +9,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 
 ### Core Commands
 - **Install dependencies:** `npm install`
-- **Build project:** `npm run build` (uses `tsdown` to bundle into `dist/`)
+- **Build project:** `npm run build` (uses `vite` to bundle into `dist/`)
 - **Lint code:** `npm run lint` (runs `tsc`, `oxlint`, and `prettier`)
 - **Run all tests:** `npm run test` (uses `vitest` with coverage)
 - **Run CI suite:** `npm run ci` (lint + build + test)

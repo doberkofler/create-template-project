@@ -23,7 +23,7 @@ When working in this repository, please:
 - **CLI Framework:** `commander` and `@clack/prompts`
 - **Process Execution:** `execa`
 - **Validation:** `zod`
-- **Bundler:** `tsdown`
+- **Bundler:** `vite`
 - **Testing:** `vitest` with `v8` coverage
 - **Linting:** `oxlint`, `typescript`, `prettier`
 

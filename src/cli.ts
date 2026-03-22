@@ -281,7 +281,7 @@ Restrictions & Behavior:
 			let skipBuild = false;
 			if (template !== 'web-app') {
 				const res = await p.confirm({
-					message: 'Should we use build tooling? (Enables bundling using tsdown, and uses raw dist/ instead of src/)',
+					message: 'Should we use build tooling? (Enables bundling using Vite, and uses raw dist/ instead of src/)',
 					initialValue: true,
 				});
 

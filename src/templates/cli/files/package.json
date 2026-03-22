@@ -1,15 +1,15 @@
 {
-	"bin": "./dist/index.mjs",
+	"bin": "./dist/index.js",
 	"dependencies": {
 		"commander": "",
 		"cli-progress": ""
 	},
 	"devDependencies": {
 		"@types/cli-progress": "",
-		"tsdown": ""
+		"vite": ""
 	},
 	"scripts": {
-		"dev": "tsdown --watch",
-		"build": "tsdown"
+		"dev": "vite build --watch",
+		"build": "vite build"
 	}
 }

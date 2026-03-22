@@ -82,7 +82,7 @@ describe('generateProject', () => {
 		expect(await pathExists(projectPath)).toBe(true);
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.name).toBe(projectName);
-		expect(pkg.bin).toBe('./dist/index.mjs');
+		expect(pkg.bin).toBe('./dist/index.js');
 		expect(pkg.dependencies).toHaveProperty('commander');
 		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
 

@@ -14,7 +14,8 @@ export default defineConfig({
 		target: 'node22',
 	},
 	test: {
-		globals: true,
-		environment: 'node',
+		coverage: {
+			provider: 'v8',
+		},
 	},
 });
