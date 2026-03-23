@@ -125,4 +125,26 @@ describe('generateProject Update Logic', () => {
 		const finalContent = await fs.readFile(indexPath, 'utf8');
 		expect(finalContent).toBe(customCode);
 	});
+
+	it('should throw error if update run on a project without configuration', async () => {
+		const projectName = 'no-config-update-test';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				version: '1.0.0',
+			}),
+		);
+
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: true,
+		};
+
+		await expect(generateProject(opts)).rejects.toThrow(/No "create-template-project" configuration found/);
+	});
 });

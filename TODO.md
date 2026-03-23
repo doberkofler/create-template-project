@@ -1,24 +1,10 @@
 # improvements
 
-## after generating and updating there should be information on what files must and might need to be abjusted
-
-a (most likely not complete) list of files:
-- the LICENSE file might need a different copyright date or user name
-- the package.json properties like description, keywords, ...
-...
-
 ## open source improvements
 
-1. Enrich package.json Metadata
-Currently, the package.json is missing several fields essential for npm's search algorithm and professional presentation:
-- Add description: Syncing it with your GitHub description.
-- Add keywords: Adding terms like dependencies, security, vulnerability, cli, maintenance, and npm to improve search rankings.
-- Add Links: Including repository, homepage, and bugs fields so users can find your source code and report issues directly from the npm page.
-- Add author and license: Formally declaring the project's ownership and usage rights.
-- Consistency: Updating the bin and scripts to consistently point to ./dist/index.js.
 2. Enhance README.md
 The README is good but can be more engaging for first-time visitors:
-- Add Badges: NPM version, License, and GitHub Actions CI status.
+- Add Badges: NPM version, License, GitHub Actions CI status and coverage
 - Quick Start: Adding an npx depvital section so users can try it without installation.
 - Improved Formatting: Refining the "Features" and "Usage" sections for better readability.
 3. Implement Open Source Standards
@@ -49,35 +35,7 @@ gh repo edit --add-topic dependency-management,security-audit,vulnerability-scan
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/doberkofler/depvital/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/depvital/actions/workflows/node.js.yml)
 
-??? HOW TO MAINTAI THEM?
-
-## update package.json to include essential metadata for npm search and professional branding. Here are the specific additions:
-
-{
-  "description": "A production-ready CLI tool for analyzing project dependencies' health, security, and maintenance.",
-  "keywords": [
-    "dependencies", "security", "vulnerability", "cli", "maintenance", "npm", "audit", "health"
-  ],
-  "author": "Dieter Oberkofler <1009585+doberkofler@users.noreply.github.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/doberkofler/depvital.git"
-  },
-  "bugs": {
-    "url": "https://github.com/doberkofler/depvital/issues"
-  },
-  "homepage": "https://github.com/doberkofler/depvital#readme",
-  "engines": {
-    "node": ">=22"
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "CONTRIBUTING.md"
-  ]
-}
+??? HOW TO MAINTAIN THEM?
 
 ## Creating these templates standardizes how people interact with your project, ensuring you get all the information you need to fix bugs or review code without constant back-and-forth.
 I will create three specific files in your .github/ directory:

@@ -262,7 +262,14 @@ describe('generateProject', () => {
 		const projectName = 'test-update-project';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
-		await fs.writeFile(path.join(projectPath, 'package.json'), JSON.stringify({name: projectName, version: '1.0.0'}));
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				version: '1.0.0',
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -308,6 +315,13 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -329,6 +343,13 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -363,6 +384,13 @@ describe('generateProject', () => {
 		const projectName = 'test-git-exists';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(path.join(projectPath, '.git'), {recursive: true});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -407,6 +435,13 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'new'}],
 			templateDir: undefined,
 		} as any);
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -430,6 +465,13 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'same'}],
 			templateDir: undefined,
 		} as any);
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -515,6 +557,13 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -546,6 +595,13 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
@@ -673,6 +729,13 @@ describe('generateProject', () => {
 		// Create a file that should be deleted (e.g., vitest.config.ts for cli template)
 		await fs.writeFile(path.join(projectPath, 'vitest.config.ts'), 'content');
 
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli',
 			projectName,
@@ -701,6 +764,13 @@ describe('generateProject', () => {
 			templateDir: undefined,
 		} as any);
 
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli',
 			projectName,
@@ -733,6 +803,13 @@ describe('generateProject', () => {
 			templateDir: undefined,
 		} as any);
 
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 		const opts: any = {
 			template: 'cli',
 			projectName,
@@ -770,6 +847,13 @@ describe('generateProject', () => {
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'old content');
 
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'web-fullstack'},
+			}),
+		);
 		const opts: any = {
 			template: 'web-fullstack',
 			projectName,

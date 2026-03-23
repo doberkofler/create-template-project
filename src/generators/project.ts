@@ -151,6 +151,13 @@ export const generateProject = async (opts: ProjectOptions) => {
 	if (isUpdate && (await pathExists(pkgPath))) {
 		debug('Loading existing package.json for update');
 		const existingPkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+
+		if (!existingPkg['create-template-project']?.template) {
+			throw new Error(
+				`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`,
+			);
+		}
+
 		finalPkg = {...finalPkg, ...existingPkg}; // Keep existing name/version/type if they exist
 		finalPkg['create-template-project'] = {
 			...existingPkg['create-template-project'],

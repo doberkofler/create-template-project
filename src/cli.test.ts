@@ -111,7 +111,14 @@ describe('cli', () => {
 	it('should parse update command arguments', async () => {
 		const tempDir = path.resolve('./temp-update-test');
 		await fs.mkdir(tempDir, {recursive: true});
-		await fs.writeFile(path.join(tempDir, 'package.json'), JSON.stringify({name: 'temp-project', author: 'Old Author'}));
+		await fs.writeFile(
+			path.join(tempDir, 'package.json'),
+			JSON.stringify({
+				name: 'temp-project',
+				author: 'Old Author',
+				'create-template-project': {template: 'web-vanilla'},
+			}),
+		);
 
 		process.argv.push('update', '-t', 'web-vanilla', '-d', tempDir);
 		const result = await parseArgs();
@@ -162,6 +169,14 @@ describe('cli', () => {
 		const projectName = 'exists-test';
 		const projectDir = path.resolve('.', projectName);
 		await fs.mkdir(projectDir, {recursive: true});
+		await fs.writeFile(
+			path.join(projectDir, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				author: 'Test Author',
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 
 		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), Action (select), Template (select), Deps (confirm), CI (confirm), GH (confirm)
 		vi.mocked(p.text)
@@ -257,7 +272,7 @@ describe('cli', () => {
 		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 
-	it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])('should handle cancel at prompt stage %i', async (stage) => {
+	it.each([0, 1, 2, 3, 4, 5, 6, 7, 8])('should handle cancel at prompt stage %i', async (stage) => {
 		vi.resetAllMocks();
 		process.argv = [...originalArgv.slice(0, 2), 'interactive'];
 		const exitSpyLocal = vi.spyOn(process, 'exit').mockImplementation((code) => {
@@ -280,6 +295,14 @@ describe('cli', () => {
 
 		const projectDir = path.resolve('.', 'test');
 		await fs.mkdir(projectDir, {recursive: true});
+		await fs.writeFile(
+			path.join(projectDir, 'package.json'),
+			JSON.stringify({
+				name: 'test',
+				author: 'author',
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 
 		await expect(parseArgs()).rejects.toThrow('Process exited with code');
 		expect(p.cancel).toHaveBeenCalledWith('Operation cancelled.');
@@ -291,7 +314,14 @@ describe('cli', () => {
 	it('should handle update command with specific options', async () => {
 		const tempDir = path.resolve('./temp-update-opts-test');
 		await fs.mkdir(tempDir, {recursive: true});
-		await fs.writeFile(path.join(tempDir, 'package.json'), JSON.stringify({name: 'upd-test', author: 'Test Author'}));
+		await fs.writeFile(
+			path.join(tempDir, 'package.json'),
+			JSON.stringify({
+				name: 'upd-test',
+				author: 'Test Author',
+				'create-template-project': {template: 'web-app'},
+			}),
+		);
 
 		process.argv.push('update', '-t', 'web-app', '-d', tempDir, '--no-progress');
 		const result = await parseArgs();
@@ -308,13 +338,66 @@ describe('cli', () => {
 	it('should exit if update run in directory with package.json missing name', async () => {
 		const tempDir = path.resolve('./temp-no-name');
 		await fs.mkdir(tempDir, {recursive: true});
-		await fs.writeFile(path.join(tempDir, 'package.json'), JSON.stringify({version: '1.0.0', author: 'Test Author'}));
+		await fs.writeFile(
+			path.join(tempDir, 'package.json'),
+			JSON.stringify({
+				version: '1.0.0',
+				author: 'Test Author',
+				'create-template-project': {template: 'cli'},
+			}),
+		);
 
 		process.argv.push('update', '-t', 'cli', '-d', tempDir);
 		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('No name property found'));
 
 		await fs.rm(tempDir, {recursive: true, force: true});
+	});
+
+	it('should exit if update run in directory with package.json missing configuration', async () => {
+		const tempDir = path.resolve('./temp-no-config');
+		await fs.mkdir(tempDir, {recursive: true});
+		await fs.writeFile(
+			path.join(tempDir, 'package.json'),
+			JSON.stringify({
+				name: 'no-config',
+				version: '1.0.0',
+				author: 'Test Author',
+			}),
+		);
+
+		process.argv.push('update', '-t', 'cli', '-d', tempDir);
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
+		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('No "create-template-project" configuration found'));
+
+		await fs.rm(tempDir, {recursive: true, force: true});
+	});
+
+	it('should exit if interactive update selected for project without configuration', async () => {
+		process.argv.push('interactive');
+		const projectName = 'inter-no-config';
+		const projectDir = path.resolve('.', projectName);
+		await fs.mkdir(projectDir, {recursive: true});
+		await fs.writeFile(
+			path.join(projectDir, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				author: 'Test Author',
+			}),
+		);
+
+		vi.mocked(p.text)
+			.mockResolvedValueOnce(projectName)
+			.mockResolvedValueOnce('.')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('Test Author');
+		vi.mocked(p.select).mockResolvedValueOnce('update');
+
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
+		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('No "create-template-project" configuration found'));
+
+		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 
 	it('should validate project name in interactive mode', async () => {
@@ -349,7 +432,7 @@ describe('cli', () => {
 		expect(debugLib.enable).toHaveBeenCalledWith('create-template-project:*');
 	});
 
-	it('should handle error reading existing package.json in interactive mode', async () => {
+	it('should fail interactive update if package.json is invalid', async () => {
 		process.argv.push('interactive');
 		const projectName = 'pkg-error-test';
 		const projectDir = path.resolve('.', projectName);
@@ -362,12 +445,10 @@ describe('cli', () => {
 			.mockResolvedValueOnce('Test Description')
 			.mockResolvedValueOnce('test, keywords')
 			.mockResolvedValueOnce('Test Author');
-		vi.mocked(p.select).mockResolvedValueOnce('update').mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
-		vi.mocked(p.confirm).mockResolvedValue(true);
+		vi.mocked(p.select).mockResolvedValueOnce('update');
 
-		const result = await parseArgs();
-		expect(result.projectName).toBe(projectName);
-		expect(result.author).toBe('Test Author');
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
+		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('No "create-template-project" configuration found'));
 
 		await fs.rm(projectDir, {recursive: true, force: true});
 	});

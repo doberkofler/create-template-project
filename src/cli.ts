@@ -181,6 +181,11 @@ Restrictions & Behavior:
 				process.exit(1);
 			}
 
+			if (!pkg['create-template-project']?.template) {
+				p.log.error(`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`);
+				process.exit(1);
+			}
+
 			commandResult = {
 				...opts,
 				update: true,
@@ -298,6 +303,12 @@ Restrictions & Behavior:
 				}
 
 				if (action === 'update') {
+					if (!existingConfig.template) {
+						p.log.error(
+							`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`,
+						);
+						process.exit(1);
+					}
 					update = true;
 				}
 			}
