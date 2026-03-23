@@ -38,7 +38,7 @@
 		"integration-test:web-vanilla": "rimraf ./temp/web-vanilla && node dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-vanilla --name=web-vanilla --path=./temp/web-vanilla",
 		"integration-test:web-app": "rimraf ./temp/web-app && node dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-app --name=web-app --path=./temp/web-app",
 		"integration-test:web-fullstack": "rimraf ./temp/web-fullstack && node dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-fullstack --name=web-fullstack --path=./temp/web-fullstack",
-		"integration-test:all": "pnpm run test:integration:cli && pnpm run test:integration:web-vanilla && pnpm run test:integration:web-app && pnpm run test:integration:web-fullstack",
+		"integration-test:all": "pnpm run integration-test:cli && pnpm run integration-test:web-vanilla && pnpm run integration-test:web-app && pnpm run integration-test:web-fullstack",
 		"ci": "pnpm run lint && pnpm run build && pnpm run test",
 		"create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
 		"prepare": "husky"

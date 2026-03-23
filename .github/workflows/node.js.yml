@@ -48,5 +48,6 @@ jobs:
       - name: Unit tests
         run: pnpm run test
 
+      # custom steps
       - name: Integration tests
         run: pnpm run integration-test:all
