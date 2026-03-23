@@ -1,3 +1,32 @@
+# [0.5.0](https://github.com/doberkofler/create-template-project/compare/v0.4.0...v0.5.0) (2026-03-23)
+
+
+### Bug Fixes
+
+* coverage badge ([bdaee82](https://github.com/doberkofler/create-template-project/commit/bdaee824516b355dbb29bf2fcdea4c7823b15eda))
+* fixed integration test ([a89d461](https://github.com/doberkofler/create-template-project/commit/a89d461933111279a4c3d4fe0db4058e9f804430))
+* github username handling ([4bb27bc](https://github.com/doberkofler/create-template-project/commit/4bb27bc35d8f81e0860e3c672a41c7d1907bb3e2))
+* the .gitignore package is properly documented and adapted to the package manager ([a880c87](https://github.com/doberkofler/create-template-project/commit/a880c87e975ff13c2e2cba802e9269ad9064585b))
+* update used wrong git merge-file ([85105e1](https://github.com/doberkofler/create-template-project/commit/85105e1ec4f504c9074b46e240dba132aceb3732))
+
+
+### Features
+
+* --name argument no longer has a default and is no longer appended to --path on create ([54a486b](https://github.com/doberkofler/create-template-project/commit/54a486b687e29c20fbd79f19055e173343b1d41f))
+* add --author argument and generate a LICENSE file ([7442aa7](https://github.com/doberkofler/create-template-project/commit/7442aa73dad79c74aeb9f285bc70b4f9d42e6536))
+* add badges to README.md ([58f94b7](https://github.com/doberkofler/create-template-project/commit/58f94b75a96ac23a00cf8875ad5ec133c717fedd))
+* add GENERATED.md file ([952690e](https://github.com/doberkofler/create-template-project/commit/952690e99a9b7be5e7723afa75e1e394b2d45ece))
+* add GitHub template ([47e3b24](https://github.com/doberkofler/create-template-project/commit/47e3b24b03cca6319109401ae8b98c5561056505))
+* add GitHub template ([a600a82](https://github.com/doberkofler/create-template-project/commit/a600a82ef9a5f5b6c8e94e0789be086508907dbd))
+* add optional --description and --keywords arguments ([2a158f4](https://github.com/doberkofler/create-template-project/commit/2a158f40c471453dc4a104de45185a0b65ae9d65))
+* improved validations when making update ([1f86bd8](https://github.com/doberkofler/create-template-project/commit/1f86bd8dde81ead5e62e1437756f900a5add1135))
+* migrated from prettier to oxfmt ([0f51254](https://github.com/doberkofler/create-template-project/commit/0f5125495613f72086de676e90e69b1b316ea0ba))
+* remove the options --overwrite, --dev and --open ([91a85d7](https://github.com/doberkofler/create-template-project/commit/91a85d7fd8d835407d9e6a11065c0107b16f421a))
+* update command no longer has a name argument ([d1d23bf](https://github.com/doberkofler/create-template-project/commit/d1d23bfe1774e4b0f6a7168304237102edf0263c))
+* update command no longer has a name argument ([d6e42b9](https://github.com/doberkofler/create-template-project/commit/d6e42b97f9136815888f7613f13c8eb794462e99))
+* update command should never modify *.md files ([288274c](https://github.com/doberkofler/create-template-project/commit/288274cd3603ece43a5f06f8f9f11cbbf64eb8a3))
+* use pnpm as default package manager ([462a239](https://github.com/doberkofler/create-template-project/commit/462a239b0f4de73aa483f0b167db7a9c3f4faf0f))
+
 # [0.4.0](https://github.com/doberkofler/create-template-project/compare/v0.3.0...v0.4.0) (2026-03-22)
 
 
