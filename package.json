@@ -30,7 +30,7 @@
 		"build": "vite build && node scripts/copy-templates.ts",
 		"dependencies-check": "node scripts/dependencies.ts",
 		"dependencies-update": "node scripts/dependencies.ts --update",
-		"lint": "tsc && oxlint --ignore-pattern \"src/templates/**/files\" && pnpm run prettier",
+		"lint": "tsc && oxlint --disable-nested-config src scripts *.config.ts && pnpm run prettier",
 		"prettier": "prettier --check .",
 		"prettier-write": "prettier --write .",
 		"test": "vitest run --coverage --exclude '**/*.integration.*.test.ts'",

@@ -54,5 +54,5 @@ export default defineConfig({
 		builtin: true,
 	},
 	globals: {},
-	ignorePatterns: ['**/.*', 'node_modules/**', 'dist/**', 'coverage/**', 'public/**'],
+	ignorePatterns: ['**/.*', 'node_modules/**', 'dist/**', 'coverage/**', 'public/**', 'temp/**', 'src/templates/**/files/**'],
 });

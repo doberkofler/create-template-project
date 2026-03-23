@@ -50,7 +50,13 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 	}
 
 	const pm = opts.packageManager || 'npm';
-	let processed = content.replaceAll('{{projectName}}', projectName).replaceAll('{{description}}', description).replaceAll('{{packageManager}}', pm);
+	const lockfileRules = pm === 'pnpm' ? 'package-lock.json\nyarn.lock' : pm === 'yarn' ? 'package-lock.json\npnpm-lock.yaml' : 'yarn.lock\npnpm-lock.yaml';
+
+	let processed = content
+		.replaceAll('{{projectName}}', projectName)
+		.replaceAll('{{description}}', description)
+		.replaceAll('{{packageManager}}', pm)
+		.replaceAll('{{lockfileRules}}', lockfileRules);
 
 	// Special logic for GitHub Actions workflow
 	if (filePath.includes('.github/workflows/node.js.yml')) {
