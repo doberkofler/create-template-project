@@ -50,7 +50,7 @@ const isFileRequired = (relativePath: string, type: string) => {
 };
 
 export const generateProject = async (opts: ProjectOptions) => {
-	const {template: type, projectName, author, directory, update, progress} = opts;
+	const {template: type, projectName, author, githubUsername, directory, update, progress} = opts;
 	const isProgress = progress !== false;
 	const log = getLog(isProgress);
 	const spinner = () => getSpinner(isProgress);
@@ -117,15 +117,15 @@ export const generateProject = async (opts: ProjectOptions) => {
 		version: '0.1.0',
 		description: opts.description || 'TODO: Add project description',
 		keywords: opts.keywords ? opts.keywords.split(',').map((k) => k.trim()) : ['TODO: Add keywords'],
-		homepage: `https://github.com/${author}/${projectName}#readme`,
+		homepage: `https://github.com/${githubUsername}/${projectName}#readme`,
 		bugs: {
-			url: `https://github.com/${author}/${projectName}/issues`,
+			url: `https://github.com/${githubUsername}/${projectName}/issues`,
 		},
 		license: 'MIT',
 		author: author || '',
 		repository: {
 			type: 'git',
-			url: `https://github.com/${author}/${projectName}.git`,
+			url: `https://github.com/${githubUsername}/${projectName}.git`,
 		},
 		type: 'module',
 		'create-template-project': {

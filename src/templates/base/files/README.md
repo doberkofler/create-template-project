@@ -4,9 +4,8 @@
 
 [![npm version](https://img.shields.io/npm/v/{{projectName}}.svg)](https://www.npmjs.com/package/{{projectName}})
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/doberkofler/{{projectName}}/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/{{projectName}}/actions/workflows/node.js.yml)
-[![Coverage Status](https://coveralls.io/repos/github/doberkofler/{{projectName}}/badge.svg?branch=main)](https://coveralls.io/github/doberkofler/{{projectName}}?branch=main)
-
+[![Node.js CI](https://github.com/{{githubUsername}}/{{projectName}}/actions/workflows/node.js.yml/badge.svg)](https://github.com/{{githubUsername}}/{{projectName}}/actions/workflows/node.js.yml)
+[![Coverage Status](https://coveralls.io/repos/github/{{githubUsername}}/{{projectName}}/badge.svg?branch=main)](https://coveralls.io/github/{{githubUsername}}/{{projectName}}?branch=main)
 
 ## Development Workflow
 

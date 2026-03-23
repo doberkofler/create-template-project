@@ -22,9 +22,9 @@ pnpm dlx create-template-project interactive
 
 - **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `oxfmt`, and `typescript` (strict mode).
 - **Interactive CLI:** Prompts you for project details if CLI arguments are missing, using `@clack/prompts`.
-- **🔄 Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`. 
-    - Files in `src/` and all `*.md` files are skipped to protect your application logic and documentation.
-    - Ideal for keeping your project's boilerplate (linting, CI, configs) up-to-date.
+- **🔄 Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`.
+  - Files in `src/` and all `*.md` files are skipped to protect your application logic and documentation.
+  - Ideal for keeping your project's boilerplate (linting, CI, configs) up-to-date.
 - **No-Build Option:** Supports creating simple projects without a build step (strips Vite).
 - **GitHub Integration:** Automatically initializes a Git repository and can create a GitHub repository using the `gh` CLI.
 - **CI Ready:** Generates GitHub Actions workflows for automated testing and linting.
@@ -75,6 +75,7 @@ create-template-project update --template cli
 
 #### Global Options:
 
+- `--debug`: Enable debug output
 - `-h, --help`: Show help
 - `-V, --version`: Show version
 
@@ -82,31 +83,51 @@ create-template-project update --template cli
 
 - `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
 - `-n, --name <name>`: Project name
+- `--description <description>`: Project description
+- `-k, --keywords <keywords>`: Project keywords (comma separated)
+- `-a, --author <author>`: Author name (defaults to 'git config user.name')
+- `--github-username <username>`: GitHub username (defaults to 'git config github.user')
+- `-p, --package-manager <pm>`: Package manager (`npm`, `pnpm`, `yarn`) (defaults to `pnpm`)
+- `--create-github-repository`: Create GitHub project (requires `gh` CLI authenticated)
 - `--path <path>`: Output directory (mandatory)
-- `--github`: Create GitHub project (requires `gh` CLI authenticated)
+- `--install-dependencies`: Install dependencies after scaffolding
+- `--build`: Run the CI script (lint, build, test) after scaffolding
 - `--no-progress`: Do not show progress indicators
 
 #### Command Options (update):
 
 - `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
+- `--description <description>`: Project description
+- `-k, --keywords <keywords>`: Project keywords (comma separated)
+- `-a, --author <author>`: Author name (defaults to 'git config user.name')
+- `--github-username <username>`: GitHub username (defaults to 'git config github.user')
+- `-p, --package-manager <pm>`: Package manager (`npm`, `pnpm`, `yarn`) (defaults to `pnpm`)
+- `--create-github-repository`: Create GitHub project (requires `gh` CLI authenticated)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
-- `--github`: Create GitHub project (requires `gh` CLI authenticated)
+- `--install-dependencies`: Install dependencies after updating
+- `--build`: Run the CI script (lint, build, test) after updating
+- `--dev`: Run the dev server after updating
+- `--open`: Open the browser after updating
 - `--no-progress`: Do not show progress indicators
-
 
 ## Project Templates
 
 ### 🟢 CLI
+
 A clean Node.js CLI environment featuring `commander` and `cli-progress`. Supports optional Vite bundling.
 
 ### 🔵 Web-Vanilla
+
 Standalone web page setup for modern browsers. Can be used with or without a build step.
 
 ### 🟡 Web-App
+
 Modern React application featuring MUI components and TanStack Query for state management.
 
 ### ⚛️ Web-Fullstack
+
 A full-stack monorepo featuring:
+
 - **Client**: React with MUI (including Icons) and TypeScript.
 - **Server**: Express.js backend with tRPC for end-to-end type safety.
 - **E2E**: Playwright for end-to-end testing.

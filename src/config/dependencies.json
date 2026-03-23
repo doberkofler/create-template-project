@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.0.1",
+			"version": "8.0.2",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -9,11 +9,11 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "4.1.0",
+			"version": "4.1.1",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "4.1.0",
+			"version": "4.1.1",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
@@ -41,7 +41,7 @@
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "4.1.0",
+			"version": "4.1.1",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -69,7 +69,7 @@
 			"description": "A superset of JavaScript that compiles to clean JavaScript output."
 		},
 		"vitest": {
-			"version": "4.1.0",
+			"version": "4.1.1",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
@@ -129,19 +129,19 @@
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
-			"version": "11.14.1",
+			"version": "11.15.0",
 			"description": "tRPC server library."
 		},
 		"@trpc/client": {
-			"version": "11.14.1",
+			"version": "11.15.0",
 			"description": "tRPC client library."
 		},
 		"@trpc/react-query": {
-			"version": "11.14.1",
+			"version": "11.15.0",
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.94.5",
+			"version": "5.95.2",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
@@ -149,7 +149,7 @@
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
-			"version": "7.13.1",
+			"version": "7.13.2",
 			"description": "Declarative routing for React web applications."
 		},
 		"cors": {

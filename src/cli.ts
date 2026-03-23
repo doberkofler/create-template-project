@@ -22,6 +22,15 @@ const getDefaultAuthor = async () => {
 	}
 };
 
+const getDefaultGithubUsername = async () => {
+	try {
+		const {stdout} = await execa('git', ['config', 'github.user']);
+		return stdout.trim();
+	} catch (e) {
+		return '';
+	}
+};
+
 const debug = debugLib('create-template-project:cli');
 
 export const parseArgs = async (): Promise<ProjectOptions> => {
@@ -103,7 +112,8 @@ Templates:
 		.option('-n, --name <name>', 'Project name')
 		.option('--description <description>', 'Project description')
 		.option('-k, --keywords <keywords>', 'Project keywords (comma separated)')
-		.option('-a, --author <author>', 'Author name')
+		.option('-a, --author <author>', "Author name (defaults to 'git config user.name')")
+		.option('--github-username <username>', "GitHub username (defaults to 'git config github.user')")
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.requiredOption('--path <path>', 'Output directory')
@@ -120,6 +130,7 @@ Templates:
 				description: opts.description,
 				keywords: opts.keywords,
 				author: opts.author || (await getDefaultAuthor()),
+				githubUsername: opts.githubUsername || (await getDefaultGithubUsername()),
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: path.resolve(opts.path),
 				createGithubRepository: !!opts.createGithubRepository,
@@ -148,7 +159,8 @@ Restrictions & Behavior:
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('--description <description>', 'Project description')
 		.option('-k, --keywords <keywords>', 'Project keywords (comma separated)')
-		.option('-a, --author <author>', 'Author name')
+		.option('-a, --author <author>', "Author name (defaults to 'git config user.name')")
+		.option('--github-username <username>', "GitHub username (defaults to 'git config github.user')")
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
@@ -194,6 +206,7 @@ Restrictions & Behavior:
 				description: opts.description || pkg.description,
 				keywords: opts.keywords || (pkg.keywords ? pkg.keywords.join(', ') : undefined),
 				author: opts.author || pkg.author || (await getDefaultAuthor()),
+				githubUsername: opts.githubUsername || pkg['create-template-project']?.githubUsername || (await getDefaultGithubUsername()),
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: directory,
 				createGithubRepository: !!opts.createGithubRepository,
@@ -237,6 +250,7 @@ Restrictions & Behavior:
 
 			let existingConfig: any = {};
 			let existingAuthor = '';
+			let existingGithubUsername = '';
 			let existingDescription = '';
 			let existingKeywords = [];
 			if (pkgExists) {
@@ -244,6 +258,7 @@ Restrictions & Behavior:
 					const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
 					existingConfig = pkg['create-template-project'] || {};
 					existingAuthor = pkg.author;
+					existingGithubUsername = existingConfig.githubUsername;
 					existingDescription = pkg.description;
 					existingKeywords = pkg.keywords || [];
 					debug('Found existing project config: %O', existingConfig);
@@ -283,6 +298,19 @@ Restrictions & Behavior:
 			});
 
 			if (p.isCancel(author)) {
+				p.cancel('Operation cancelled.');
+				process.exit(0);
+			}
+
+			const defaultGithubUsername = await getDefaultGithubUsername();
+			const githubUsername = await p.text({
+				message: 'GitHub username:',
+				placeholder: 'your-github-username',
+				defaultValue: existingGithubUsername || defaultGithubUsername,
+				validate: (value) => (value && value.length > 0 ? undefined : 'GitHub username is required'),
+			});
+
+			if (p.isCancel(githubUsername)) {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -397,6 +425,7 @@ Restrictions & Behavior:
 				description: projectDescription as string,
 				keywords: projectKeywords as string,
 				author: author as string,
+				githubUsername: githubUsername as string,
 				packageManager: packageManager as ProjectOptions['packageManager'],
 				createGithubRepository,
 				directory: projectDir,

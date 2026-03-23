@@ -9,6 +9,7 @@ const MOCK_OPTS: ProjectOptions = {
 	template: 'cli',
 	projectName: 'mock',
 	author: 'mock',
+	githubUsername: 'mock',
 	directory: '.',
 	packageManager: 'npm',
 	update: false,

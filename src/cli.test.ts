@@ -132,13 +132,14 @@ describe('cli', () => {
 
 	it('should handle interactive mode', async () => {
 		process.argv.push('interactive');
-		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), Template (select), PM (select), Deps (confirm), CI (confirm), GH (confirm)
+		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), GithubUsername (text), Template (select), PM (select), Deps (confirm), CI (confirm), GH (confirm)
 		vi.mocked(p.text)
 			.mockResolvedValueOnce('my-web-fullstack-app')
 			.mockResolvedValueOnce('./out')
 			.mockResolvedValueOnce('A cool fullstack app')
 			.mockResolvedValueOnce('fullstack, react, express')
-			.mockResolvedValueOnce('Test Author');
+			.mockResolvedValueOnce('Test Author')
+			.mockResolvedValueOnce('test-github-user');
 		vi.mocked(p.select).mockResolvedValueOnce('web-fullstack').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
 		const result = await parseArgs();
@@ -178,13 +179,14 @@ describe('cli', () => {
 			}),
 		);
 
-		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), Action (select), Template (select), Deps (confirm), CI (confirm), GH (confirm)
+		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), GithubUsername (text), Action (select), Template (select), Deps (confirm), CI (confirm), GH (confirm)
 		vi.mocked(p.text)
 			.mockResolvedValueOnce(projectName)
 			.mockResolvedValueOnce('.')
 			.mockResolvedValueOnce('')
 			.mockResolvedValueOnce('')
-			.mockResolvedValueOnce('Test Author');
+			.mockResolvedValueOnce('Test Author')
+			.mockResolvedValueOnce('test-github-user');
 		vi.mocked(p.select).mockResolvedValueOnce('update').mockResolvedValueOnce('cli');
 		vi.mocked(p.confirm).mockResolvedValue(false);
 
@@ -201,7 +203,8 @@ describe('cli', () => {
 			.mockResolvedValueOnce('.')
 			.mockResolvedValueOnce('')
 			.mockResolvedValueOnce('')
-			.mockResolvedValueOnce('Test Author');
+			.mockResolvedValueOnce('Test Author')
+			.mockResolvedValueOnce('test-github-user');
 		vi.mocked(p.select).mockResolvedValueOnce('web-app').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(false);
 		const result = await parseArgs();
@@ -216,7 +219,8 @@ describe('cli', () => {
 			.mockResolvedValueOnce('.')
 			.mockResolvedValueOnce('')
 			.mockResolvedValueOnce('')
-			.mockResolvedValueOnce('Test Author');
+			.mockResolvedValueOnce('Test Author')
+			.mockResolvedValueOnce('test-github-user');
 		vi.mocked(p.select).mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
 		const result = await parseArgs();
@@ -250,7 +254,8 @@ describe('cli', () => {
 			.mockResolvedValueOnce('.')
 			.mockResolvedValueOnce('Test Description')
 			.mockResolvedValueOnce('test, keywords')
-			.mockResolvedValueOnce('Test Author');
+			.mockResolvedValueOnce('Test Author')
+			.mockResolvedValueOnce('test-github-user');
 		vi.mocked(p.select).mockResolvedValueOnce('update');
 		// Should NOT prompt for template because it's found in package.json
 		vi.mocked(p.confirm).mockResolvedValue(true);
@@ -389,9 +394,10 @@ describe('cli', () => {
 		vi.mocked(p.text)
 			.mockResolvedValueOnce(projectName)
 			.mockResolvedValueOnce('.')
-			.mockResolvedValueOnce('')
-			.mockResolvedValueOnce('')
-			.mockResolvedValueOnce('Test Author');
+			.mockResolvedValueOnce('Test Description')
+			.mockResolvedValueOnce('test, keywords')
+			.mockResolvedValueOnce('Test Author')
+			.mockResolvedValueOnce('test-github-user');
 		vi.mocked(p.select).mockResolvedValueOnce('update');
 
 		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');

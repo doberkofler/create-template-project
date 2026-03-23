@@ -54,10 +54,10 @@
     "format": "oxfmt --write src scripts *.config.ts",
     "format:check": "oxfmt --check src scripts *.config.ts",
     "test": "vitest run --coverage --exclude '**/*.integration.*.test.ts'",
-    "integration-test:cli": "rimraf ./temp/cli && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=cli --name=cli --author=\"Jon Doe\" --path=./temp/cli",
-    "integration-test:web-vanilla": "rimraf ./temp/web-vanilla && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-vanilla --name=web-vanilla --author=\"Jon Doe\" --path=./temp/web-vanilla",
-    "integration-test:web-app": "rimraf ./temp/web-app && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-app --name=web-app --author=\"Jon Doe\" --path=./temp/web-app",
-    "integration-test:web-fullstack": "rimraf ./temp/web-fullstack && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-fullstack --name=web-fullstack --author=\"Jon Doe\" --path=./temp/web-fullstack",
+    "integration-test:cli": "rimraf ./temp/cli && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=cli --name=cli --author=\"Jon Doe\" --github-username=\"jon-doe\" --path=./temp/cli",
+    "integration-test:web-vanilla": "rimraf ./temp/web-vanilla && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-vanilla --name=web-vanilla --author=\"Jon Doe\" --github-username=\"jon-doe\" --path=./temp/web-vanilla",
+    "integration-test:web-app": "rimraf ./temp/web-app && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-app --name=web-app --author=\"Jon Doe\" --github-username=\"jon-doe\" --path=./temp/web-app",
+    "integration-test:web-fullstack": "rimraf ./temp/web-fullstack && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-fullstack --name=web-fullstack --author=\"Jon Doe\" --github-username=\"jon-doe\" --path=./temp/web-fullstack",
     "integration-test:all": "pnpm run integration-test:cli && pnpm run integration-test:web-vanilla && pnpm run integration-test:web-app && pnpm run integration-test:web-fullstack",
     "ci": "pnpm run lint && pnpm run build && pnpm run test",
     "create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
@@ -75,7 +75,7 @@
     "@commitlint/config-conventional": "20.5.0",
     "@types/cli-progress": "3.11.6",
     "@types/debug": "4.1.13",
-    "@vitest/coverage-v8": "4.1.0",
+    "@vitest/coverage-v8": "4.1.1",
     "conventional-changelog": "7.2.0",
     "conventional-changelog-angular": "8.3.0",
     "eslint-plugin-regexp": "3.1.0",
@@ -86,8 +86,8 @@
     "pnpm": "10.32.1",
     "rimraf": "6.1.3",
     "typescript": "5.9.3",
-    "vite": "8.0.1",
-    "vitest": "4.1.0"
+    "vite": "8.0.2",
+    "vitest": "4.1.1"
   },
   "engines": {
     "node": ">=22"

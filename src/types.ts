@@ -12,6 +12,7 @@ export const ProjectOptionsSchema = z.object({
 	description: z.string().optional(),
 	keywords: z.string().optional(),
 	author: z.string().min(1, 'Author name is required'),
+	githubUsername: z.string().min(1, 'GitHub username is required'),
 	packageManager: PackageManagerSchema.optional().default('npm'),
 	createGithubRepository: z.boolean().optional().default(false),
 	directory: z.string(),

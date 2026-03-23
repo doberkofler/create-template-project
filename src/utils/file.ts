@@ -31,7 +31,7 @@ export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) 
 }
 
 export function processContent(filePath: string, content: string, opts: ProjectOptions, addedDeps: Array<{name: string; description: string}>): string {
-	const {projectName, template, author} = opts;
+	const {projectName, template, author, githubUsername} = opts;
 	let description = opts.description || '';
 
 	if (!description) {
@@ -59,6 +59,7 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		.replaceAll('{{description}}', description)
 		.replaceAll('{{packageManager}}', pm)
 		.replaceAll('{{author}}', author || '')
+		.replaceAll('{{githubUsername}}', githubUsername || '')
 		.replaceAll('{{year}}', new Date().getFullYear().toString())
 		.replaceAll('{{lockfileRules}}', lockfileRules);
 
