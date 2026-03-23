@@ -15,8 +15,10 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
-          cache: '{{packageManager}}'
-      - run: '{{installCommand}}'
+          node-version: "22.x"
+          cache: "{{packageManager}}"
+      - run: "{{installCommand}}"
       # [PLAYWRIGHT_SETUP]
-      - run: '{{packageManager}} run ci'
+      - run: "{{packageManager}} run ci"
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2

@@ -2,9 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
   pull_request:
-    branches: ['main']
+    branches: ["main"]
 
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Verify pnpm
         run: pnpm --version
@@ -47,6 +47,9 @@ jobs:
 
       - name: Unit tests
         run: pnpm run test
+
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2
 
       # custom steps
       - name: Integration tests
