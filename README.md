@@ -2,16 +2,29 @@
 
 [![NPM Version](https://img.shields.io/npm/v/create-template-project.svg)](https://www.npmjs.com/package/create-template-project)
 [![NPM Downloads](https://img.shields.io/npm/dm/create-template-project.svg)](https://www.npmjs.com/package/create-template-project)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml)
 [![Coverage Status](https://coveralls.io/repos/github/doberkofler/create-template-project/badge.svg?branch=master)](https://coveralls.io/github/doberkofler/create-template-project?branch=master)
 
 An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-App, Web-Fullstack) with best-practice configurations pre-installed.
 
-## Features
+## 🚀 Quick Start
+
+Run directly without installation:
+
+```bash
+npx create-template-project interactive
+# or
+pnpm dlx create-template-project interactive
+```
+
+## ✨ Features
 
 - **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `prettier`, and `typescript` (strict mode).
 - **Interactive CLI:** Prompts you for project details if CLI arguments are missing, using `@clack/prompts`.
-- **Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`. Files in `src/` and all `*.md` files are skipped to protect your application logic and documentation.
+- **🔄 Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`. 
+    - Files in `src/` and all `*.md` files are skipped to protect your application logic and documentation.
+    - Ideal for keeping your project's boilerplate (linting, CI, configs) up-to-date.
 - **No-Build Option:** Supports creating simple projects without a build step (strips Vite).
 - **GitHub Integration:** Automatically initializes a Git repository and can create a GitHub repository using the `gh` CLI.
 - **CI Ready:** Generates GitHub Actions workflows for automated testing and linting.
