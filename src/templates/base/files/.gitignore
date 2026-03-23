@@ -80,7 +80,7 @@ coverage/
 # ---------------------------
 .cache/
 .eslintcache
-.prettiercache
+.oxc_cache
 
 # ---------------------------
 # Misc

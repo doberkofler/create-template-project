@@ -2,37 +2,52 @@
 	"name": "create-template-project",
 	"version": "0.4.0",
 	"description": "An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-App, Web-Fullstack) with best-practice configurations pre-installed.",
-	"type": "module",
+	"keywords": [
+		"boilerplate",
+		"cli",
+		"express",
+		"generator",
+		"monorepo",
+		"react",
+		"scaffold",
+		"scaffolding",
+		"template",
+		"trpc",
+		"typescript",
+		"vite"
+	],
+	"homepage": "https://github.com/doberkofler/create-template-project#readme",
+	"bugs": {
+		"url": "https://github.com/doberkofler/create-template-project/issues"
+	},
 	"license": "MIT",
 	"author": "Dieter Oberkofler",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/doberkofler/create-template-project.git"
+	},
+	"bin": {
+		"create-template-project": "./dist/index.js"
+	},
 	"files": [
 		"dist"
 	],
-	"keywords": [
-		"scaffold",
-		"scaffolding",
-		"generator",
-		"boilerplate",
-		"template",
-		"cli",
-		"typescript",
-		"react",
-		"monorepo",
-		"trpc",
-		"express",
-		"vite"
-	],
-	"bin": {
-		"create-template-project": "./dist/index.js"
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": "./dist/index.js",
+		"./package.json": "./package.json"
 	},
 	"scripts": {
 		"run-interactive": "node dist/index.js interactive",
 		"build": "vite build && node scripts/copy-templates.ts",
 		"dependencies-check": "node scripts/dependencies.ts",
 		"dependencies-update": "node scripts/dependencies.ts --update",
-		"lint": "tsc && oxlint --disable-nested-config src scripts *.config.ts && pnpm run prettier",
-		"prettier": "prettier --check .",
-		"prettier-write": "prettier --write .",
+		"lint": "tsc && oxlint --disable-nested-config src scripts *.config.ts && pnpm run format:check",
+		"format": "oxfmt --write .",
+		"format:check": "oxfmt --check .",
 		"test": "vitest run --coverage --exclude '**/*.integration.*.test.ts'",
 		"integration-test:cli": "rimraf ./temp/cli && node dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=cli --name=cli --path=./temp/cli",
 		"integration-test:web-vanilla": "rimraf ./temp/web-vanilla && node dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=web-vanilla --name=web-vanilla --path=./temp/web-vanilla",
@@ -43,23 +58,12 @@
 		"create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
 		"prepare": "husky"
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": "./dist/index.js",
-		"./package.json": "./package.json"
-	},
-	"engines": {
-		"node": ">=22"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/doberkofler/create-template-project.git"
-	},
-	"homepage": "https://github.com/doberkofler/create-template-project#readme",
-	"bugs": {
-		"url": "https://github.com/doberkofler/create-template-project/issues"
+	"dependencies": {
+		"@clack/prompts": "1.1.0",
+		"commander": "14.0.3",
+		"debug": "4.4.3",
+		"execa": "9.6.1",
+		"zod": "4.3.6"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "20.5.0",
@@ -71,20 +75,16 @@
 		"conventional-changelog-angular": "8.3.0",
 		"eslint-plugin-regexp": "3.1.0",
 		"husky": "9.1.7",
+		"oxfmt": "0.41.0",
 		"oxlint": "1.56.0",
 		"oxlint-tsgolint": "0.17.1",
 		"pnpm": "10.32.1",
-		"prettier": "3.8.1",
 		"rimraf": "6.1.3",
 		"typescript": "5.9.3",
 		"vite": "8.0.1",
 		"vitest": "4.1.0"
 	},
-	"dependencies": {
-		"@clack/prompts": "1.1.0",
-		"commander": "14.0.3",
-		"debug": "4.4.3",
-		"execa": "9.6.1",
-		"zod": "4.3.6"
+	"engines": {
+		"node": ">=22"
 	}
 }

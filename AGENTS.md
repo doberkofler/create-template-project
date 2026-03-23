@@ -10,7 +10,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 ### Core Commands
 - **Install dependencies:** `pnpm install`
 - **Build project:** `pnpm run build` (uses `vite` and copies templates)
-- **Lint code:** `pnpm run lint` (runs `tsc`, `oxlint`, and `prettier`)
+- **Lint code:** `pnpm run lint` (runs `tsc`, `oxlint`, and `oxfmt`)
 - **Run all tests:** `pnpm run test` (uses `vitest` with coverage)
 - **Run CI suite:** `pnpm run ci` (lint + build + test)
 - **Run integration tests:** `pnpm run test:integration` (builds and scaffolds all templates)
@@ -36,7 +36,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 - **Built-ins:** Use the `node:` prefix for built-in modules (e.g., `import path from 'node:path';`).
 
 ### Formatting
-- **Tooling:** Prettier is enforced via `pnpm run lint`.
+- **Tooling:** oxfmt is enforced via `pnpm run lint`.
 - **Indentation:** Tabs are used for indentation.
 - **Quotes:** Single quotes for strings, except when double quotes prevent escaping.
 
@@ -73,7 +73,7 @@ Every generated project MUST include:
 - `conventional-changelog`: For automated release notes.
 - `husky`: For git hooks (pre-commit linting).
 - `oxlint` & `oxlint-tsgolint`: For ultra-fast linting.
-- `prettier`: For consistent formatting.
+- `oxfmt`: For consistent formatting.
 - `typescript`: Strict mode configuration.
 - `AGENTS.md` & `README.md`: With appropriate badges and instructions.
 - `CONTRIBUTING.md`: Basic contribution guidelines.

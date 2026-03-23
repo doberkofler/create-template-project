@@ -6,3 +6,4 @@ Build/Lint/Test:
 - `pnpm run test`: Runs unit tests (browser-based for web projects).
 - `pnpm run test:e2e`: Runs Playwright E2E tests.
 - `pnpm exec vitest <file>`: Runs a specific test file.
+- `pnpm run lint`: Lints and formats the codebase (oxlint + oxfmt).

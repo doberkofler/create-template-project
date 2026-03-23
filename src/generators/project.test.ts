@@ -56,7 +56,9 @@ describe('generateProject', () => {
 
 	beforeEach(async () => {
 		vi.clearAllMocks();
-		const actual = (await vi.importActual('../templates/base/index.js')) as {getBaseTemplate: any};
+		const actual = (await vi.importActual('../templates/base/index.js')) as {
+			getBaseTemplate: any;
+		};
 		vi.mocked(getBaseTemplate).mockImplementation(actual.getBaseTemplate);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string) => {
 			if (cmd === 'npm' || cmd === 'pnpm' || cmd === 'yarn' || cmd === 'git' || cmd === 'gh') {
@@ -91,8 +93,8 @@ describe('generateProject', () => {
 		const indexContent = await fs.readFile(path.join(projectPath, 'src/index.ts'), 'utf8');
 		expect(indexContent).toContain('#!/usr/bin/env node');
 
-		// Verify .prettierignore exists
-		expect(await pathExists(path.join(projectPath, '.prettierignore'))).toBe(true);
+		// Verify oxc.config.ts exists
+		expect(await pathExists(path.join(projectPath, 'oxc.config.ts'))).toBe(true);
 
 		// Verify README.md contains project name
 		const readme = await fs.readFile(path.join(projectPath, 'README.md'), 'utf8');
@@ -206,7 +208,12 @@ describe('generateProject', () => {
 			files: [],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: false,
+		};
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Dependency "missing-dep" not found'));
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
@@ -369,7 +376,12 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'hello'}],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: false,
+		};
 		await generateProject(opts);
 		expect(await fs.readFile(path.join(projectPath, 'p.txt'), 'utf8')).toBe('hello');
 	});
@@ -387,7 +399,12 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'new'}],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: true,
+		};
 		await generateProject(opts);
 		expect(execa).toHaveBeenCalledWith('git', ['merge-file', path.join(projectPath, 'p.txt'), expect.anything(), expect.anything()], expect.anything());
 	});
@@ -405,7 +422,12 @@ describe('generateProject', () => {
 			files: [{path: 'p.txt', content: 'same'}],
 			templateDir: undefined,
 		} as any);
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: true,
+		};
 		await generateProject(opts);
 		expect(execa).not.toHaveBeenCalledWith('git', ['merge-file', expect.anything(), expect.anything(), expect.anything()]);
 	});
@@ -419,17 +441,23 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false, installDependencies: true};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: false,
+			installDependencies: true,
+		};
 		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
 	});
 
-	it('should handle prettier-write failure', async () => {
-		const projectName = 'test-prettier-fail';
+	it('should handle format failure', async () => {
+		const projectName = 'test-format-fail';
 		const projectPath = path.join(tmpDir, projectName);
 		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'prettier-write') {
-				throw new Error('prettier fail');
+			if (cmd === 'npm' && args?.[1] === 'format') {
+				throw new Error('format fail');
 			}
 			return {stdout: '', stderr: ''};
 		});
@@ -440,13 +468,13 @@ describe('generateProject', () => {
 			update: false,
 			build: true,
 		};
-		// We need to make sure prettier-write script exists in the package
+		// We need to make sure format script exists in the package
 		vi.mocked(getBaseTemplate).mockReturnValue({
 			name: 'base',
 			dependencies: {},
 			devDependencies: {},
 			scripts: {
-				'prettier-write': 'prettier --write .',
+				format: 'oxfmt --write .',
 				ci: 'npm run lint && npm run test',
 			},
 			files: [],
@@ -479,7 +507,12 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: true,
+		};
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Conflict: p.txt'));
 	});
@@ -505,7 +538,12 @@ describe('generateProject', () => {
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: true};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: true,
+		};
 		await generateProject(opts);
 		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Updated: p.txt'));
 	});
@@ -514,7 +552,12 @@ describe('generateProject', () => {
 		const projectName = 'test-exists-error';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
-		const opts: any = {template: 'cli' as const, projectName, directory: projectPath, update: false};
+		const opts: any = {
+			template: 'cli' as const,
+			projectName,
+			directory: projectPath,
+			update: false,
+		};
 		await expect(generateProject(opts)).rejects.toThrow('already exists');
 	});
 

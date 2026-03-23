@@ -20,7 +20,7 @@ pnpm dlx create-template-project interactive
 
 ## ✨ Features
 
-- **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `prettier`, and `typescript` (strict mode).
+- **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `oxfmt`, and `typescript` (strict mode).
 - **Interactive CLI:** Prompts you for project details if CLI arguments are missing, using `@clack/prompts`.
 - **🔄 Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`. 
     - Files in `src/` and all `*.md` files are skipped to protect your application logic and documentation.

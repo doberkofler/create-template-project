@@ -1,6 +1,17 @@
 # improvements
 
-## it feels like we mixed up .gitignore and .prettierignore
+## how to get some licensing information
+
+`$ git config user.name && git config user.email`
+Dieter Oberkofler
+1009585+doberkofler@users.noreply.github.com
+
+## after generating and updating there should be information on what files must and might need to be abjusted
+
+a (most likely not complete) list of files:
+- the LICENSE file might need a different copyright date or user name
+- the package.json properties like description, keywords, ...
+...
 
 ## open source improvements
 
@@ -45,12 +56,6 @@ gh repo edit --add-topic dependency-management,security-audit,vulnerability-scan
 [![Node.js CI](https://github.com/doberkofler/depvital/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/depvital/actions/workflows/node.js.yml)
 
 ??? HOW TO MAINTAI THEM?
-
-## how to get some licensing information
-
-$ git config user.name && git config user.email
-Dieter Oberkofler
-1009585+doberkofler@users.noreply.github.com
 
 ## update package.json to include essential metadata for npm search and professional branding. Here are the specific additions:
 

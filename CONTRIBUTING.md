@@ -25,7 +25,7 @@ When working in this repository, please:
 - **Validation:** `zod`
 - **Bundler:** `vite`
 - **Testing:** `vitest` with `v8` coverage
-- **Linting:** `oxlint`, `typescript`, `prettier`
+- **Linting:** `oxlint`, `typescript`, `oxfmt`
 
 ## Build and Development Commands
 

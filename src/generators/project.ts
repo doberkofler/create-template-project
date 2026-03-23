@@ -179,7 +179,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 	}
 
 	// Second pass: Collect and report actions
-	const actions: Array<{type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE'; path: string}> = [];
+	const actions: Array<{
+		type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE';
+		path: string;
+	}> = [];
 	const pendingOperations: Array<() => Promise<void>> = [];
 
 	for (const t of templates) {
@@ -209,8 +212,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 					continue;
 				}
 
-				if (relativePath === '_oxlint.config.ts') {
-					relativePath = 'oxlint.config.ts';
+				if (relativePath.startsWith('_') && relativePath.endsWith('.config.ts')) {
+					relativePath = relativePath.substring(1);
 					targetPath = path.join(projectDir, relativePath);
 				}
 
@@ -326,7 +329,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 
 		if (workspaceChanged) {
-			actions.push({type: workspaceExists ? 'MODIFY' : 'ADD', path: 'pnpm-workspace.yaml'});
+			actions.push({
+				type: workspaceExists ? 'MODIFY' : 'ADD',
+				path: 'pnpm-workspace.yaml',
+			});
 			pendingOperations.push(async () => {
 				await fs.writeFile(workspacePath, workspaceYaml);
 			});
@@ -398,7 +404,11 @@ export const generateProject = async (opts: ProjectOptions) => {
 		debug('Initializing Git repository');
 		try {
 			debug('Executing: git init');
-			await execa('git', ['init'], {cwd: projectDir, stdio, preferLocal: true});
+			await execa('git', ['init'], {
+				cwd: projectDir,
+				stdio,
+				preferLocal: true,
+			});
 			log.success('Initialized Git repository (git init).');
 		} catch (e: any) {
 			debug('Failed to initialize Git: %O', e);
@@ -432,7 +442,11 @@ export const generateProject = async (opts: ProjectOptions) => {
 		s.start(`Installing dependencies using ${pm}...`);
 		try {
 			debug('Executing: %s install', pm);
-			await execa(pm, ['install'], {cwd: projectDir, stdio, preferLocal: true});
+			await execa(pm, ['install'], {
+				cwd: projectDir,
+				stdio,
+				preferLocal: true,
+			});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Dependencies installed (${pm} install).`);
 		} catch (e: any) {
 			debug('Failed to install dependencies: %O', e);
@@ -447,12 +461,16 @@ export const generateProject = async (opts: ProjectOptions) => {
 		debug('Running CI script');
 		const s = spinner();
 
-		if (finalPkg.scripts['prettier-write']) {
-			s.start(`Formatting files with Prettier (${pm} run prettier-write)...`);
+		if (finalPkg.scripts.format) {
+			s.start(`Formatting files with oxfmt (${pm} run format)...`);
 			try {
-				debug('Executing: %s run prettier-write', pm);
-				await execa(pm, ['run', 'prettier-write'], {cwd: projectDir, stdio, preferLocal: true});
-				s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Files formatted (${pm} run prettier-write).`);
+				debug('Executing: %s run format', pm);
+				await execa(pm, ['run', 'format'], {
+					cwd: projectDir,
+					stdio,
+					preferLocal: true,
+				});
+				s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Files formatted (${pm} run format).`);
 			} catch (e: any) {
 				debug('Failed to format files: %O', e);
 				s.stop('Failed to format files.');
@@ -464,7 +482,11 @@ export const generateProject = async (opts: ProjectOptions) => {
 		s.start(`Running CI script (lint, build, test) (${pm} run ci)...`);
 		try {
 			debug('Executing: %s run ci', pm);
-			await execa(pm, ['run', 'ci'], {cwd: projectDir, stdio, preferLocal: true});
+			await execa(pm, ['run', 'ci'], {
+				cwd: projectDir,
+				stdio,
+				preferLocal: true,
+			});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  CI script completed (${pm} run ci).`);
 		} catch (e: any) {
 			debug('Failed to run CI script: %O', e);

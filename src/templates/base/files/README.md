@@ -16,7 +16,7 @@ This project is built using **Vite 8** for high-performance development and bund
 - `pnpm run preview`: Previews the production build.
 - `pnpm run test`: Runs the unit test suite (browser-based for web targets using **Vitest** and **Playwright**).
 - `pnpm run test:e2e`: Runs E2E tests using **Playwright**.
-- `pnpm run lint`: Lints and formats the codebase using **oxlint** and **prettier**.
+- `pnpm run lint`: Lints and formats the codebase using **oxlint** and **oxfmt**.
 - `pnpm run ci`: Full CI pipeline (lint, build, test).
 
 ## Getting Started
@@ -41,6 +41,6 @@ This project is built using **Vite 8** for high-performance development and bund
 - **Vitest**: Vite-native testing framework with browser support.
 - **Playwright**: Reliable E2E and browser automation.
 - **oxlint**: Extremely fast JavaScript/TypeScript linter.
-- **Prettier**: Opinionated code formatter.
+- **oxfmt**: High performance JavaScript / TypeScript formatter.
 - **Husky & Commitlint**: Ensuring high-quality commit messages.
 - **Conventional Changelog**: Automated changelog generation.

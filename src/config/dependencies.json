@@ -60,9 +60,9 @@
 			"version": "0.17.1",
 			"description": "TypeScript-specific rules for oxlint."
 		},
-		"prettier": {
-			"version": "3.8.1",
-			"description": "An opinionated code formatter."
+		"oxfmt": {
+			"version": "0.41.0",
+			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
 			"version": "5.9.3",

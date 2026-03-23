@@ -81,7 +81,7 @@ yarn.lock
 # ---------------------------
 .cache/
 .eslintcache
-.prettiercache
+.oxc_cache
 
 # ---------------------------
 # Misc
