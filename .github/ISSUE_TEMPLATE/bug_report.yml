@@ -1,0 +1,72 @@
+name: 🐛 Bug Report
+description: Create a report to help us improve
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run command '...'
+        2. Select option '...'
+        3. See error
+    validations:
+      required: true
+  - type: input
+    id: reproduction-link
+    attributes:
+      label: Reproducible Test Case
+      description: Please provide a link to a repository or a StackBlitz/CodeSandbox that reproduces the issue. Issues without a reproduction will be closed.
+      placeholder: https://github.com/user/repo
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      description: What operating system are you using?
+      placeholder: e.g. macOS, Windows, Linux
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node version
+      description: What version of Node.js are you using?
+      placeholder: e.g. 22.0.0
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: create-template-project version
+      description: What version of create-template-project are you using?
+      placeholder: e.g. 0.4.0
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here, such as screenshots.
+    validations:
+      required: false
