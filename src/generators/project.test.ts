@@ -650,7 +650,7 @@ describe('generateProject', () => {
 		expect(pkg.scripts.test).toBe('yarn run lint && yarn run test');
 	});
 
-	it('should show the correct summary message', async () => {
+	it('should create GENERATED.md and show success message', async () => {
 		const projectName = 'test-summary';
 		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
@@ -660,10 +660,15 @@ describe('generateProject', () => {
 			update: false,
 		};
 		await generateProject(opts);
-		expect(p.note).toHaveBeenCalledWith(expect.stringContaining(`Successfully created a new cli project named '${projectName}'.`));
+		expect(p.log.success).toHaveBeenCalledWith(
+			expect.stringContaining(`Project "${projectName}" scaffolded successfully in ${projectPath}. A detailed setup guide has been generated at GENERATED.md`),
+		);
+		const generatedMd = await fs.readFile(path.join(projectPath, 'GENERATED.md'), 'utf8');
+		expect(generatedMd).toContain(`# 🚀 Project Setup Guide: ${projectName}`);
+		expect(generatedMd).toContain('## 📋 Initialization Checklist');
 	});
 
-	it('should not show summary when progress is false', async () => {
+	it('should create GENERATED.md even when progress is false', async () => {
 		const projectName = 'test-no-summary-no-progress';
 		const projectPath = path.join(tmpDir, projectName);
 		const opts: any = {
@@ -674,7 +679,7 @@ describe('generateProject', () => {
 			progress: false,
 		};
 		await generateProject(opts);
-		expect(p.note).not.toHaveBeenCalled();
+		expect(await pathExists(path.join(projectPath, 'GENERATED.md'))).toBe(true);
 	});
 
 	it('should not show progress when progress is false', async () => {

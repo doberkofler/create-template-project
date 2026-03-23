@@ -42,16 +42,6 @@ const getSpinner = (progress: boolean) => {
 	};
 };
 
-const showNote = (msg: string, title?: string, progress?: boolean) => {
-	if (progress !== undefined && !progress) {
-		return;
-	}
-	if (title) {
-		p.log.success(title);
-	}
-	p.note(msg);
-};
-
 const isFileRequired = (relativePath: string, type: string) => {
 	if (relativePath === 'vitest.config.ts') {
 		return !['cli', 'web-vanilla', 'web-app', 'web-fullstack'].includes(type);
@@ -416,6 +406,17 @@ export const generateProject = async (opts: ProjectOptions) => {
 		await op();
 	}
 
+	const states = {
+		gitInitialized: false,
+		githubCreated: false,
+		githubSkipped: !opts.createGithubRepository || isUpdate,
+		githubError: '',
+		depsInstalled: false,
+		depsSkipped: !opts.installDependencies,
+		ciRun: false,
+		ciSkipped: !opts.build || !finalPkg.scripts.ci,
+	};
+
 	// Initialize Git
 	const stdio = debug.enabled ? 'inherit' : 'pipe';
 	const isGit = await pathExists(path.join(projectDir, '.git'));
@@ -429,11 +430,14 @@ export const generateProject = async (opts: ProjectOptions) => {
 				preferLocal: true,
 			});
 			log.success('Initialized Git repository (git init).');
+			states.gitInitialized = true;
 		} catch (e: any) {
 			debug('Failed to initialize Git: %O', e);
 			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
 			log.error(`Failed to initialize Git: ${e.message}${detail}`);
 		}
+	} else {
+		states.gitInitialized = true; // Already initialized
 	}
 
 	// GitHub Integration
@@ -447,10 +451,12 @@ export const generateProject = async (opts: ProjectOptions) => {
 				preferLocal: true,
 			});
 			log.success('Created GitHub repository (gh repo create).');
+			states.githubCreated = true;
 		} catch (e: any) {
 			debug('Failed to create GitHub repository: %O', e);
 			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
 			log.warn(`Failed to create GitHub repository: ${e.message}${detail}\nEnsure "gh" CLI is installed and authenticated.`);
+			states.githubError = e.message;
 		}
 	}
 
@@ -467,6 +473,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 				preferLocal: true,
 			});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Dependencies installed (${pm} install).`);
+			states.depsInstalled = true;
 		} catch (e: any) {
 			debug('Failed to install dependencies: %O', e);
 			s.stop('Failed to install dependencies.');
@@ -507,6 +514,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 				preferLocal: true,
 			});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  CI script completed (${pm} run ci).`);
+			states.ciRun = true;
 		} catch (e: any) {
 			debug('Failed to run CI script: %O', e);
 			s.stop('Failed to run CI script.');
@@ -516,31 +524,222 @@ export const generateProject = async (opts: ProjectOptions) => {
 		}
 	}
 
-	log.success(`Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}`);
-	showSummary(opts, pm, isProgress);
+	let hasErrors = false;
+	let hasWarnings = false;
+	const errorMessages: string[] = [];
+
+	if (states.githubError) {
+		hasWarnings = true;
+		errorMessages.push(`GitHub repository creation failed: ${states.githubError}`);
+	}
+
+	await generateGeneratedMd(projectDir, opts, pm, states, isUpdate, {
+		hasErrors,
+		hasWarnings,
+		errorMessages,
+	});
+
+	const successMsg = `Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}. A detailed setup guide has been generated at GENERATED.md`;
+	if (hasErrors) {
+		log.error(`${successMsg} (completed with errors)`);
+	} else if (hasWarnings) {
+		log.warn(`${successMsg} (completed with warnings)`);
+	} else {
+		log.success(successMsg);
+	}
 };
 
-function showSummary(opts: ProjectOptions, pm: string, isProgress: boolean) {
-	debug('Showing summary for options: %O', opts);
-	const {projectName, template} = opts;
+async function generateGeneratedMd(
+	projectDir: string,
+	opts: ProjectOptions,
+	pm: string,
+	states: any,
+	isUpdate: boolean,
+	status: {hasErrors: boolean; hasWarnings: boolean; errorMessages: string[]},
+) {
+	const statusBadge = status.hasErrors
+		? '🔴 **Completed with Errors**'
+		: status.hasWarnings
+			? '🟡 **Completed with Warnings**'
+			: '🟢 **Successfully Completed**';
 
-	const summary = [`Successfully created a new ${template} project named '${projectName}'.`, '', 'Available Commands:'];
-
-	const commands = [
-		`${pm} run dev    - Starts the development server`,
-		`${pm} run build  - Builds the project for production`,
-		`${pm} run test   - Runs the unit test suite (Vitest)`,
-		`${pm} run lint   - Lints and formats the codebase`,
-		`${pm} run ci     - Runs lint, build, and test (used by CI/CD)`,
-	];
-
-	const adjustments = [
+	const md = [
+		`# 🚀 Project Setup Guide: ${opts.projectName}`,
 		'',
-		'Manual adjustments needed:',
-		'  ● LICENSE: Verify the copyright year and author name.',
-		'  ● package.json: Review description, keywords, and repository links.',
-		'  ● README.md: Update with project-specific instructions.',
-	];
+		`Welcome to your newly ${isUpdate ? 'updated' : 'generated'} **${opts.template}** project! This document outlines what was scaffolded, the automated steps already completed, and the remaining manual adjustments required to finalize your setup.`,
+		'',
+		`**Status:** ${statusBadge}`,
+		'',
+		...(status.errorMessages.length > 0 ? ['### ⚠️ Issues Encountered', ...status.errorMessages.map((msg) => `- ${msg}`), ''] : []),
+		'## 📦 What Was Generated',
+		`* **Project Name:** \`${opts.projectName}\``,
+		`* **Template Used:** \`${opts.template}\``,
+		`* **Package Manager:** \`${pm}\``,
+		'',
+		'---',
+		'',
+		'## 📋 Initialization Checklist',
+		'The following tasks were executed during the generation process:',
+		`- [x] Scaffold project files and directories`,
+		`- [x] Configure \`package.json\` with appropriate dependencies`,
+		`- [${states.depsInstalled ? 'x' : ' '}] Install dependencies using \`${pm}\`${states.depsSkipped ? ' *(Skipped)*' : ''}`,
+		`- [${states.gitInitialized ? 'x' : ' '}] Initialize Git repository`,
+		`- [${states.githubCreated ? 'x' : ' '}] Create GitHub repository${states.githubSkipped ? ' *(Skipped)*' : states.githubError ? ' *(Failed)*' : ''}`,
+		`- [${states.ciRun ? 'x' : ' '}] Run initial CI pipeline (lint, build, test)${states.ciSkipped ? ' *(Skipped)*' : ''}`,
+		'',
+		'---',
+		'',
+		'## 💻 Available Commands',
+		`You can run these commands from the project root using \`${pm} run <command>\`:`,
+		'',
+		'| Command | Description |',
+		'| :--- | :--- |',
+		'| `dev` | Starts the development server |',
+		'| `build` | Builds the project for production |',
+		'| `test` | Runs the unit test suite (Vitest) |',
+		'| `lint` | Lints and formats the codebase |',
+		'| `ci` | Runs lint, build, and test (used by CI/CD) |',
+		'',
+		'---',
+		'',
+		...getTemplateArchitectureSection(opts.template),
+		'',
+		'---',
+		'',
+		'## 🧪 Testing Strategy',
+		'',
+		'### Unit Testing (Vitest)',
+		'This project is pre-configured with **Vitest** for blazing-fast unit testing and coverage reporting.',
+		`- **Where to put tests**: Create files with the \`.test.ts\` or \`.spec.ts\` extension next to your source files (e.g., \`src/main.test.ts\`).`,
+		`- **How to run**: \`${pm} run test\``,
+		`- **Watch mode**: \`${pm} exec vitest\` to automatically re-run tests on file changes.`,
+		`- **Coverage**: Coverage is generated automatically during the test run. Aim for high coverage on core logic!`,
+		'',
+		'### End-to-End (E2E) Testing',
+		"Currently, only unit tests are scaffolded by default. To enhance your project's reliability, we highly recommend adding E2E testing:",
+		`- **For Web Apps**: Consider installing [Playwright](https://playwright.dev/) (\`${pm} create playwright\`) to simulate real user interactions in the browser.`,
+		`- **For CLIs**: Consider using \`execa\` within your Vitest suite to invoke your compiled CLI binary and assert its \`stdout\`/\`stderr\` outputs.`,
+		'',
+		'---',
+		'',
+		'## 🐙 Key Git Commands',
+		'Here are the most common Git operations you will use to manage your codebase:',
+		'',
+		'| Command | Description |',
+		'| :--- | :--- |',
+		'| `git status` | Check the current state of your working directory |',
+		'| `git add .` | Stage all your changes for the next commit |',
+		'| `git commit -m "feat: your feature"` | Create a new commit (following Conventional Commits) |',
+		'| `git push` | Push your committed changes to the remote repository |',
+		'| `git pull` | Fetch and merge changes from the remote repository |',
+		'| `git checkout -b <branch>` | Create and switch to a new branch |',
+		'',
+		'---',
+		'',
+		'## 🐈 Key GitHub (`gh`) Commands',
+		'The `gh` CLI provides powerful tools to interact with GitHub right from your terminal:',
+		'',
+		'| Command | Description |',
+		'| :--- | :--- |',
+		'| `gh repo view --web` | Open the repository in your default web browser |',
+		'| `gh pr create` | Create a new Pull Request |',
+		'| `gh pr checkout <pr-number>` | Checkout a Pull Request branch locally |',
+		'| `gh issue create` | Create a new Issue |',
+		'| `gh issue list` | List all open Issues |',
+		'| `gh repo delete <owner>/<repo> --confirm` | Dangerously delete a repository completely (use with caution!) |',
+		'',
+		'---',
+		'',
+		'## 🚀 Creating a Release',
+		'This project uses Conventional Commits and automated changelogs. To create a new release:',
+		'1. **Verify build/tests:** `pnpm run ci`',
+		'2. **Bump version:** `pnpm version <patch|minor|major> --no-git-tag-version`',
+		'3. **Update changelog:** `pnpm run create-changelog`',
+		'4. **Commit changes:** `git add . && git commit -m "chore(release): $(node -p \'require("./package.json").version\')"`',
+		'5. **Tag & Push:** `git tag v$(node -p \'require("./package.json").version\') && git push && git push --tags`',
+		'6. **Create GitHub Release:** `gh release create v$(node -p \'require("./package.json").version\') --generate-notes`',
+		'7. **Publish (if applicable):** `pnpm publish`',
+		'',
+		'---',
+		'',
+		'## 🛠️ Manual Adjustments Needed',
+		'To complete your project setup, please review and manually update the following:',
+		'- [ ] **`LICENSE`**: Verify the copyright year and author name.',
+		'- [ ] **`package.json`**: Review the description, keywords, author, and repository links.',
+		'- [ ] **`README.md`**: Update with project-specific instructions, architecture details, and contribution guidelines.',
+		'',
+		'---',
+		'',
+		'## 💡 Next Steps',
+		'1. Review the generated codebase to familiarize yourself with the structure.',
+		`2. Start the development server using \`${pm} run dev\`.`,
+		'3. Make your first commit and push to your remote repository.',
+		'',
+		'<br>',
+		'<p align="center"><i>This file was auto-generated by <b>create-template-project</b>.</i></p>',
+	].join('\n');
 
-	showNote([...summary, ...commands.map((c) => `  ${c}`), ...adjustments].join('\n'), 'Project ready', isProgress);
+	await fs.writeFile(path.join(projectDir, 'GENERATED.md'), md);
+}
+
+function getTemplateArchitectureSection(template: string): string[] {
+	switch (template) {
+		case 'cli':
+			return [
+				'## 🏗️ CLI Architecture',
+				'This project uses `commander` for argument parsing and `@clack/prompts` for interactive CLI interfaces.',
+				'',
+				'### Source Files Generated',
+				'- **`src/index.ts`**: The main execution entry point. Handles top-level errors and bootstraps the CLI application.',
+				'- **`src/cli.ts`**: Parses command-line arguments and orchestrates your user prompts.',
+				'',
+				'### How to Enhance',
+				'- Add new sub-commands directly in `src/cli.ts`.',
+				'- Extract logic into a new `src/commands/` directory as your application scales.',
+			];
+		case 'web-vanilla':
+			return [
+				'## 🏗️ Web Vanilla Architecture',
+				'A standalone, blazing fast web application scaffolded with Vite.',
+				'',
+				'### Source Files Generated',
+				'- **`index.html`**: The main HTML entry point that loads your application scripts.',
+				'- **`src/main.ts`**: The core TypeScript application logic where you can start adding DOM manipulation.',
+				'',
+				'### How to Enhance',
+				'- Add new UI logic or Web Components inside the `src/` directory.',
+				'- Create styling (`.css` or `.scss`) and import them directly into `main.ts`.',
+			];
+		case 'web-app':
+			return [
+				'## 🏗️ Web App Architecture',
+				'A robust React SPA configured with MUI components and TanStack Query.',
+				'',
+				'### Source Files Generated',
+				'- **`index.html`**: The HTML entry point hosting the React root element.',
+				'- **`src/main.tsx`**: Bootstraps the React application and mounts all necessary providers (QueryClient, Theme).',
+				'- **`src/App.tsx`**: The root application component. Start building your UI here.',
+				'',
+				'### How to Enhance',
+				'- Add new components to a `src/components/` directory.',
+				'- Set up React Router for client-side routing.',
+				'- Manage complex global state with a store like Zustand if needed.',
+			];
+		case 'web-fullstack':
+			return [
+				'## 🏗️ Fullstack Monorepo Architecture',
+				'A modern monorepo combining an Express server with a React client, seamlessly integrated using workspaces.',
+				'',
+				'### Source Files Generated',
+				'- **`client/`**: The frontend React application (similar to the `web-app` template).',
+				'- **`server/`**: The backend Express/Node application delivering API endpoints.',
+				'',
+				'### How to Enhance',
+				'- Add new API routes in the `server` package.',
+				'- Consume those routes in the `client` package via TanStack Query.',
+				'- **Tip**: Create a `shared/` workspace package to share types across both frontend and backend for end-to-end type safety.',
+			];
+		default:
+			return [];
+	}
 }
