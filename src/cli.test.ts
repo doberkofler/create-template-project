@@ -1,6 +1,9 @@
 import {describe, it, expect, vi, beforeEach, type MockInstance} from 'vitest';
 import * as p from '@clack/prompts';
 import debugLib from 'debug';
+import {execa} from 'execa';
+
+vi.mock('execa');
 
 vi.mock('debug', () => {
 	const debugMock = vi.fn(() => vi.fn());
@@ -67,6 +70,18 @@ describe('cli', () => {
 		delete process.env['DEBUG'];
 		debugLib.disable();
 
+		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
+			if (cmd === 'git' && args[0] === 'config') {
+				if (args[1] === 'user.name') {
+					return {stdout: 'Mock Author'};
+				}
+				if (args[1] === 'github.user') {
+					return {stdout: 'mock-github-user'};
+				}
+			}
+			return {stdout: ''};
+		});
+
 		exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
 			const err: any = new Error(`Process exited with code ${code}`);
 			err.code = code === 0 ? 'PROCESS_EXIT_0' : 'PROCESS_EXIT_1';
@@ -97,12 +112,13 @@ describe('cli', () => {
 	});
 
 	it('should parse create command arguments', async () => {
-		process.argv.push('create', '-t', 'cli', '-n', 'my-test-project', '--path', './test-dir', '-a', 'Test Author');
+		process.argv.push('create', '-t', 'cli', '-n', 'my-test-project', '--path', './test-dir', '-a', 'Test Author', '--github-username', 'test-user');
 		const result = await parseArgs();
 		expect(result).toMatchObject({
 			template: 'cli',
 			projectName: 'my-test-project',
 			author: 'Test Author',
+			githubUsername: 'test-user',
 			directory: path.resolve('./test-dir'),
 			packageManager: 'pnpm',
 		});
@@ -116,7 +132,10 @@ describe('cli', () => {
 			JSON.stringify({
 				name: 'temp-project',
 				author: 'Old Author',
-				'create-template-project': {template: 'web-vanilla'},
+				'create-template-project': {
+					template: 'web-vanilla',
+					githubUsername: 'old-github-user',
+				},
 			}),
 		);
 
@@ -125,6 +144,7 @@ describe('cli', () => {
 		expect(result.update).toBe(true);
 		expect(result.projectName).toBe('temp-project');
 		expect(result.author).toBe('Old Author');
+		expect(result.githubUsername).toBe('old-github-user');
 		expect(result.packageManager).toBe('pnpm');
 
 		await fs.rm(tempDir, {recursive: true, force: true});
