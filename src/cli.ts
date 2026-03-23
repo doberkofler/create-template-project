@@ -1,6 +1,7 @@
 import {Command} from 'commander';
 import * as p from '@clack/prompts';
 import {ProjectOptions, ProjectOptionsSchema, TemplateTypeSchema} from './types.js';
+import {execa} from 'execa';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import debugLib from 'debug';
@@ -11,6 +12,15 @@ const pathExists = (p: string) =>
 		.access(p)
 		.then(() => true)
 		.catch(() => false);
+
+const getDefaultAuthor = async () => {
+	try {
+		const {stdout} = await execa('git', ['config', 'user.name']);
+		return stdout.trim();
+	} catch (e) {
+		return '';
+	}
+};
 
 const debug = debugLib('create-template-project:cli');
 
@@ -91,19 +101,21 @@ Templates:
 		.description('Create a new project from a template')
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
+		.option('-a, --author <author>', 'Author name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.requiredOption('--path <path>', 'Output directory')
 		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--no-progress', 'Do not show progress indicators')
-		.action((opts) => {
+		.action(async (opts) => {
 			debug('Executing "create" command with options: %O', opts);
 			commandResult = {
 				...opts,
 				update: false,
 				template: opts.template as ProjectOptions['template'],
 				projectName: opts.name,
+				author: opts.author || (await getDefaultAuthor()),
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: path.resolve(opts.path),
 				createGithubRepository: !!opts.createGithubRepository,
@@ -130,6 +142,7 @@ Restrictions & Behavior:
 `,
 		)
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.option('-a, --author <author>', 'Author name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
@@ -165,8 +178,9 @@ Restrictions & Behavior:
 			commandResult = {
 				...opts,
 				update: true,
-				template: opts.template as ProjectOptions['template'],
+				template: (opts.template || pkg['create-template-project']?.template) as ProjectOptions['template'],
 				projectName: pkg.name,
+				author: opts.author || pkg.author || (await getDefaultAuthor()),
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: directory,
 				createGithubRepository: !!opts.createGithubRepository,
@@ -209,14 +223,29 @@ Restrictions & Behavior:
 			const pkgExists = await pathExists(pkgPath);
 
 			let existingConfig: any = {};
+			let existingAuthor = '';
 			if (pkgExists) {
 				try {
 					const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
 					existingConfig = pkg['create-template-project'] || {};
+					existingAuthor = pkg.author;
 					debug('Found existing project config: %O', existingConfig);
 				} catch (e) {
 					debug('Failed to read existing package.json: %O', e);
 				}
+			}
+
+			const defaultAuthor = await getDefaultAuthor();
+			const author = await p.text({
+				message: 'Author name:',
+				placeholder: 'Your Name',
+				defaultValue: existingAuthor || existingConfig.author || defaultAuthor,
+				validate: (value) => (value && value.length > 0 ? undefined : 'Author name is required'),
+			});
+
+			if (p.isCancel(author)) {
+				p.cancel('Operation cancelled.');
+				process.exit(0);
 			}
 
 			let update = false;
@@ -248,7 +277,10 @@ Restrictions & Behavior:
 						{label: 'CLI Application (Node.js)', value: 'cli'},
 						{label: 'Web-Vanilla (Standalone)', value: 'web-vanilla'},
 						{label: 'Web-App (React + MUI)', value: 'web-app'},
-						{label: 'Web-Fullstack (Express + React Monorepo)', value: 'web-fullstack'},
+						{
+							label: 'Web-Fullstack (Express + React Monorepo)',
+							value: 'web-fullstack',
+						},
 					],
 				});
 
@@ -317,6 +349,7 @@ Restrictions & Behavior:
 			commandResult = {
 				template: template as ProjectOptions['template'],
 				projectName: projectName as string,
+				author: author as string,
 				packageManager: packageManager as ProjectOptions['packageManager'],
 				createGithubRepository,
 				directory: projectDir,

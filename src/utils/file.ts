@@ -31,7 +31,7 @@ export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) 
 }
 
 export function processContent(filePath: string, content: string, opts: ProjectOptions, addedDeps: Array<{name: string; description: string}>): string {
-	const {projectName, template} = opts;
+	const {projectName, template, author} = opts;
 	let description = '';
 
 	switch (template) {
@@ -56,6 +56,8 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		.replaceAll('{{projectName}}', projectName)
 		.replaceAll('{{description}}', description)
 		.replaceAll('{{packageManager}}', pm)
+		.replaceAll('{{author}}', author || '')
+		.replaceAll('{{year}}', new Date().getFullYear().toString())
 		.replaceAll('{{lockfileRules}}', lockfileRules);
 
 	// Special logic for GitHub Actions workflow
@@ -135,7 +137,10 @@ export function mergePackageJson(target: any, source: any) {
 		target.dependencies = {...target.dependencies, ...source.dependencies};
 	}
 	if (source.devDependencies) {
-		target.devDependencies = {...target.devDependencies, ...source.devDependencies};
+		target.devDependencies = {
+			...target.devDependencies,
+			...source.devDependencies,
+		};
 	}
 	if (source.workspaces) {
 		target.workspaces = source.workspaces;
@@ -147,7 +152,7 @@ export function mergePackageJson(target: any, source: any) {
 
 export function isSeedFile(filePath: string): boolean {
 	const seedDirs = ['src/', 'client/src/', 'server/src/', 'backend/src/', 'frontend/src/'];
-	const seedFiles = ['index.html', 'App.tsx', 'main.tsx', 'index.tsx'];
+	const seedFiles = ['index.html', 'App.tsx', 'main.tsx', 'index.tsx', 'LICENSE'];
 	return seedDirs.some((dir) => filePath.startsWith(dir)) || seedFiles.some((file) => filePath === file) || filePath.toLowerCase().endsWith('.md');
 }
 
@@ -168,7 +173,10 @@ export async function mergeFile(
 		try {
 			const stdio = debug.enabled ? 'inherit' : 'pipe';
 			debug('Executing: git merge-file %s %s %s', filePath, tempBase, tempNew);
-			await execa('git', ['merge-file', filePath, tempBase, tempNew], {stdio, preferLocal: true});
+			await execa('git', ['merge-file', filePath, tempBase, tempNew], {
+				stdio,
+				preferLocal: true,
+			});
 			const postMergeContent = await fs.readFile(filePath, 'utf8');
 			return postMergeContent.trim() !== template.trim() ? 'merged' : 'updated';
 		} catch (e: any) {

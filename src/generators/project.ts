@@ -60,7 +60,7 @@ const isFileRequired = (relativePath: string, type: string) => {
 };
 
 export const generateProject = async (opts: ProjectOptions) => {
-	const {template: type, projectName, directory, update, progress} = opts;
+	const {template: type, projectName, author, directory, update, progress} = opts;
 	const isProgress = progress !== false;
 	const log = getLog(isProgress);
 	const spinner = () => getSpinner(isProgress);
@@ -125,6 +125,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 	let finalPkg: any = {
 		name: projectName,
 		version: '0.1.0',
+		author: author || '',
 		type: 'module',
 		'create-template-project': {
 			template: type,

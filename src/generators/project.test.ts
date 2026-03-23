@@ -75,6 +75,7 @@ describe('generateProject', () => {
 		const opts: any = {
 			template: 'cli' as const,
 			projectName,
+			author: 'Test Author',
 			createGithubRepository: true,
 			directory: projectPath,
 			update: false,
@@ -85,6 +86,7 @@ describe('generateProject', () => {
 		expect(await pathExists(projectPath)).toBe(true);
 		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
 		expect(pkg.name).toBe(projectName);
+		expect(pkg.author).toBe('Test Author');
 		expect(pkg.bin).toBe('./dist/index.js');
 		expect(pkg.dependencies).toHaveProperty('commander');
 		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
@@ -99,6 +101,12 @@ describe('generateProject', () => {
 		// Verify README.md contains project name
 		const readme = await fs.readFile(path.join(projectPath, 'README.md'), 'utf8');
 		expect(readme).toContain(projectName);
+
+		// Verify LICENSE exists and contains author/year
+		expect(await pathExists(path.join(projectPath, 'LICENSE'))).toBe(true);
+		const license = await fs.readFile(path.join(projectPath, 'LICENSE'), 'utf8');
+		expect(license).toContain('Test Author');
+		expect(license).toContain(new Date().getFullYear().toString());
 
 		// Verify Husky hooks exist and are executable (simulated by checking if chmod was called or just if file exists in test)
 		expect(await pathExists(path.join(projectPath, '.husky/pre-commit'))).toBe(true);

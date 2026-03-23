@@ -8,6 +8,7 @@ import {getWebFullstackTemplate} from '../templates/web-fullstack/index.js';
 const MOCK_OPTS: ProjectOptions = {
 	template: 'cli',
 	projectName: 'mock',
+	author: 'mock',
 	directory: '.',
 	packageManager: 'npm',
 	update: false,

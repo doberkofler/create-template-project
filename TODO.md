@@ -1,11 +1,5 @@
 # improvements
 
-## how to get some licensing information
-
-`$ git config user.name && git config user.email`
-Dieter Oberkofler
-1009585+doberkofler@users.noreply.github.com
-
 ## after generating and updating there should be information on what files must and might need to be abjusted
 
 a (most likely not complete) list of files:
