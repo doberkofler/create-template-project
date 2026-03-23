@@ -4,7 +4,7 @@
 [![NPM Downloads](https://img.shields.io/npm/dm/create-template-project.svg)](https://www.npmjs.com/package/create-template-project)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml)
-[![Coverage Status](https://coveralls.io/repos/github/doberkofler/create-template-project/badge.svg?branch=master)](https://coveralls.io/github/doberkofler/create-template-project?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/doberkofler/create-template-project/badge.svg?branch=main)](https://coveralls.io/github/doberkofler/create-template-project?branch=main)
 
 An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-App, Web-Fullstack) with best-practice configurations pre-installed.
 
