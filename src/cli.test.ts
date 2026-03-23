@@ -125,14 +125,21 @@ describe('cli', () => {
 
 	it('should handle interactive mode', async () => {
 		process.argv.push('interactive');
-		// Order: ProjectName (text), Directory (text), Author (text), Template (select), PM (select), Deps (confirm), CI (confirm), GH (confirm)
-		vi.mocked(p.text).mockResolvedValueOnce('my-web-fullstack-app').mockResolvedValueOnce('./out').mockResolvedValueOnce('Test Author');
+		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), Template (select), PM (select), Deps (confirm), CI (confirm), GH (confirm)
+		vi.mocked(p.text)
+			.mockResolvedValueOnce('my-web-fullstack-app')
+			.mockResolvedValueOnce('./out')
+			.mockResolvedValueOnce('A cool fullstack app')
+			.mockResolvedValueOnce('fullstack, react, express')
+			.mockResolvedValueOnce('Test Author');
 		vi.mocked(p.select).mockResolvedValueOnce('web-fullstack').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
 		const result = await parseArgs();
 		expect(result).toMatchObject({
 			template: 'web-fullstack',
 			projectName: 'my-web-fullstack-app',
+			description: 'A cool fullstack app',
+			keywords: 'fullstack, react, express',
 			author: 'Test Author',
 		});
 	});
@@ -156,8 +163,13 @@ describe('cli', () => {
 		const projectDir = path.resolve('.', projectName);
 		await fs.mkdir(projectDir, {recursive: true});
 
-		// Order: ProjectName (text), Directory (text), Author (text), Action (select), Template (select), Deps (confirm), CI (confirm), GH (confirm)
-		vi.mocked(p.text).mockResolvedValueOnce(projectName).mockResolvedValueOnce('.').mockResolvedValueOnce('Test Author');
+		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), Action (select), Template (select), Deps (confirm), CI (confirm), GH (confirm)
+		vi.mocked(p.text)
+			.mockResolvedValueOnce(projectName)
+			.mockResolvedValueOnce('.')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('Test Author');
 		vi.mocked(p.select).mockResolvedValueOnce('update').mockResolvedValueOnce('cli');
 		vi.mocked(p.confirm).mockResolvedValue(false);
 
@@ -169,7 +181,12 @@ describe('cli', () => {
 
 	it('should handle web-app specifically in interactive', async () => {
 		process.argv.push('interactive');
-		vi.mocked(p.text).mockResolvedValueOnce('web-app-test').mockResolvedValueOnce('.').mockResolvedValueOnce('Test Author');
+		vi.mocked(p.text)
+			.mockResolvedValueOnce('web-app-test')
+			.mockResolvedValueOnce('.')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('Test Author');
 		vi.mocked(p.select).mockResolvedValueOnce('web-app').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(false);
 		const result = await parseArgs();
@@ -179,7 +196,12 @@ describe('cli', () => {
 
 	it('should handle full interactive flow', async () => {
 		process.argv.push('interactive');
-		vi.mocked(p.text).mockResolvedValueOnce('full-test').mockResolvedValueOnce('.').mockResolvedValueOnce('Test Author');
+		vi.mocked(p.text)
+			.mockResolvedValueOnce('full-test')
+			.mockResolvedValueOnce('.')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('Test Author');
 		vi.mocked(p.select).mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
 		const result = await parseArgs();
@@ -208,7 +230,12 @@ describe('cli', () => {
 			}),
 		);
 
-		vi.mocked(p.text).mockResolvedValueOnce(projectName).mockResolvedValueOnce('.').mockResolvedValueOnce('Test Author');
+		vi.mocked(p.text)
+			.mockResolvedValueOnce(projectName)
+			.mockResolvedValueOnce('.')
+			.mockResolvedValueOnce('Test Description')
+			.mockResolvedValueOnce('test, keywords')
+			.mockResolvedValueOnce('Test Author');
 		vi.mocked(p.select).mockResolvedValueOnce('update');
 		// Should NOT prompt for template because it's found in package.json
 		vi.mocked(p.confirm).mockResolvedValue(true);
@@ -230,7 +257,7 @@ describe('cli', () => {
 		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 
-	it.each([0, 1, 2, 3, 4, 5, 6, 7])('should handle cancel at prompt stage %i', async (stage) => {
+	it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])('should handle cancel at prompt stage %i', async (stage) => {
 		vi.resetAllMocks();
 		process.argv = [...originalArgv.slice(0, 2), 'interactive'];
 		const exitSpyLocal = vi.spyOn(process, 'exit').mockImplementation((code) => {
@@ -242,7 +269,12 @@ describe('cli', () => {
 		let currentCall = 0;
 		vi.mocked(p.isCancel).mockImplementation(() => currentCall++ === stage);
 
-		vi.mocked(p.text).mockResolvedValueOnce('test').mockResolvedValueOnce('.').mockResolvedValueOnce('author');
+		vi.mocked(p.text)
+			.mockResolvedValueOnce('test')
+			.mockResolvedValueOnce('.')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('')
+			.mockResolvedValueOnce('author');
 		vi.mocked(p.select).mockResolvedValueOnce('update').mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
 
@@ -324,7 +356,12 @@ describe('cli', () => {
 		await fs.mkdir(projectDir, {recursive: true});
 		await fs.writeFile(path.join(projectDir, 'package.json'), 'invalid json');
 
-		vi.mocked(p.text).mockResolvedValueOnce(projectName).mockResolvedValueOnce('.').mockResolvedValueOnce('Test Author');
+		vi.mocked(p.text)
+			.mockResolvedValueOnce(projectName)
+			.mockResolvedValueOnce('.')
+			.mockResolvedValueOnce('Test Description')
+			.mockResolvedValueOnce('test, keywords')
+			.mockResolvedValueOnce('Test Author');
 		vi.mocked(p.select).mockResolvedValueOnce('update').mockResolvedValueOnce('cli').mockResolvedValueOnce('npm');
 		vi.mocked(p.confirm).mockResolvedValue(true);
 

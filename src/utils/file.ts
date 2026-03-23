@@ -32,21 +32,23 @@ export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) 
 
 export function processContent(filePath: string, content: string, opts: ProjectOptions, addedDeps: Array<{name: string; description: string}>): string {
 	const {projectName, template, author} = opts;
-	let description = '';
+	let description = opts.description || '';
 
-	switch (template) {
-		case 'cli':
-			description = 'A modern Node.js CLI application with TypeScript and automated tooling.';
-			break;
-		case 'web-vanilla':
-			description = 'A standalone web page/application for modern browsers.';
-			break;
-		case 'web-fullstack':
-			description = 'A full-stack monorepo with an Express server and a React/MUI client.';
-			break;
-		case 'web-app':
-			description = 'A React application with MUI and TanStack Query.';
-			break;
+	if (!description) {
+		switch (template) {
+			case 'cli':
+				description = 'A modern Node.js CLI application with TypeScript and automated tooling.';
+				break;
+			case 'web-vanilla':
+				description = 'A standalone web page/application for modern browsers.';
+				break;
+			case 'web-fullstack':
+				description = 'A full-stack monorepo with an Express server and a React/MUI client.';
+				break;
+			case 'web-app':
+				description = 'A React application with MUI and TanStack Query.';
+				break;
+		}
 	}
 
 	const pm = opts.packageManager || 'npm';

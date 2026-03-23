@@ -9,6 +9,8 @@ export type PackageManagerType = z.infer<typeof PackageManagerSchema>;
 export const ProjectOptionsSchema = z.object({
 	template: TemplateTypeSchema,
 	projectName: z.string().min(1, 'Project name is required'),
+	description: z.string().optional(),
+	keywords: z.string().optional(),
 	author: z.string().min(1, 'Author name is required'),
 	packageManager: PackageManagerSchema.optional().default('npm'),
 	createGithubRepository: z.boolean().optional().default(false),

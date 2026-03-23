@@ -125,7 +125,18 @@ export const generateProject = async (opts: ProjectOptions) => {
 	let finalPkg: any = {
 		name: projectName,
 		version: '0.1.0',
+		description: opts.description || 'TODO: Add project description',
+		keywords: opts.keywords ? opts.keywords.split(',').map((k) => k.trim()) : ['TODO: Add keywords'],
+		homepage: `https://github.com/${author}/${projectName}#readme`,
+		bugs: {
+			url: `https://github.com/${author}/${projectName}/issues`,
+		},
+		license: 'MIT',
 		author: author || '',
+		repository: {
+			type: 'git',
+			url: `https://github.com/${author}/${projectName}.git`,
+		},
 		type: 'module',
 		'create-template-project': {
 			template: type,
@@ -516,5 +527,13 @@ function showSummary(opts: ProjectOptions, pm: string, isProgress: boolean) {
 		`${pm} run ci     - Runs lint, build, and test (used by CI/CD)`,
 	];
 
-	showNote([...summary, ...commands.map((c) => `  ${c}`)].join('\n'), 'Project ready', isProgress);
+	const adjustments = [
+		'',
+		'Manual adjustments needed:',
+		'  ● LICENSE: Verify the copyright year and author name.',
+		'  ● package.json: Review description, keywords, and repository links.',
+		'  ● README.md: Update with project-specific instructions.',
+	];
+
+	showNote([...summary, ...commands.map((c) => `  ${c}`), ...adjustments].join('\n'), 'Project ready', isProgress);
 }

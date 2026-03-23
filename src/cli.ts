@@ -101,6 +101,8 @@ Templates:
 		.description('Create a new project from a template')
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
+		.option('--description <description>', 'Project description')
+		.option('-k, --keywords <keywords>', 'Project keywords (comma separated)')
 		.option('-a, --author <author>', 'Author name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
@@ -115,6 +117,8 @@ Templates:
 				update: false,
 				template: opts.template as ProjectOptions['template'],
 				projectName: opts.name,
+				description: opts.description,
+				keywords: opts.keywords,
 				author: opts.author || (await getDefaultAuthor()),
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: path.resolve(opts.path),
@@ -142,6 +146,8 @@ Restrictions & Behavior:
 `,
 		)
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.option('--description <description>', 'Project description')
+		.option('-k, --keywords <keywords>', 'Project keywords (comma separated)')
 		.option('-a, --author <author>', 'Author name')
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
@@ -180,6 +186,8 @@ Restrictions & Behavior:
 				update: true,
 				template: (opts.template || pkg['create-template-project']?.template) as ProjectOptions['template'],
 				projectName: pkg.name,
+				description: opts.description || pkg.description,
+				keywords: opts.keywords || (pkg.keywords ? pkg.keywords.join(', ') : undefined),
 				author: opts.author || pkg.author || (await getDefaultAuthor()),
 				packageManager: opts.packageManager as ProjectOptions['packageManager'],
 				directory: directory,
@@ -224,15 +232,41 @@ Restrictions & Behavior:
 
 			let existingConfig: any = {};
 			let existingAuthor = '';
+			let existingDescription = '';
+			let existingKeywords = [];
 			if (pkgExists) {
 				try {
 					const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
 					existingConfig = pkg['create-template-project'] || {};
 					existingAuthor = pkg.author;
+					existingDescription = pkg.description;
+					existingKeywords = pkg.keywords || [];
 					debug('Found existing project config: %O', existingConfig);
 				} catch (e) {
 					debug('Failed to read existing package.json: %O', e);
 				}
+			}
+
+			const projectDescription = await p.text({
+				message: 'Project description:',
+				placeholder: 'A new project',
+				defaultValue: existingDescription || '',
+			});
+
+			if (p.isCancel(projectDescription)) {
+				p.cancel('Operation cancelled.');
+				process.exit(0);
+			}
+
+			const projectKeywords = await p.text({
+				message: 'Project keywords (comma separated):',
+				placeholder: 'cli, nodejs, typescript',
+				defaultValue: existingKeywords ? existingKeywords.join(', ') : '',
+			});
+
+			if (p.isCancel(projectKeywords)) {
+				p.cancel('Operation cancelled.');
+				process.exit(0);
 			}
 
 			const defaultAuthor = await getDefaultAuthor();
@@ -349,6 +383,8 @@ Restrictions & Behavior:
 			commandResult = {
 				template: template as ProjectOptions['template'],
 				projectName: projectName as string,
+				description: projectDescription as string,
+				keywords: projectKeywords as string,
 				author: author as string,
 				packageManager: packageManager as ProjectOptions['packageManager'],
 				createGithubRepository,
