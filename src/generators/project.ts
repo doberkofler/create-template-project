@@ -769,7 +769,7 @@ async function generateGeneratedMd(
 		'| `gh pr checkout <pr-number>` | Checkout a Pull Request branch locally |',
 		'| `gh issue create` | Create a new Issue |',
 		'| `gh issue list` | List all open Issues |',
-		'| `gh repo delete <owner>/<repo> --confirm` | Dangerously delete a repository completely (use with caution!) |',
+		'| `gh repo delete <owner>/<repo> --yes` | Dangerously delete a repository completely (use with caution!) |',
 		'',
 		'---',
 		'',
