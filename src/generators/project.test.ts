@@ -115,7 +115,9 @@ describe('generateProject', () => {
 		expect(preCommit).toContain('npm run ci');
 
 		expect(execa).toHaveBeenCalledWith('git', ['init'], expect.anything());
-		expect(execa).toHaveBeenCalledWith('gh', expect.anything(), expect.anything());
+		expect(execa).toHaveBeenCalledWith('git', ['add', '.'], expect.anything());
+		expect(execa).toHaveBeenCalledWith('git', ['commit', '-m', 'chore: initial scaffold'], expect.anything());
+		expect(execa).toHaveBeenCalledWith('gh', ['repo', 'create', projectName, '--public', '--source=.', '--remote=origin', '--push'], expect.anything());
 		expect(execa).toHaveBeenCalledWith('npm', ['install'], expect.anything());
 		expect(execa).toHaveBeenCalledWith('npm', ['run', 'ci'], expect.anything());
 	});
@@ -298,7 +300,7 @@ describe('generateProject', () => {
 			update: false,
 		};
 		await generateProject(opts);
-		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to create GitHub repository'));
+		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to create/push GitHub repository'));
 	});
 
 	it('should handle merge conflicts', async () => {

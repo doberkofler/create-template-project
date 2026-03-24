@@ -27,7 +27,7 @@ pnpm dlx create-template-project interactive
   - **Seed File Protection:** Files in `src/`, all `*.md` files, and other core files are skipped to protect your application logic and custom documentation.
   - **Tooling Sync:** Keeps your project's boilerplate (linting, CI, configs, scripts) up-to-date with the latest template versions.
 - **No-Build Option:** Supports creating simple projects without a build step (strips Vite).
-- **GitHub Integration:** Automatically initializes a Git repository and can create a GitHub repository using the `gh` CLI.
+- **GitHub Integration:** Automatically initializes a Git repository and can create a GitHub repository (including initial commit and push) using the `gh` CLI.
 - **CI Ready:** Generates GitHub Actions workflows for automated testing and linting.
 
 ## Installation
@@ -89,7 +89,7 @@ create-template-project update --template cli
 - `-a, --author <author>`: Author name (defaults to 'git config user.name')
 - `--github-username <username>`: GitHub username (defaults to 'git config github.user')
 - `-p, --package-manager <pm>`: Package manager (`npm`, `pnpm`, `yarn`) (defaults to `pnpm`)
-- `--create-github-repository`: Create GitHub project (requires `gh` CLI authenticated)
+- `--create-github-repository`: Create GitHub repository and push initial commit (requires `gh` CLI authenticated)
 - `--path <path>`: Output directory (mandatory)
 - `--build`: Run the CI script (lint, build, test) after scaffolding
 - `--no-progress`: Do not show progress indicators
@@ -102,7 +102,7 @@ create-template-project update --template cli
 - `-a, --author <author>`: Author name (defaults to 'git config user.name')
 - `--github-username <username>`: GitHub username (defaults to 'git config github.user')
 - `-p, --package-manager <pm>`: Package manager (`npm`, `pnpm`, `yarn`) (defaults to `pnpm`)
-- `--create-github-repository`: Create GitHub project (requires `gh` CLI authenticated)
+- `--create-github-repository`: Create GitHub repository and push initial commit (requires `gh` CLI authenticated)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
 - `--build`: Run the CI script (lint, build, test) after updating
 - `--dev`: Run the dev server after updating

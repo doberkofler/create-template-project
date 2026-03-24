@@ -115,7 +115,7 @@ Templates:
 		.option('-a, --author <author>', "Author name (defaults to 'git config user.name')")
 		.option('--github-username <username>', "GitHub username (defaults to 'git config github.user')")
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
-		.option('--create-github-repository', 'Create GitHub project')
+		.option('--create-github-repository', 'Create GitHub repository and push initial commit')
 		.requiredOption('--path <path>', 'Output directory')
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--no-progress', 'Do not show progress indicators')
@@ -161,7 +161,7 @@ Restrictions & Behavior:
 		.option('-a, --author <author>', "Author name (defaults to 'git config user.name')")
 		.option('--github-username <username>', "GitHub username (defaults to 'git config github.user')")
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
-		.option('--create-github-repository', 'Create GitHub project')
+		.option('--create-github-repository', 'Create GitHub repository and push initial commit')
 		.option('-d, --directory <path>', 'Output directory', '.')
 		.option('--build', 'Run the CI script (lint, build, test) after updating', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
@@ -392,7 +392,7 @@ Restrictions & Behavior:
 			}
 
 			const createGithubRepositoryRes = await p.confirm({
-				message: 'Should we create a GitHub repository?',
+				message: 'Create GitHub repository and push initial commit?',
 				initialValue: false,
 			});
 

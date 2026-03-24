@@ -497,26 +497,6 @@ export const generateProject = async (opts: ProjectOptions) => {
 		states.gitInitialized = true; // Already initialized
 	}
 
-	// GitHub Integration
-	if (opts.createGithubRepository && !isUpdate) {
-		debug('Creating GitHub repository');
-		try {
-			debug('Executing: gh repo create %s --public --source=. --remote=origin', projectName);
-			await execa('gh', ['repo', 'create', projectName, '--public', '--source=.', '--remote=origin'], {
-				cwd: projectDir,
-				stdio,
-				preferLocal: true,
-			});
-			log.success('Created GitHub repository (gh repo create).');
-			states.githubCreated = true;
-		} catch (e: any) {
-			debug('Failed to create GitHub repository: %O', e);
-			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
-			log.warn(`Failed to create GitHub repository: ${e.message}${detail}\nEnsure "gh" CLI is installed and authenticated.`);
-			states.githubError = e.message;
-		}
-	}
-
 	// Post-scaffolding actions
 	if (opts.build) {
 		debug('Installing dependencies using %s', pm);
@@ -578,6 +558,43 @@ export const generateProject = async (opts: ProjectOptions) => {
 			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
 			log.error(`${e.message}${detail}`);
 			throw new Error(`Failed to run CI script: ${e.message}${detail}`);
+		}
+	}
+
+	// GitHub Integration (Create, Commit, Push)
+	if (opts.createGithubRepository && !isUpdate) {
+		debug('Creating and pushing GitHub repository');
+		const s = spinner();
+		s.start('Creating and pushing GitHub repository...');
+		try {
+			debug('Executing: git add .');
+			await execa('git', ['add', '.'], {
+				cwd: projectDir,
+				stdio,
+				preferLocal: true,
+			});
+
+			debug('Executing: git commit -m "chore: initial scaffold"');
+			await execa('git', ['commit', '-m', 'chore: initial scaffold'], {
+				cwd: projectDir,
+				stdio,
+				preferLocal: true,
+			});
+
+			debug('Executing: gh repo create %s --public --source=. --remote=origin --push', projectName);
+			await execa('gh', ['repo', 'create', projectName, '--public', '--source=.', '--remote=origin', '--push'], {
+				cwd: projectDir,
+				stdio,
+				preferLocal: true,
+			});
+			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Created GitHub repository and pushed initial commit.`);
+			states.githubCreated = true;
+		} catch (e: any) {
+			debug('Failed to create/push GitHub repository: %O', e);
+			s.stop('Failed to create/push GitHub repository.');
+			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
+			log.warn(`Failed to create/push GitHub repository: ${e.message}${detail}\nEnsure "gh" CLI is installed and authenticated.`);
+			states.githubError = e.message;
 		}
 	}
 
@@ -650,7 +667,7 @@ async function generateGeneratedMd(
 		`- [x] Configure \`package.json\` with appropriate dependencies`,
 		`- [${states.depsInstalled ? 'x' : ' '}] Install dependencies using \`${pm}\`${states.depsSkipped ? ' *(Skipped)*' : ''}`,
 		`- [${states.gitInitialized ? 'x' : ' '}] Initialize Git repository`,
-		`- [${states.githubCreated ? 'x' : ' '}] Create GitHub repository${states.githubSkipped ? ' *(Skipped)*' : states.githubError ? ' *(Failed)*' : ''}`,
+		`- [${states.githubCreated ? 'x' : ' '}] Create and push GitHub repository${states.githubSkipped ? ' *(Skipped)*' : states.githubError ? ' *(Failed)*' : ''}`,
 		`- [${states.ciRun ? 'x' : ' '}] Run initial CI pipeline (lint, build, test)${states.ciSkipped ? ' *(Skipped)*' : ''}`,
 		'',
 		...(isUpdate
