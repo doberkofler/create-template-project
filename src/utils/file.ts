@@ -4,17 +4,9 @@ import {existsSync} from 'node:fs';
 import {execa} from 'execa';
 import debugLib from 'debug';
 import {ProjectOptions} from '../types.js';
+import {processContent as processContentInternal} from './templating/index.js';
 
 const debug = debugLib('create-template-project:utils:file');
-
-const WORKFLOW_PNPM_SETUP = `      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false`;
-
-const WORKFLOW_PLAYWRIGHT_SETUP = `      - name: Install Playwright Browsers & Deps
-        run: npx playwright install --with-deps chromium`;
 
 export function getTemplateDir(dirname: string, templateName: string): string {
 	const sourcePath = path.resolve(dirname, 'files');
@@ -40,105 +32,7 @@ export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []) 
 }
 
 export function processContent(filePath: string, content: string, opts: ProjectOptions, addedDeps: Array<{name: string; description: string}>): string {
-	const {projectName, template, author, githubUsername} = opts;
-	let description = opts.description || '';
-
-	if (!description) {
-		switch (template) {
-			case 'cli':
-				description = 'A modern Node.js CLI application with TypeScript and automated tooling.';
-				break;
-			case 'web-vanilla':
-				description = 'A standalone web page/application for modern browsers.';
-				break;
-			case 'web-fullstack':
-				description = 'A full-stack monorepo with an Express server and a React/MUI client.';
-				break;
-			case 'web-app':
-				description = 'A React application with MUI and TanStack Query.';
-				break;
-		}
-	}
-
-	const pm = opts.packageManager || 'npm';
-	const lockfileRules = pm === 'pnpm' ? 'package-lock.json\nyarn.lock' : pm === 'yarn' ? 'package-lock.json\npnpm-lock.yaml' : 'yarn.lock\npnpm-lock.yaml';
-
-	let processed = content
-		.replaceAll('{{projectName}}', projectName)
-		.replaceAll('{{description}}', description)
-		.replaceAll('{{packageManager}}', pm)
-		.replaceAll('{{author}}', author || '')
-		.replaceAll('{{githubUsername}}', githubUsername || '')
-		.replaceAll('{{year}}', new Date().getFullYear().toString())
-		.replaceAll('{{lockfileRules}}', lockfileRules);
-
-	// Special logic for GitHub Actions workflow
-	if (filePath.includes('.github/workflows/node.js.yml')) {
-		let installCommand = 'npm ci';
-		let pmSetup = '';
-		if (pm === 'pnpm') {
-			installCommand = 'pnpm install --frozen-lockfile';
-			pmSetup = WORKFLOW_PNPM_SETUP;
-		} else if (pm === 'yarn') {
-			installCommand = 'yarn install --frozen-lockfile';
-		}
-
-		let playwrightSetup = '';
-		if (template === 'web-fullstack' || template === 'web-app' || template === 'web-vanilla') {
-			playwrightSetup = WORKFLOW_PLAYWRIGHT_SETUP;
-		}
-
-		processed = processed
-			.replaceAll('{{installCommand}}', installCommand)
-			.replaceAll('# [PM_SETUP]', pmSetup)
-			.replaceAll('# [PLAYWRIGHT_SETUP]', playwrightSetup);
-
-		// Clean up empty lines from empty placeholders
-		processed = processed.replace(/^\s*# \[PM_SETUP\]\s*\n/m, '');
-		processed = processed.replace(/^\s*# \[PLAYWRIGHT_SETUP\]\s*\n/m, '');
-	}
-
-	// Special logic for web-vanilla template script tag in index.html
-	if (template === 'web-vanilla' && filePath === 'index.html') {
-		processed = processed.replace('{{scriptSrc}}', '/src/index.ts');
-	}
-
-	// Append dependencies to CONTRIBUTING.md
-	if (filePath === 'CONTRIBUTING.md' && addedDeps.length > 0) {
-		processed += '\n## Dependencies\n\n';
-		const uniqueDeps = Array.from(new Set(addedDeps.map((d) => JSON.stringify(d)))).map((s) => JSON.parse(s)) as Array<{
-			name: string;
-			description: string;
-		}>;
-		for (const dep of uniqueDeps) {
-			processed += `- **${dep.name}**: ${dep.description}\n`;
-		}
-	}
-
-	// Web-Fullstack/Web-Vanilla/Web-App tsconfig.json overrides
-	if ((template === 'web-fullstack' || template === 'web-vanilla' || template === 'web-app') && filePath === 'tsconfig.json') {
-		const webEnv = `/* Language and Environment */
-		"target": "ES2023" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
-		"lib": ["ES2023", "DOM", "DOM.Iterable"] /* Specify a set of bundled library declaration files that describe the target runtime environment. */,
-		"module": "ESNext" /* Specify what module code is generated. */,
-		"moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
-		"esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. */,
-		"resolveJsonModule": true /* Enable importing .json files. */,
-		"allowImportingTsExtensions": true /* Allow imports to include TypeScript file extensions. */,
-		"noEmit": true /* Disable emitting files from a compilation. */,
-		"jsx": "react-jsx" /* Specify what JSX code is generated. */,`;
-
-		processed = processed.replace(
-			/\/\* Language and Environment \*\/[\s\S]*?\/\* Strict Type-Checking Options \*\//,
-			webEnv + '\n\n\t\t/* Strict Type-Checking Options */',
-		);
-	}
-
-	if (template === 'web-fullstack' && filePath === 'tsconfig.json') {
-		processed = processed.replace(/"include":\s*\[\s*"src\/\*\*\/\*"\s*\]/, '"include": ["client/src/**/*", "server/src/**/*"]');
-	}
-
-	return processed;
+	return processContentInternal(filePath, content, opts, addedDeps);
 }
 
 export function mergePackageJson(target: any, source: any) {
