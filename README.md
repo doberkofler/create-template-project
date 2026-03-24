@@ -22,9 +22,10 @@ pnpm dlx create-template-project interactive
 
 - **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `oxfmt`, and `typescript` (strict mode).
 - **Interactive CLI:** Prompts you for project details if CLI arguments are missing, using `@clack/prompts`.
-- **🔄 Update Mode:** Detects existing projects and offers a safe update path using `git merge-file`.
-  - Files in `src/` and all `*.md` files are skipped to protect your application logic and documentation.
-  - Ideal for keeping your project's boilerplate (linting, CI, configs) up-to-date.
+- **🔄 Update Mode:** Detects existing projects and offers a safe update path.
+  - **Intelligent Tracking:** Automatically generates a detailed `GENERATED.md` with an "Upgrade Details" table showing exactly what changed, why, and what actions (like conflict resolution) are needed.
+  - **Seed File Protection:** Files in `src/`, all `*.md` files, and other core files are skipped to protect your application logic and custom documentation.
+  - **Tooling Sync:** Keeps your project's boilerplate (linting, CI, configs, scripts) up-to-date with the latest template versions.
 - **No-Build Option:** Supports creating simple projects without a build step (strips Vite).
 - **GitHub Integration:** Automatically initializes a Git repository and can create a GitHub repository using the `gh` CLI.
 - **CI Ready:** Generates GitHub Actions workflows for automated testing and linting.

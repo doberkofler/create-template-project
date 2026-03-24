@@ -189,8 +189,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 
 	// Second pass: Collect and report actions
 	const actions: Array<{
-		type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE';
+		type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE' | 'UPDATED';
 		path: string;
+		reason?: string;
+		recommendedAction?: string;
 	}> = [];
 	const pendingOperations: Array<() => Promise<void>> = [];
 
@@ -207,13 +209,21 @@ export const generateProject = async (opts: ProjectOptions) => {
 
 				// Skip seed files during update
 				if (isUpdate && isSeedFile(relativePath)) {
-					actions.push({type: 'SKIP', path: relativePath});
+					actions.push({
+						type: 'SKIP',
+						path: relativePath,
+						reason: 'Seed file - skipped during update to preserve manual changes',
+					});
 					continue;
 				}
 
 				if (!isFileRequired(relativePath, type)) {
 					if (isUpdate && (await pathExists(targetPath))) {
-						actions.push({type: 'DELETE', path: relativePath});
+						actions.push({
+							type: 'DELETE',
+							path: relativePath,
+							reason: 'File no longer required for this template type',
+						});
 						pendingOperations.push(async () => {
 							await fs.rm(targetPath, {force: true});
 						});
@@ -241,20 +251,37 @@ export const generateProject = async (opts: ProjectOptions) => {
 					const existingContent = await fs.readFile(finalTargetPath, 'utf8');
 					if (existingContent.trim() !== content.trim()) {
 						// For now, we assume it's a MERGE or MODIFY
-						actions.push({type: 'MODIFY', path: finalRelativePath});
+						const action: (typeof actions)[0] = {
+							type: 'MODIFY',
+							path: finalRelativePath,
+							reason: 'Template tooling or configuration update',
+						};
+						actions.push(action);
 						pendingOperations.push(async () => {
 							const result = await mergeFile(finalTargetPath, existingContent, content, log);
 							if (result === 'merged') {
+								action.type = 'MERGE';
+								action.reason = 'Merged template updates with your manual changes';
+								action.recommendedAction = 'Review changes for correct integration';
 								log.info(`ℹ Merged: ${finalRelativePath}`);
 							} else if (result === 'conflict') {
+								action.type = 'CONFLICT';
+								action.reason = 'Conflicting changes between template and your code';
+								action.recommendedAction = 'Resolve git conflict markers in this file';
 								log.warn(`⚠ Conflict: ${finalRelativePath}`);
 							} else if (result === 'updated') {
+								action.type = 'UPDATED';
+								action.reason = 'File was updated to the latest template version';
 								log.info(`✔ Updated: ${finalRelativePath}`);
 							}
 						});
 					}
 				} else if (!exists) {
-					actions.push({type: 'ADD', path: finalRelativePath});
+					actions.push({
+						type: 'ADD',
+						path: finalRelativePath,
+						reason: 'New template file added',
+					});
 					pendingOperations.push(async () => {
 						await fs.mkdir(path.dirname(finalTargetPath), {recursive: true});
 						await fs.writeFile(finalTargetPath, content);
@@ -271,13 +298,21 @@ export const generateProject = async (opts: ProjectOptions) => {
 		for (const file of t.files) {
 			const targetPath = path.join(projectDir, file.path);
 			if (isUpdate && isSeedFile(file.path)) {
-				actions.push({type: 'SKIP', path: file.path});
+				actions.push({
+					type: 'SKIP',
+					path: file.path,
+					reason: 'Seed file - skipped during update to preserve manual changes',
+				});
 				continue;
 			}
 
 			if (!isFileRequired(file.path, type)) {
 				if (isUpdate && (await pathExists(targetPath))) {
-					actions.push({type: 'DELETE', path: file.path});
+					actions.push({
+						type: 'DELETE',
+						path: file.path,
+						reason: 'File no longer required for this template type',
+					});
 					pendingOperations.push(async () => {
 						await fs.rm(targetPath, {force: true});
 					});
@@ -292,20 +327,37 @@ export const generateProject = async (opts: ProjectOptions) => {
 			if (isUpdate && exists) {
 				const existingContent = await fs.readFile(targetPath, 'utf8');
 				if (existingContent.trim() !== content.trim()) {
-					actions.push({type: 'MODIFY', path: file.path});
+					const action: (typeof actions)[0] = {
+						type: 'MODIFY',
+						path: file.path,
+						reason: 'Template configuration update',
+					};
+					actions.push(action);
 					pendingOperations.push(async () => {
 						const result = await mergeFile(targetPath, existingContent, content, log);
 						if (result === 'merged') {
+							action.type = 'MERGE';
+							action.reason = 'Merged template updates with your manual changes';
+							action.recommendedAction = 'Review changes for correct integration';
 							log.info(`ℹ Merged: ${file.path}`);
 						} else if (result === 'conflict') {
+							action.type = 'CONFLICT';
+							action.reason = 'Conflicting changes between template and your code';
+							action.recommendedAction = 'Resolve git conflict markers in this file';
 							log.warn(`⚠ Conflict: ${file.path}`);
 						} else if (result === 'updated') {
+							action.type = 'UPDATED';
+							action.reason = 'File was updated to the latest template version';
 							log.info(`✔ Updated: ${file.path}`);
 						}
 					});
 				}
 			} else if (!exists) {
-				actions.push({type: 'ADD', path: file.path});
+				actions.push({
+					type: 'ADD',
+					path: file.path,
+					reason: 'New template file added',
+				});
 				pendingOperations.push(async () => {
 					await fs.mkdir(path.dirname(targetPath), {recursive: true});
 					await fs.writeFile(targetPath, content);
@@ -341,6 +393,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 			actions.push({
 				type: workspaceExists ? 'MODIFY' : 'ADD',
 				path: 'pnpm-workspace.yaml',
+				reason: 'Updated workspace configuration for pnpm',
 			});
 			pendingOperations.push(async () => {
 				await fs.writeFile(workspacePath, workspaceYaml);
@@ -366,9 +419,13 @@ export const generateProject = async (opts: ProjectOptions) => {
 
 	if (pkgChanged) {
 		if (isUpdate) {
-			actions.push({type: 'MODIFY', path: 'package.json'});
+			actions.push({
+				type: 'MODIFY',
+				path: 'package.json',
+				reason: 'Updated dependencies and scripts to match latest template',
+			});
 		} else {
-			actions.push({type: 'ADD', path: 'package.json'});
+			actions.push({type: 'ADD', path: 'package.json', reason: 'Initial project configuration'});
 		}
 		pendingOperations.push(async () => {
 			debug('Writing final consolidated package.json to: %s', pkgPath);
@@ -533,11 +590,19 @@ export const generateProject = async (opts: ProjectOptions) => {
 		errorMessages.push(`GitHub repository creation failed: ${states.githubError}`);
 	}
 
-	await generateGeneratedMd(projectDir, opts, pm, states, isUpdate, {
-		hasErrors,
-		hasWarnings,
-		errorMessages,
-	});
+	await generateGeneratedMd(
+		projectDir,
+		opts,
+		pm,
+		states,
+		isUpdate,
+		{
+			hasErrors,
+			hasWarnings,
+			errorMessages,
+		},
+		actions,
+	);
 
 	const successMsg = `Project "${projectName}" ${isUpdate ? 'updated' : 'scaffolded'} successfully in ${projectDir}. A detailed setup guide has been generated at GENERATED.md`;
 	if (hasErrors) {
@@ -556,6 +621,7 @@ async function generateGeneratedMd(
 	states: any,
 	isUpdate: boolean,
 	status: {hasErrors: boolean; hasWarnings: boolean; errorMessages: string[]},
+	actions: Array<{type: string; path: string; reason?: string; recommendedAction?: string}>,
 ) {
 	const statusBadge = status.hasErrors
 		? '🔴 **Completed with Errors**'
@@ -579,13 +645,53 @@ async function generateGeneratedMd(
 		'---',
 		'',
 		'## 📋 Initialization Checklist',
-		'The following tasks were executed during the generation process:',
+		isUpdate ? 'The project was updated with the latest template changes:' : 'The following tasks were executed during the generation process:',
 		`- [x] Scaffold project files and directories`,
 		`- [x] Configure \`package.json\` with appropriate dependencies`,
 		`- [${states.depsInstalled ? 'x' : ' '}] Install dependencies using \`${pm}\`${states.depsSkipped ? ' *(Skipped)*' : ''}`,
 		`- [${states.gitInitialized ? 'x' : ' '}] Initialize Git repository`,
 		`- [${states.githubCreated ? 'x' : ' '}] Create GitHub repository${states.githubSkipped ? ' *(Skipped)*' : states.githubError ? ' *(Failed)*' : ''}`,
 		`- [${states.ciRun ? 'x' : ' '}] Run initial CI pipeline (lint, build, test)${states.ciSkipped ? ' *(Skipped)*' : ''}`,
+		'',
+		...(isUpdate
+			? [
+					'### 🛠️ Upgrade Details',
+					'The following files were affected by this update:',
+					'',
+					'| File Path | Action | Reason | Next Steps |',
+					'| :--- | :--- | :--- | :--- |',
+					...actions
+						.filter((a) => a.type !== 'SKIP')
+						.map((a) => {
+							const actionIcon =
+								{
+									ADD: '➕ ADD',
+									MODIFY: '📝 MODIFY',
+									MERGE: '🔀 MERGE',
+									CONFLICT: '🔥 CONFLICT',
+									DELETE: '🗑️ DELETE',
+									UPDATED: '✨ UPDATED',
+								}[a.type] || a.type;
+							return `| \`${a.path}\` | ${actionIcon} | ${a.reason || '-'} | ${a.recommendedAction || (a.type === 'CONFLICT' ? '**Resolve conflicts**' : 'Review changes')} |`;
+						}),
+					'',
+				]
+			: []),
+		'---',
+		'',
+		'## 🛠️ Manual Adjustments Needed',
+		'To complete your project setup, please review and manually update the following:',
+		'- [ ] **`LICENSE`**: Verify the copyright year and author name.',
+		'- [ ] **`package.json`**: Review the description, keywords, author, and repository links.',
+		'- [ ] **`README.md`**: Update with project-specific instructions, architecture details, and contribution guidelines.',
+		'- [ ] **`.gitignore`**: Note that there is a **`# Custom`** section at the end of the file for your own ignores.',
+		'',
+		'---',
+		'',
+		'## 💡 Next Steps',
+		'1. Review the generated codebase to familiarize yourself with the structure.',
+		`2. Start the development server using \`${pm} run dev\`.`,
+		'3. Make your first commit and push to your remote repository.',
 		'',
 		'---',
 		'',
@@ -661,19 +767,6 @@ async function generateGeneratedMd(
 		'7. **Publish (if applicable):** `pnpm publish`',
 		'',
 		'---',
-		'',
-		'## 🛠️ Manual Adjustments Needed',
-		'To complete your project setup, please review and manually update the following:',
-		'- [ ] **`LICENSE`**: Verify the copyright year and author name.',
-		'- [ ] **`package.json`**: Review the description, keywords, author, and repository links.',
-		'- [ ] **`README.md`**: Update with project-specific instructions, architecture details, and contribution guidelines.',
-		'',
-		'---',
-		'',
-		'## 💡 Next Steps',
-		'1. Review the generated codebase to familiarize yourself with the structure.',
-		`2. Start the development server using \`${pm} run dev\`.`,
-		'3. Make your first commit and push to your remote repository.',
 		'',
 		'<br>',
 		'<p align="center"><i>This file was auto-generated by <b>create-template-project</b>.</i></p>',

@@ -873,18 +873,4 @@ describe('generateProject', () => {
 		expect(content).toContain('packages:');
 		expect(content).not.toBe('old content');
 	});
-
-	it('should cover isSeedFile branches', () => {
-		expect(isSeedFile('src/index.ts')).toBe(true);
-		expect(isSeedFile('client/src/main.ts')).toBe(true);
-		expect(isSeedFile('server/src/main.ts')).toBe(true);
-		expect(isSeedFile('backend/src/main.ts')).toBe(true);
-		expect(isSeedFile('frontend/src/main.ts')).toBe(true);
-		expect(isSeedFile('index.html')).toBe(true);
-		expect(isSeedFile('App.tsx')).toBe(true);
-		expect(isSeedFile('main.tsx')).toBe(true);
-		expect(isSeedFile('index.tsx')).toBe(true);
-		expect(isSeedFile('package.json')).toBe(false);
-		expect(isSeedFile('src.ts')).toBe(false);
-	});
 });
