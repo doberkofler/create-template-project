@@ -1,6 +1,6 @@
 {
   "name": "create-template-project",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Webpage, Webapp, Fullstack) with best-practice configurations pre-installed.",
   "keywords": [
@@ -63,7 +63,7 @@
     "ci": "pnpm run lint && pnpm run build && pnpm run test",
     "create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "prepare": "husky",
-	"release": "release-it"
+    "release": "release-it"
   },
   "dependencies": {
     "@clack/prompts": "1.1.0",

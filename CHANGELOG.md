@@ -1,3 +1,21 @@
+# [1.1.0](https://github.com/doberkofler/create-template-project/compare/v1.0.0...v1.1.0) (2026-03-24)
+
+
+### Bug Fixes
+
+* clean up string inputs by removing surrounding matching quotes and trimming whitespace ([10f18fa](https://github.com/doberkofler/create-template-project/commit/10f18fac0cc88367d6b9e20f37c5da870af872cc))
+* fix gh repo flag ([ccdee12](https://github.com/doberkofler/create-template-project/commit/ccdee127a0160fcf4ea7492929ab6f3543626df7))
+
+
+### Features
+
+* improved the AGENTS.md template file ([e9fafed](https://github.com/doberkofler/create-template-project/commit/e9fafedf14b87e040009cf8f8b4f4f33600ea0ae))
+* introduce an automated release workflow using release-it ([e35606f](https://github.com/doberkofler/create-template-project/commit/e35606f4368814e939b99c183e04d2373314b748))
+* introduce an automated release workflow using release-it ([c1f55ef](https://github.com/doberkofler/create-template-project/commit/c1f55ef43d89e61b18c9b23c36b4a63a61084dba))
+* introduce an automated release workflow using release-it ([8bf73bf](https://github.com/doberkofler/create-template-project/commit/8bf73bf74b4a1ab727b356a56552021dc4a3f2e3))
+* remove option  --install-dependencies ([f02b9f0](https://github.com/doberkofler/create-template-project/commit/f02b9f04f71981d5a2c231efca278c9e3c342d5f))
+* updated the --create-github-repository option to include an initial commit and push ([7ce8076](https://github.com/doberkofler/create-template-project/commit/7ce8076700f2e21fa12054821573227da7681913))
+
 # [1.0.0](https://github.com/doberkofler/create-template-project/compare/v0.5.0...v1.0.0) (2026-03-24)
 
 
