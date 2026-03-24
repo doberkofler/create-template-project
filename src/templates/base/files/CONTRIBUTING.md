@@ -21,11 +21,22 @@ We follow the **Conventional Commits** specification. This is **enforced** by `c
 
 ## Release Process
 
-1. **Verify**: `pnpm run ci`
-2. **Bump Version**: `pnpm version <patch|minor|major> --no-git-tag-version`
-3. **Update Changelog**: `pnpm run create-changelog`
-4. **Commit**: `git add . && git commit -m "chore(release): $(node -p 'require("./package.json").version')"`
-5. **Tag & Push**: `git tag v$(node -p 'require("./package.json").version') && git push && git push --tags`
-6. **Create GitHub Release**: `gh release create v$(node -p 'require("./package.json").version') --generate-notes`
-7. **Publish**: `pnpm publish`
+To release a new version:
+
+```sh
+pnpm release -- patch   # or minor / major
+```
+
+This will automatically:
+1. Run the CI suite (`pnpm run ci`).
+2. Bump the version in `package.json`.
+3. Update the `CHANGELOG.md`.
+4. Commit, tag, and push the changes.
+5. Create a GitHub release with auto-generated notes.
+6. Publish to npm (if configured).
+
+**Note:** NPM publishing is **disabled** by default for new projects. To enable it:
+1. Set `"private": false` in `package.json`.
+2. Set `"publish": true` in `.release-it.json`.
+3. Ensure you have the necessary `NPM_TOKEN` configured.
 

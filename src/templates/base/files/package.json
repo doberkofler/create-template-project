@@ -1,12 +1,14 @@
 {
   "name": "{{projectName}}",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "lint": "tsc && oxlint --disable-nested-config src client server tests *.config.ts && npm run format:check",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "test": "vitest run --coverage",
+    "release": "release-it",
     "ci": "npm run lint && npm run build && npm run test",
     "create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "prepare": "husky"
@@ -25,6 +27,7 @@
     "oxlint": "",
     "oxlint-tsgolint": "",
     "oxfmt": "",
+    "release-it": "",
     "eslint-plugin-regexp": "",
     "typescript": "",
     "vitest": ""

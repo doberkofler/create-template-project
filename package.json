@@ -1,6 +1,7 @@
 {
   "name": "create-template-project",
   "version": "1.0.0",
+  "private": true,
   "description": "An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Webpage, Webapp, Fullstack) with best-practice configurations pre-installed.",
   "keywords": [
     "boilerplate",
@@ -61,7 +62,8 @@
     "integration-test": "pnpm run integration-test:cli && pnpm run integration-test:web-vanilla && pnpm run integration-test:web-app && pnpm run integration-test:web-fullstack",
     "ci": "pnpm run lint && pnpm run build && pnpm run test",
     "create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "prepare": "husky"
+    "prepare": "husky",
+	"release": "release-it"
   },
   "dependencies": {
     "@clack/prompts": "1.1.0",
@@ -80,10 +82,11 @@
     "conventional-changelog-angular": "8.3.0",
     "eslint-plugin-regexp": "3.1.0",
     "husky": "9.1.7",
-    "oxfmt": "0.41.0",
-    "oxlint": "1.56.0",
-    "oxlint-tsgolint": "0.17.1",
+    "oxfmt": "0.42.0",
+    "oxlint": "1.57.0",
+    "oxlint-tsgolint": "0.17.3",
     "pnpm": "10.32.1",
+    "release-it": "19.2.4",
     "rimraf": "6.1.3",
     "typescript": "5.9.3",
     "vite": "8.0.2",

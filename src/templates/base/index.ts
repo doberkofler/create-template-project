@@ -26,6 +26,7 @@ export const getBaseTemplate = (_opts: ProjectOptions): TemplateDefinition => {
 				name: 'conventional-changelog',
 				description: 'Automated release notes.',
 			},
+			{name: 'release-it', description: 'Automated release workflow.'},
 			{name: 'debug', description: 'Structured logging for debugging.'},
 			{
 				name: 'Zod',
@@ -37,6 +38,7 @@ export const getBaseTemplate = (_opts: ProjectOptions): TemplateDefinition => {
 		},
 		devDependencies: {
 			'eslint-plugin-regexp': '',
+			'release-it': '',
 		},
 		scripts: {},
 		files: [],
