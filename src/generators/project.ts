@@ -469,7 +469,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 		githubSkipped: !opts.createGithubRepository || isUpdate,
 		githubError: '',
 		depsInstalled: false,
-		depsSkipped: !opts.installDependencies,
+		depsSkipped: !opts.build,
 		ciRun: false,
 		ciSkipped: !opts.build || !finalPkg.scripts.ci,
 	};
@@ -518,7 +518,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 	}
 
 	// Post-scaffolding actions
-	if (opts.installDependencies) {
+	if (opts.build) {
 		debug('Installing dependencies using %s', pm);
 		const s = spinner();
 		s.start(`Installing dependencies using ${pm}...`);

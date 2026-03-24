@@ -152,7 +152,7 @@ describe('cli', () => {
 
 	it('should handle interactive mode', async () => {
 		process.argv.push('interactive');
-		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), GithubUsername (text), Template (select), PM (select), Deps (confirm), CI (confirm), GH (confirm)
+		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), GithubUsername (text), Template (select), PM (select), CI (confirm), GH (confirm)
 		vi.mocked(p.text)
 			.mockResolvedValueOnce('my-web-fullstack-app')
 			.mockResolvedValueOnce('./out')
@@ -199,7 +199,7 @@ describe('cli', () => {
 			}),
 		);
 
-		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), GithubUsername (text), Action (select), Template (select), Deps (confirm), CI (confirm), GH (confirm)
+		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), GithubUsername (text), Action (select), Template (select), CI (confirm), GH (confirm)
 		vi.mocked(p.text)
 			.mockResolvedValueOnce(projectName)
 			.mockResolvedValueOnce('.')
@@ -234,6 +234,7 @@ describe('cli', () => {
 
 	it('should handle full interactive flow', async () => {
 		process.argv.push('interactive');
+		// Order: ProjectName (text), Directory (text), Description (text), Keywords (text), Author (text), GithubUsername (text), Template (select), PM (select), CI (confirm), GH (confirm)
 		vi.mocked(p.text)
 			.mockResolvedValueOnce('full-test')
 			.mockResolvedValueOnce('.')
@@ -245,7 +246,6 @@ describe('cli', () => {
 		vi.mocked(p.confirm).mockResolvedValue(true);
 		const result = await parseArgs();
 		expect(result.build).toBe(true);
-		expect(result.installDependencies).toBe(true);
 		expect(result.author).toBe('Test Author');
 	});
 

@@ -79,7 +79,6 @@ describe('generateProject', () => {
 			createGithubRepository: true,
 			directory: projectPath,
 			update: false,
-			installDependencies: true,
 			build: true,
 		};
 		await generateProject(opts);
@@ -496,7 +495,7 @@ describe('generateProject', () => {
 			projectName,
 			directory: projectPath,
 			update: false,
-			installDependencies: true,
+			build: true,
 		};
 		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
@@ -691,7 +690,6 @@ describe('generateProject', () => {
 			directory: projectPath,
 			update: false,
 			progress: false,
-			installDependencies: true,
 		};
 		await generateProject(opts);
 		expect(spinnerMock.start).not.toHaveBeenCalled();

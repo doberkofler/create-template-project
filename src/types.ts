@@ -17,7 +17,6 @@ export const ProjectOptionsSchema = z.object({
 	createGithubRepository: z.boolean().optional().default(false),
 	directory: z.string(),
 	update: z.boolean().optional().default(false),
-	installDependencies: z.boolean().optional().default(false),
 	build: z.boolean().optional().default(false),
 	progress: z.boolean().optional().default(true),
 });

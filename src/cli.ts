@@ -117,7 +117,6 @@ Templates:
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.requiredOption('--path <path>', 'Output directory')
-		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--no-progress', 'Do not show progress indicators')
 		.action(async (opts) => {
@@ -164,7 +163,6 @@ Restrictions & Behavior:
 		.option('-p, --package-manager <pm>', 'Package manager (npm, pnpm, yarn)', 'pnpm')
 		.option('--create-github-repository', 'Create GitHub project')
 		.option('-d, --directory <path>', 'Output directory', '.')
-		.option('--install-dependencies', 'Install dependencies after scaffolding', false)
 		.option('--build', 'Run the CI script (lint, build, test) after updating', false)
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
@@ -383,29 +381,14 @@ Restrictions & Behavior:
 				}
 			}
 
-			const installDependenciesRes = await p.confirm({
-				message: 'Should we install dependencies?',
+			const build = await p.confirm({
+				message: 'Should we run the CI script (lint, build, test)?',
 				initialValue: true,
 			});
 
-			if (p.isCancel(installDependenciesRes)) {
+			if (p.isCancel(build)) {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
-			}
-			const installDependencies = installDependenciesRes as boolean;
-
-			let build = false;
-			if (installDependencies) {
-				const res = await p.confirm({
-					message: 'Should we run the CI script (lint, build, test)?',
-					initialValue: true,
-				});
-
-				if (p.isCancel(res)) {
-					p.cancel('Operation cancelled.');
-					process.exit(0);
-				}
-				build = res as boolean;
 			}
 
 			const createGithubRepositoryRes = await p.confirm({
@@ -430,8 +413,7 @@ Restrictions & Behavior:
 				createGithubRepository,
 				directory: projectDir,
 				update,
-				installDependencies,
-				build,
+				build: build as boolean,
 				progress: true,
 			};
 		});
@@ -477,10 +459,6 @@ Restrictions & Behavior:
 	if (exists && !commandResult.update) {
 		p.cancel(`Directory "${projectDir}" already exists. Use the "update" command to update.`);
 		process.exit(1);
-	}
-
-	if (commandResult.build) {
-		commandResult.installDependencies = true;
 	}
 
 	return commandResult;

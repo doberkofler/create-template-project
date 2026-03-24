@@ -13,7 +13,6 @@ const MOCK_OPTS: ProjectOptions = {
 	directory: '.',
 	packageManager: 'npm',
 	update: false,
-	installDependencies: false,
 	build: false,
 	progress: true,
 	createGithubRepository: false,

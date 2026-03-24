@@ -12,7 +12,6 @@ describe('github workflow processor', () => {
 		packageManager: 'npm',
 		createGithubRepository: false,
 		update: false,
-		installDependencies: false,
 		build: false,
 		progress: false,
 	};

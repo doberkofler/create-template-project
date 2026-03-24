@@ -91,7 +91,6 @@ create-template-project update --template cli
 - `-p, --package-manager <pm>`: Package manager (`npm`, `pnpm`, `yarn`) (defaults to `pnpm`)
 - `--create-github-repository`: Create GitHub project (requires `gh` CLI authenticated)
 - `--path <path>`: Output directory (mandatory)
-- `--install-dependencies`: Install dependencies after scaffolding
 - `--build`: Run the CI script (lint, build, test) after scaffolding
 - `--no-progress`: Do not show progress indicators
 
@@ -105,7 +104,6 @@ create-template-project update --template cli
 - `-p, --package-manager <pm>`: Package manager (`npm`, `pnpm`, `yarn`) (defaults to `pnpm`)
 - `--create-github-repository`: Create GitHub project (requires `gh` CLI authenticated)
 - `-d, --directory <path>`: Output directory (defaults to `.`)
-- `--install-dependencies`: Install dependencies after updating
 - `--build`: Run the CI script (lint, build, test) after updating
 - `--dev`: Run the dev server after updating
 - `--open`: Open the browser after updating
