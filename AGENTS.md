@@ -15,7 +15,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 - **Lint code:** `pnpm run lint` (runs `tsc`, `oxlint`, and `oxfmt`)
 - **Run all tests:** `pnpm run test` (uses `vitest` with coverage)
 - **Run CI suite:** `pnpm run ci` (lint + build + test)
-- **Run integration tests:** `pnpm run test:integration` (builds and scaffolds all templates)
+- **Run integration tests:** `pnpm run integration-test` (builds and scaffolds all templates)
 - **Check dependencies:** `pnpm run dependencies-check` (verifies template dependencies)
 
 ### Targeted Testing
@@ -90,6 +90,15 @@ Every generated project MUST include:
 - `typescript`: Strict mode configuration.
 - `AGENTS.md` & `README.md`: With appropriate badges and instructions.
 - `CONTRIBUTING.md`: Basic contribution guidelines.
+
+## Mandatory Completion Protocol (Definition of Done)
+
+No task involving code changes is considered complete until the agent provides the following "Evidence of Done" in its final response:
+
+1. **CI Verification:** The agent MUST run `pnpm run ci` and include the full terminal output (showing `Found 0 warnings and 0 errors` and `Tests passed`).
+2. **Integration Verification:** The agent MUST run `pnpm run integration-test` and confirm successful scaffolding of all templates.
+
+**Failure to provide these logs means the task is INCOMPLETE.** The user is encouraged to reject any response that lacks this section.
 
 ## Git Workflow
 

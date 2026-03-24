@@ -13,6 +13,23 @@ const pathExists = (p: string) =>
 		.then(() => true)
 		.catch(() => false);
 
+const stripQuotes = (str: string | undefined): string | undefined => {
+	if (typeof str !== 'string') {
+		return str;
+	}
+	let result = str.trim();
+	while (result.length >= 2) {
+		const first = result[0];
+		const last = result[result.length - 1];
+		if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+			result = result.substring(1, result.length - 1).trim();
+		} else {
+			break;
+		}
+	}
+	return result;
+};
+
 const getDefaultAuthor = async () => {
 	try {
 		const {stdout} = await execa('git', ['config', 'user.name']);
@@ -440,6 +457,29 @@ Restrictions & Behavior:
 		debug('No command result found');
 		p.cancel('Unknown command or missing options.');
 		process.exit(1);
+	}
+
+	// Sanitize string inputs (strip surrounding quotes)
+	if (commandResult.template) {
+		commandResult.template = stripQuotes(commandResult.template) as any;
+	}
+	if (commandResult.projectName) {
+		commandResult.projectName = stripQuotes(commandResult.projectName) as any;
+	}
+	if (commandResult.description) {
+		commandResult.description = stripQuotes(commandResult.description);
+	}
+	if (commandResult.keywords) {
+		commandResult.keywords = stripQuotes(commandResult.keywords);
+	}
+	if (commandResult.author) {
+		commandResult.author = stripQuotes(commandResult.author) as any;
+	}
+	if (commandResult.githubUsername) {
+		commandResult.githubUsername = stripQuotes(commandResult.githubUsername) as any;
+	}
+	if (commandResult.packageManager) {
+		commandResult.packageManager = stripQuotes(commandResult.packageManager) as any;
 	}
 
 	// Validation using Zod

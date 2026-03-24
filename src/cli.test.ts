@@ -124,6 +124,35 @@ describe('cli', () => {
 		});
 	});
 
+	it('should strip surrounding quotes from CLI arguments', async () => {
+		process.argv.push(
+			'create',
+			'-t',
+			'"cli"',
+			'-n',
+			'"quoted-project"',
+			'--path',
+			'./test-dir-quoted',
+			'-a',
+			"'Quoted Author'",
+			'--github-username',
+			'"quoted-user"',
+		);
+		const result = await parseArgs();
+		expect(result.template).toBe('cli');
+		expect(result.projectName).toBe('quoted-project');
+		expect(result.author).toBe('Quoted Author');
+		expect(result.githubUsername).toBe('quoted-user');
+	});
+
+	it('should handle nested and mismatched quotes', async () => {
+		process.argv.push('create', '-t', '""cli""', '-n', '"\'mixed-quoted\'"', '--path', './test-dir-nested', '-a', 'NoQuotes', '--github-username', 'user');
+		const result = await parseArgs();
+		expect(result.template).toBe('cli');
+		expect(result.projectName).toBe('mixed-quoted');
+		expect(result.author).toBe('NoQuotes');
+	});
+
 	it('should parse update command arguments', async () => {
 		const tempDir = path.resolve('./temp-update-test');
 		await fs.mkdir(tempDir, {recursive: true});
