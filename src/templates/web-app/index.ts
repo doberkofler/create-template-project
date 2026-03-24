@@ -44,7 +44,7 @@ export const getWebAppTemplate = (_opts: ProjectOptions): TemplateDefinition => 
 			preview: 'vite preview',
 			test: 'vitest run',
 			'test:ui': 'vitest',
-			'test:e2e': 'playwright test',
+			'integration-test': 'playwright test',
 			start: 'vite preview',
 		},
 		files: [],

@@ -51,7 +51,7 @@ export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefiniti
 			build: 'npm run build --workspaces',
 			dev: 'npm run dev --workspaces',
 			test: 'npm run test --workspaces',
-			'test:e2e': 'playwright test',
+			'integration-test': 'playwright test',
 		},
 		files: [],
 		templateDir: getTemplateDir(__dirname, 'web-fullstack'),

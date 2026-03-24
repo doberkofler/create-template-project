@@ -2,9 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    branches: ["main"]
+    branches: [main]
 
 jobs:
   build:
@@ -33,11 +33,12 @@ jobs:
       - name: Verify pnpm
         run: pnpm --version
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      # NOTE: We must install the Playwright dependencies because we will run the web integration tests 
       - name: Install Playwright Browsers & Deps
         run: npx playwright install --with-deps chromium
+        
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm run lint
@@ -45,12 +46,11 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Unit tests
+      - name: Unit test
         run: pnpm run test
 
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2
 
-      # custom steps
-      - name: Integration tests
-        run: pnpm run integration-test:all
+      - name: Integration test
+        run: pnpm run integration-test

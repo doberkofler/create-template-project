@@ -7,6 +7,15 @@ import {ProjectOptions} from '../types.js';
 
 const debug = debugLib('create-template-project:utils:file');
 
+const WORKFLOW_PNPM_SETUP = `      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false`;
+
+const WORKFLOW_PLAYWRIGHT_SETUP = `      - name: Install Playwright Browsers & Deps
+        run: npx playwright install --with-deps chromium`;
+
 export function getTemplateDir(dirname: string, templateName: string): string {
 	const sourcePath = path.resolve(dirname, 'files');
 	const distPath = path.resolve(dirname, 'templates', templateName, 'files');
@@ -69,14 +78,14 @@ export function processContent(filePath: string, content: string, opts: ProjectO
 		let pmSetup = '';
 		if (pm === 'pnpm') {
 			installCommand = 'pnpm install --frozen-lockfile';
-			pmSetup = '- uses: pnpm/action-setup@v4\n        with:\n          version: 9';
+			pmSetup = WORKFLOW_PNPM_SETUP;
 		} else if (pm === 'yarn') {
 			installCommand = 'yarn install --frozen-lockfile';
 		}
 
 		let playwrightSetup = '';
 		if (template === 'web-fullstack' || template === 'web-app' || template === 'web-vanilla') {
-			playwrightSetup = '- name: Install Playwright Browsers & Deps\n        run: npx playwright install --with-deps chromium';
+			playwrightSetup = WORKFLOW_PLAYWRIGHT_SETUP;
 		}
 
 		processed = processed

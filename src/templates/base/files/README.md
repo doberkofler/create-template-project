@@ -17,7 +17,7 @@ This project is built using **Vite 8** for high-performance development and bund
 - `pnpm run build`: Builds the project for production.
 - `pnpm run preview`: Previews the production build.
 - `pnpm run test`: Runs the unit test suite (browser-based for web targets using **Vitest** and **Playwright**).
-- `pnpm run test:e2e`: Runs E2E tests using **Playwright**.
+- `pnpm run integration-test`: Runs integration tests using **Playwright**.
 - `pnpm run lint`: Lints and formats the codebase using **oxlint** and **oxfmt**.
 - `pnpm run ci`: Full CI pipeline (lint, build, test).
 
@@ -34,7 +34,7 @@ This project is built using **Vite 8** for high-performance development and bund
 3. **Run tests**:
    ```bash
    pnpm run test
-   pnpm run test:e2e
+   pnpm run integration-test
    ```
 
 ## Tooling

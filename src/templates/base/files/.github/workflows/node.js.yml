@@ -2,23 +2,49 @@ name: Node.js CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+
     steps:
-      - uses: actions/checkout@v4
-      # [PM_SETUP]
-      - name: Use Node.js
+      - name: Checkout
+        uses: actions/checkout@v4
+
+# [PM_SETUP]
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: ${{ matrix.node-version }}
           cache: "{{packageManager}}"
-      - run: "{{installCommand}}"
-      # [PLAYWRIGHT_SETUP]
-      - run: "{{packageManager}} run ci"
+
+      - name: Verify {{packageManager}}
+        run: {{packageManager}} --version
+
+      - name: Install dependencies
+        run: {{installCommand}}
+
+# [PLAYWRIGHT_SETUP]
+
+      - name: Lint
+        run: {{packageManager}} run lint
+
+      - name: Build
+        run: {{packageManager}} run build
+
+      - name: Unit test
+        run: {{packageManager}} run test
+
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2
+
+      - name: Integration test
+        run: {{packageManager}} run integration-test
