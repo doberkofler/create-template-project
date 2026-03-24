@@ -873,4 +873,47 @@ describe('generateProject', () => {
 		expect(content).toContain('packages:');
 		expect(content).not.toBe('old content');
 	});
+
+	it('should include "lcov" reporter in all vitest/vite coverage configurations', async () => {
+		const templates = ['cli', 'web-vanilla', 'web-app', 'web-fullstack'] as const;
+
+		for (const template of templates) {
+			const projectName = `test-lcov-${template}`;
+			const projectPath = path.join(tmpDir, projectName);
+			const opts: any = {
+				template,
+				projectName,
+				directory: projectPath,
+				update: false,
+				progress: false,
+			};
+			await generateProject(opts);
+
+			const configFiles = [
+				path.join(projectPath, 'vite.config.ts'),
+				path.join(projectPath, 'vitest.config.ts'),
+				path.join(projectPath, 'client/vite.config.ts'),
+				path.join(projectPath, 'server/vite.config.ts'),
+			];
+
+			for (const configFile of configFiles) {
+				if (!(await pathExists(configFile))) {
+					continue;
+				}
+
+				const content = await fs.readFile(configFile, 'utf8');
+				if (!content.includes('coverage:')) {
+					continue;
+				}
+
+				// Ensure "lcov" is present if "coverage" is configured
+				expect(content).toContain("'lcov'");
+			}
+		}
+
+		// Also check the root vite.config.ts of THIS project
+		const rootConfig = path.resolve(__dirname, '../../vite.config.ts');
+		const rootContent = await fs.readFile(rootConfig, 'utf8');
+		expect(rootContent).toContain("'lcov'");
+	});
 });
