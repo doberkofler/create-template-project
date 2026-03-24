@@ -1,3 +1,16 @@
+# [1.0.0](https://github.com/doberkofler/create-template-project/compare/v0.5.0...v1.0.0) (2026-03-24)
+
+
+### Bug Fixes
+
+* problem in GitHub coveralls workflow because of missing vitest reporter ([6d84a34](https://github.com/doberkofler/create-template-project/commit/6d84a34c212d23e35ad13dda4fc8f6e494e52d26))
+
+
+### Features
+
+* add a custom section to .gitignore ([2a06772](https://github.com/doberkofler/create-template-project/commit/2a06772e998f2089264b4f52931e45b55c16f7b3))
+* improved GENERATED.md ([b178187](https://github.com/doberkofler/create-template-project/commit/b17818739a89aff06dd7b2ead4f66bf5f9d02e8c))
+
 # [0.5.0](https://github.com/doberkofler/create-template-project/compare/v0.4.0...v0.5.0) (2026-03-23)
 
 
