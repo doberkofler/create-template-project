@@ -1,4 +1,18 @@
+## [1.1.2](https://github.com/doberkofler/create-template-project/compare/v1.1.1...v1.1.2) (2026-04-08)
+
+
+### Features
+
+* add min release age to dependencies script ([dde2dd2](https://github.com/doberkofler/create-template-project/commit/dde2dd2b49e310e870a78caa21e012a8294b4de5))
+
 ## [1.1.1](https://github.com/doberkofler/create-template-project/compare/v1.1.0...v1.1.1) (2026-03-24)
+
+
+### Features
+
+* introduce an automated release workflow using release-it ([c6439d1](https://github.com/doberkofler/create-template-project/commit/c6439d1b60750417861f365fa0c752ad38a081b4))
+
+# [1.1.0](https://github.com/doberkofler/create-template-project/compare/v1.0.0...v1.1.0) (2026-03-24)
 
 
 ### Bug Fixes
@@ -10,7 +24,6 @@
 ### Features
 
 * improved the AGENTS.md template file ([e9fafed](https://github.com/doberkofler/create-template-project/commit/e9fafedf14b87e040009cf8f8b4f4f33600ea0ae))
-* introduce an automated release workflow using release-it ([c6439d1](https://github.com/doberkofler/create-template-project/commit/c6439d1b60750417861f365fa0c752ad38a081b4))
 * introduce an automated release workflow using release-it ([e35606f](https://github.com/doberkofler/create-template-project/commit/e35606f4368814e939b99c183e04d2373314b748))
 * introduce an automated release workflow using release-it ([c1f55ef](https://github.com/doberkofler/create-template-project/commit/c1f55ef43d89e61b18c9b23c36b4a63a61084dba))
 * introduce an automated release workflow using release-it ([8bf73bf](https://github.com/doberkofler/create-template-project/commit/8bf73bf74b4a1ab727b356a56552021dc4a3f2e3))
