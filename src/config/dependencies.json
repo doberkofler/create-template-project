@@ -41,7 +41,7 @@
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "4.1.1",
+			"version": "4.1.2",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -69,7 +69,7 @@
 			"description": "A superset of JavaScript that compiles to clean JavaScript output."
 		},
 		"vitest": {
-			"version": "4.1.1",
+			"version": "4.1.2",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {

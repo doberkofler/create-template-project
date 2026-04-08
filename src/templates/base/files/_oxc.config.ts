@@ -1,6 +1,9 @@
 import { defineConfig } from "oxlint";
 import pluginRegexp from "eslint-plugin-regexp";
 
+/** Filter out core ESLint rules bundled into eslint-plugin-regexp recommended config */
+const regexpPluginRules = Object.fromEntries(Object.entries(pluginRegexp.configs.recommended.rules ?? {}).filter(([key]) => key.startsWith("regexp/")));
+
 const commonIgnore = [
   "**/.*",
   "node_modules/**",
@@ -32,7 +35,7 @@ export const linter = defineConfig({
     correctness: "error",
   },
   rules: {
-    ...pluginRegexp.configs.recommended.rules,
+    ...regexpPluginRules,
     curly: ["error", "all"],
     "typescript/no-unused-vars": [
       "error",
