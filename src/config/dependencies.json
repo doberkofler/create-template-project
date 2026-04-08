@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.0.2",
+			"version": "8.0.3",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -9,11 +9,11 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "4.1.1",
+			"version": "4.1.2",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "4.1.1",
+			"version": "4.1.2",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
@@ -37,7 +37,7 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "25.5.0",
+			"version": "25.5.2",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
@@ -53,15 +53,15 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.57.0",
+			"version": "1.58.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "0.17.3",
+			"version": "0.19.0",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.42.0",
+			"version": "0.43.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -125,19 +125,19 @@
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
-			"version": "1.58.2",
+			"version": "1.59.1",
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
-			"version": "11.15.0",
+			"version": "11.16.0",
 			"description": "tRPC server library."
 		},
 		"@trpc/client": {
-			"version": "11.15.0",
+			"version": "11.16.0",
 			"description": "tRPC client library."
 		},
 		"@trpc/react-query": {
-			"version": "11.15.0",
+			"version": "11.16.0",
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
@@ -149,7 +149,7 @@
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
-			"version": "7.13.2",
+			"version": "7.14.0",
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
@@ -169,7 +169,7 @@
 			"description": "ESLint plugin for finding regexp mistakes and style guide violations."
 		},
 		"vitest-browser-react": {
-			"version": "2.1.0",
+			"version": "2.2.0",
 			"description": "Native React testing utilities for Vitest browser mode."
 		}
 	}

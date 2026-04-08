@@ -33,13 +33,13 @@ jobs:
       - name: Verify pnpm
         run: pnpm --version
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       # NOTE: We must install the Playwright dependencies because we will run the web integration tests 
       - name: Install Playwright Browsers & Deps
         run: npx playwright install --with-deps chromium
         
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Lint
         run: pnpm run lint
 

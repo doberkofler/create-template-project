@@ -6,31 +6,31 @@ import os from 'node:os';
 import * as p from '@clack/prompts';
 
 vi.mock('execa', () => ({
-	execa: vi.fn(async () => ({stdout: '', stderr: ''})),
+	execa: vi.fn<any>(async () => ({stdout: '', stderr: ''})),
 }));
 
 vi.mock('@clack/prompts', async (importOriginal) => {
 	const actual: any = await importOriginal();
 	return {
 		...actual,
-		intro: vi.fn(),
-		outro: vi.fn(),
-		select: vi.fn(),
-		text: vi.fn(),
-		confirm: vi.fn(),
-		isCancel: vi.fn(() => false),
-		cancel: vi.fn(),
-		note: vi.fn(),
-		spinner: vi.fn(() => ({
-			start: vi.fn(),
-			stop: vi.fn(),
-			message: vi.fn(),
+		intro: vi.fn<any>(),
+		outro: vi.fn<any>(),
+		select: vi.fn<any>(),
+		text: vi.fn<any>(),
+		confirm: vi.fn<any>(),
+		isCancel: vi.fn<any>(() => false),
+		cancel: vi.fn<any>(),
+		note: vi.fn<any>(),
+		spinner: vi.fn<any>(() => ({
+			start: vi.fn<any>(),
+			stop: vi.fn<any>(),
+			message: vi.fn<any>(),
 		})),
 		log: {
-			success: vi.fn(),
-			error: vi.fn(),
-			warn: vi.fn(),
-			info: vi.fn(),
+			success: vi.fn<any>(),
+			error: vi.fn<any>(),
+			warn: vi.fn<any>(),
+			info: vi.fn<any>(),
 		},
 	};
 });

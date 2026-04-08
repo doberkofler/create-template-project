@@ -105,7 +105,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 				deps[dep] = config.version;
 				addedDeps.push({name: dep, description: config.description});
 			} else {
-				log.warn(`Dependency "${dep}" not found in master configuration. Using empty version.`);
+				log.warn(`Dependency "${dep}" not found in central configuration. Using empty version.`);
 				debug(`Dependency "${dep}" missing in config`);
 			}
 		}
@@ -481,13 +481,13 @@ export const generateProject = async (opts: ProjectOptions) => {
 	if (!isGit) {
 		debug('Initializing Git repository');
 		try {
-			debug('Executing: git init');
-			await execa('git', ['init'], {
+			debug('Executing: git init --initial-branch=main');
+			await execa('git', ['init', '--initial-branch=main'], {
 				cwd: projectDir,
 				stdio,
 				preferLocal: true,
 			});
-			log.success('Initialized Git repository (git init).');
+			log.success('Initialized Git repository (main branch).');
 			states.gitInitialized = true;
 		} catch (e: any) {
 			debug('Failed to initialize Git: %O', e);
@@ -667,7 +667,7 @@ async function generateGeneratedMd(
 		`- [x] Scaffold project files and directories`,
 		`- [x] Configure \`package.json\` with appropriate dependencies`,
 		`- [${states.depsInstalled ? 'x' : ' '}] Install dependencies using \`${pm}\`${states.depsSkipped ? ' *(Skipped)*' : ''}`,
-		`- [${states.gitInitialized ? 'x' : ' '}] Initialize Git repository`,
+		`- [${states.gitInitialized ? 'x' : ' '}] Initialize Git repository (main branch)`,
 		`- [${states.githubCreated ? 'x' : ' '}] Create and push GitHub repository${states.githubSkipped ? ' *(Skipped)*' : states.githubError ? ' *(Failed)*' : ''}`,
 		`- [${states.ciRun ? 'x' : ' '}] Run initial CI pipeline (lint, build, test)${states.ciSkipped ? ' *(Skipped)*' : ''}`,
 		'',

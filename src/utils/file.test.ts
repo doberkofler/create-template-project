@@ -239,7 +239,7 @@ describe('file utils', () => {
 		it('should return updated if content matches template', async () => {
 			const filePath = path.join(tmpDir, 'file.txt');
 			await fs.writeFile(filePath, 'template content');
-			const log = {error: vi.fn()};
+			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
 			expect(result).toBe('updated');
@@ -249,7 +249,7 @@ describe('file utils', () => {
 			const filePath = path.join(tmpDir, 'file.txt');
 			await fs.writeFile(filePath, 'merged content');
 			(vi.mocked(execa) as any).mockResolvedValue({exitCode: 0});
-			const log = {error: vi.fn()};
+			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
 			expect(result).toBe('merged');
@@ -261,7 +261,7 @@ describe('file utils', () => {
 			const err: any = new Error('conflict');
 			err.exitCode = 1;
 			(vi.mocked(execa) as any).mockRejectedValue(err);
-			const log = {error: vi.fn()};
+			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
 			expect(result).toBe('conflict');
@@ -272,7 +272,7 @@ describe('file utils', () => {
 			const err: any = new Error('conflict');
 			err.exitCode = 2;
 			(vi.mocked(execa) as any).mockRejectedValue(err);
-			const log = {error: vi.fn()};
+			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
 			expect(result).toBe('conflict');
@@ -283,7 +283,7 @@ describe('file utils', () => {
 			const err: any = new Error('fatal error');
 			err.exitCode = 128;
 			(vi.mocked(execa) as any).mockRejectedValue(err);
-			const log = {error: vi.fn()};
+			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
 			expect(result).toBe('error');

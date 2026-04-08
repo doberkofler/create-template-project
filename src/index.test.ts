@@ -10,15 +10,15 @@ vi.mock('@clack/prompts', async (importOriginal) => {
 	const actual = (await importOriginal()) as any;
 	return {
 		...actual,
-		intro: vi.fn(),
-		outro: vi.fn(),
-		cancel: vi.fn(),
-		note: vi.fn(),
+		intro: vi.fn<any>(),
+		outro: vi.fn<any>(),
+		cancel: vi.fn<any>(),
+		note: vi.fn<any>(),
 		log: {
-			success: vi.fn(),
-			error: vi.fn(),
-			warn: vi.fn(),
-			info: vi.fn(),
+			success: vi.fn<any>(),
+			error: vi.fn<any>(),
+			warn: vi.fn<any>(),
+			info: vi.fn<any>(),
 		},
 	};
 });

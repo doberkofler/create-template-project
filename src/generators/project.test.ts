@@ -15,9 +15,9 @@ import {getBaseTemplate} from '../templates/base/index.js';
 import {isSeedFile} from '../utils/file.js';
 
 const spinnerMock = {
-	start: vi.fn(),
-	stop: vi.fn(),
-	message: vi.fn(),
+	start: vi.fn<any>(),
+	stop: vi.fn<any>(),
+	message: vi.fn<any>(),
 };
 
 vi.mock('execa');
@@ -25,20 +25,20 @@ vi.mock('@clack/prompts', async (importOriginal) => {
 	const actual: any = await importOriginal();
 	return {
 		...actual,
-		intro: vi.fn(),
-		outro: vi.fn(),
-		select: vi.fn(),
-		text: vi.fn(),
-		confirm: vi.fn(),
-		isCancel: vi.fn(),
-		cancel: vi.fn(),
-		note: vi.fn(),
-		spinner: vi.fn(() => spinnerMock),
+		intro: vi.fn<any>(),
+		outro: vi.fn<any>(),
+		select: vi.fn<any>(),
+		text: vi.fn<any>(),
+		confirm: vi.fn<any>(),
+		isCancel: vi.fn<any>(),
+		cancel: vi.fn<any>(),
+		note: vi.fn<any>(),
+		spinner: vi.fn<any>(() => spinnerMock),
 		log: {
-			success: vi.fn(),
-			error: vi.fn(),
-			warn: vi.fn(),
-			info: vi.fn(),
+			success: vi.fn<any>(),
+			error: vi.fn<any>(),
+			warn: vi.fn<any>(),
+			info: vi.fn<any>(),
 		},
 	};
 });
@@ -47,7 +47,7 @@ vi.mock('../templates/base/index.js', async (importOriginal) => {
 	const actual: any = await importOriginal();
 	return {
 		...actual,
-		getBaseTemplate: vi.fn(actual.getBaseTemplate),
+		getBaseTemplate: vi.fn<any>(actual.getBaseTemplate),
 	};
 });
 
@@ -114,7 +114,7 @@ describe('generateProject', () => {
 		const preCommit = await fs.readFile(path.join(projectPath, '.husky/pre-commit'), 'utf8');
 		expect(preCommit).toContain('npm run ci');
 
-		expect(execa).toHaveBeenCalledWith('git', ['init'], expect.anything());
+		expect(execa).toHaveBeenCalledWith('git', ['init', '--initial-branch=main'], expect.anything());
 		expect(execa).toHaveBeenCalledWith('git', ['add', '.'], expect.anything());
 		expect(execa).toHaveBeenCalledWith('git', ['commit', '-m', 'chore: initial scaffold'], expect.anything());
 		expect(execa).toHaveBeenCalledWith('gh', ['repo', 'create', projectName, '--public', '--source=.', '--remote=origin', '--push'], expect.anything());
@@ -399,7 +399,7 @@ describe('generateProject', () => {
 			update: true,
 		};
 		await generateProject(opts);
-		expect(execa).not.toHaveBeenCalledWith('git', ['init'], expect.anything());
+		expect(execa).not.toHaveBeenCalledWith('git', ['init', '--initial-branch=main'], expect.anything());
 	});
 
 	it('should handle programmatic files', async () => {
