@@ -8,6 +8,6 @@ test('has title', async ({page}) => {
 test('api is reachable', async ({page}) => {
 	const response = await page.request.get('/api/hello');
 	expect(response.ok()).toBeTruthy();
-	const data = await response.json();
-	expect(data.message).toBe('Hello from Express!');
+	const data: unknown = await response.json();
+	expect(data).toMatchObject({message: 'Hello from Express!'});
 });

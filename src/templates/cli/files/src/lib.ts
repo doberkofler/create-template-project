@@ -1,6 +1,4 @@
-export const greet = (name: string): string => {
-	return `Hello, ${name}! Welcome to your new CLI.`;
-};
+export const greet = (name: string): string => `Hello, ${name}! Welcome to your new CLI.`;
 
 export const calculateProgress = (current: number, total: number): number => {
 	if (total === 0) {

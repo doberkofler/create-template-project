@@ -7,6 +7,6 @@ test('formatMessage returns correct string', () => {
 });
 
 test('createHeading renders in the browser', async () => {
-	document.body.appendChild(createHeading('Browser Test'));
+	document.body.append(createHeading('Browser Test'));
 	await expect.element(page.getByRole('heading', {name: 'Browser Test'})).toBeVisible();
 });

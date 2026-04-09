@@ -1,7 +1,18 @@
 import {defineConfig} from 'oxlint';
 import {configs as regexpConfigs} from 'eslint-plugin-regexp';
 
-const commonIgnore = ['**/.*', 'node_modules/**', 'dist/**', 'build/**', 'coverage/**', 'temp/**', 'public/**', 'src/templates/**/files/**', '**/*.md'];
+const commonIgnore = [
+	'**/.*',
+	'node_modules/**',
+	'dist/**',
+	'build/**',
+	'coverage/**',
+	'temp/**',
+	'public/**',
+	'**/*.md',
+	'**/*.yaml',
+	'src/templates/**/files/**',
+];
 
 /** Filter out core ESLint rules bundled into eslint-plugin-regexp recommended config */
 const regexpPluginRules = Object.fromEntries(Object.entries(regexpConfigs.recommended.rules).filter(([key]) => key.startsWith('regexp/')));
@@ -173,9 +184,7 @@ export const linter = defineConfig({
 		builtin: true,
 		node: true,
 	},
-	globals: {
-		node: 'readonly',
-	},
+	globals: {},
 	ignorePatterns: commonIgnore,
 });
 

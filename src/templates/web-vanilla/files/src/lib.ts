@@ -4,6 +4,4 @@ export const createHeading = (text: string): HTMLHeadingElement => {
 	return h1;
 };
 
-export const formatMessage = (name: string): string => {
-	return `Hello, ${name}!`;
-};
+export const formatMessage = (name: string): string => `Hello, ${name}!`;

@@ -12,7 +12,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 
 - **Install dependencies:** `pnpm install`
 - **Build project:** `pnpm run build` (uses `vite` and copies templates)
-- **Lint code:** `pnpm run lint` (runs `tsc`, `oxlint`, and `oxfmt`)
+- **Lint code:** `pnpm run lint` (runs `tsc`, `oxlint` with the shared enhanced config from `oxc.config.ts`/`oxlint.config.ts`, and `oxfmt`)
 - **Run all tests:** `pnpm run test` (uses `vitest` with coverage)
 - **Run CI suite:** `pnpm run ci` (lint + build + test)
 - **Run integration tests:** `pnpm run integration-test` (builds and scaffolds all templates)
@@ -75,6 +75,7 @@ An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templa
 - `src/templates/`: Individual template definitions (e.g., `base/index.ts`, `cli/index.ts`). Each exports a `TemplateDefinition` getter.
 - `src/generators/`: Functions that write files and perform side effects like `git init --initial-branch=main` or `gh repo create`.
 - `src/types.ts`: Shared type definitions and Zod schemas.
+- `oxc.config.ts` and `oxlint.config.ts`: Source-of-truth and entrypoint for the enhanced Oxlint setup (type-aware linting, plugin/rule configuration, and shared ignore patterns).
 
 ### Component Requirements for Templates
 

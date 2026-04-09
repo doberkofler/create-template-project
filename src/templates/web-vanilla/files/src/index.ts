@@ -1,3 +1,3 @@
 import {createHeading} from './lib.js';
 
-document.body.appendChild(createHeading('Hello from Web-Vanilla!'));
+document.body.append(createHeading('Hello from Web-Vanilla!'));

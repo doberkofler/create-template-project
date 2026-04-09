@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {Command} from 'commander';
 import {SingleBar, Presets} from 'cli-progress';
+import {greet} from './lib.js';
 
 const program = new Command();
 program.name('my-cli').description('A sample CLI');
@@ -10,7 +11,5 @@ const bar = new SingleBar({}, Presets.shades_classic);
 bar.start(100, 0);
 bar.update(50);
 bar.stop();
-
-import {greet} from './lib.js';
 
 console.log(greet('Developer'));

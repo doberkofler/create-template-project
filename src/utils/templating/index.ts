@@ -5,8 +5,16 @@ import {githubWorkflowProcessor} from './github-workflow.js';
 import {tsconfigProcessor} from './tsconfig.js';
 import {contributingProcessor} from './contributing.js';
 import {webVanillaHtmlProcessor} from './web-vanilla-html.js';
+import {oxcConfigProcessor} from './oxc-config.js';
 
-const processors: ContentProcessor[] = [genericProcessor, githubWorkflowProcessor, tsconfigProcessor, contributingProcessor, webVanillaHtmlProcessor];
+const processors: ContentProcessor[] = [
+	genericProcessor,
+	githubWorkflowProcessor,
+	tsconfigProcessor,
+	contributingProcessor,
+	webVanillaHtmlProcessor,
+	oxcConfigProcessor,
+];
 
 export const processContent = (filePath: string, content: string, opts: ProjectOptions, addedDeps: AddedDependency[]): string => {
 	const context: ProcessorContext = {

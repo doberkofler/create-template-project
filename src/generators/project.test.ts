@@ -129,6 +129,8 @@ describe('generateProject', () => {
 
 		// Verify oxc.config.ts exists
 		expect(await pathExists(path.join(projectPath, 'oxc.config.ts'))).toBe(true);
+		const cliOxcConfig = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
+		expect(cliOxcConfig).toContain('node: true');
 
 		// Verify README.md contains project name
 		const readme = await fs.readFile(path.join(projectPath, 'README.md'), 'utf8');
@@ -202,6 +204,8 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		expect(await pathExists(projectPath)).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'src/index.tsx'))).toBe(true);
+		const webAppOxcConfig = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
+		expect(webAppOxcConfig).not.toContain('node: true');
 	});
 
 	it('should scaffold a web-fullstack project correctly', async () => {
@@ -226,6 +230,9 @@ describe('generateProject', () => {
 		expect(pkg.workspaces).toContain('client');
 		expect(pkg.workspaces).toContain('server');
 		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
+
+		const fullstackOxcConfig = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
+		expect(fullstackOxcConfig).toContain('node: true');
 
 		// Verify tsconfig.json content
 		const tsconfig = await fs.readFile(path.join(projectPath, 'tsconfig.json'), 'utf8');
