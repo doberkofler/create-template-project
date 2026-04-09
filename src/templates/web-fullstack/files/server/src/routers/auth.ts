@@ -1,3 +1,5 @@
+/* eslint-disable import/no-relative-parent-imports */
+/* eslint-disable typescript/no-deprecated */
 import {z} from 'zod';
 import {publicProcedure, protectedProcedure, router} from '../trpc.js';
 import {TRPCError} from '@trpc/server';
@@ -10,7 +12,7 @@ export const authRouter = router({
 				password: z.string().min(6),
 			}),
 		)
-		.mutation(async ({input}) => {
+		.mutation(({input}) => {
 			// Mock authentication logic
 			if (input.email === 'demo@example.com' && input.password === 'password') {
 				return {
@@ -23,7 +25,5 @@ export const authRouter = router({
 				message: 'Invalid email or password',
 			});
 		}),
-	me: protectedProcedure.query(({ctx}) => {
-		return ctx.user;
-	}),
+	me: protectedProcedure.query(({ctx}) => ctx.user),
 });

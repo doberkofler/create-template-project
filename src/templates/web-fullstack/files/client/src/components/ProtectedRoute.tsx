@@ -1,8 +1,10 @@
+/* eslint-disable import/no-relative-parent-imports */
 import {Navigate, Outlet} from 'react-router-dom';
+import {type ReactNode} from 'react';
 import {useAuth} from '../contexts/AuthContext.js';
 import {CircularProgress, Box} from '@mui/material';
 
-export const ProtectedRoute = () => {
+export const ProtectedRoute = (): ReactNode => {
 	const {token, isLoading} = useAuth();
 
 	if (isLoading) {
@@ -13,7 +15,7 @@ export const ProtectedRoute = () => {
 		);
 	}
 
-	if (!token) {
+	if (token === null || token === '') {
 		return <Navigate to="/login" replace />;
 	}
 

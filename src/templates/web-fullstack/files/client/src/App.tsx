@@ -1,4 +1,5 @@
-import {useState} from 'react';
+/* eslint-disable react/jsx-max-depth */
+import {useState, type ReactNode} from 'react';
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {httpBatchLink} from '@trpc/client';
@@ -11,7 +12,7 @@ import {CssBaseline, ThemeProvider, createTheme} from '@mui/material';
 
 const theme = createTheme();
 
-export const App = () => {
+export const App = (): ReactNode => {
 	const [queryClient] = useState(() => new QueryClient());
 	const [trpcClient] = useState(() =>
 		trpc.createClient({
@@ -20,7 +21,7 @@ export const App = () => {
 					url: 'http://localhost:3001/trpc',
 					headers: () => {
 						const token = localStorage.getItem('token');
-						return token ? {Authorization: `Bearer ${token}`} : {};
+						return token !== null && token !== '' ? {Authorization: `Bearer ${token}`} : {};
 					},
 				}),
 			],

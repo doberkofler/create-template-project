@@ -1,11 +1,10 @@
+/* eslint-disable typescript/promise-function-async */
 import {initTRPC, TRPCError} from '@trpc/server';
-import {Context} from './context.js';
+import {type Context} from './context.js';
 
 const t = initTRPC.context<Context>().create();
 
-export const router = t.router;
-export const createCallerFactory = t.createCallerFactory;
-export const publicProcedure = t.procedure;
+export const {router, createCallerFactory, procedure: publicProcedure} = t;
 export const protectedProcedure = t.procedure.use(({ctx, next}) => {
 	if (!ctx.user) {
 		throw new TRPCError({code: 'UNAUTHORIZED'});
