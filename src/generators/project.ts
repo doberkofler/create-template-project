@@ -1,93 +1,241 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
-import {ProjectOptions, TemplateDefinition, DependencyConfig} from '../types.js';
-import {getBaseTemplate} from '../templates/base/index.js';
-import {getCliTemplate} from '../templates/cli/index.js';
-import {getWebVanillaTemplate} from '../templates/web-vanilla/index.js';
-import {getWebAppTemplate} from '../templates/web-app/index.ts';
-import {getWebFullstackTemplate} from '../templates/web-fullstack/index.js';
+import {type ProjectOptions, type TemplateDefinition, type DependencyConfig} from '#shared/types.js';
 import {execa} from 'execa';
-import * as p from '@clack/prompts';
+import * as prompts from '@clack/prompts';
 import debugLib from 'debug';
-import {getAllFiles, isSeedFile, mergeFile, mergePackageJson, processContent} from '../utils/file.js';
+import {getAllFiles, isSeedFile, mergeFile, mergePackageJson, processContent} from '#shared/file.js';
+import {getProjectTemplates} from '#templates/registry.js';
 
 const debug = debugLib('create-template-project:generator');
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const getDependencyConfigPath = async () => {
+const pathExists = async (filePath: string): Promise<boolean> => {
+	try {
+		await fs.access(filePath);
+		return true;
+	} catch {
+		return false;
+	}
+};
+
+const getDependencyConfigPath = async (): Promise<string> => {
 	const sourcePath = path.resolve(__dirname, '../config/dependencies.json');
 	const distPath = path.resolve(__dirname, 'config/dependencies.json');
 	return (await pathExists(distPath)) ? distPath : sourcePath;
 };
 
-const pathExists = (p: string) =>
-	fs
-		.access(p)
-		.then(() => true)
-		.catch(() => false);
-
-const getLog = (progress: boolean) => ({
-	info: (msg: string) => (progress ? p.log.info(msg) : undefined),
-	success: (msg: string) => (progress ? p.log.success(msg) : undefined),
-	warn: (msg: string) => p.log.warn(msg),
-	error: (msg: string) => p.log.error(msg),
+const getLog = (
+	progress: boolean,
+): {
+	info: (msg: string) => void;
+	success: (msg: string) => void;
+	warn: (msg: string) => void;
+	error: (msg: string) => void;
+} => ({
+	info: (msg: string): void => {
+		if (progress) {
+			prompts.log.info(msg);
+		}
+	},
+	success: (msg: string): void => {
+		if (progress) {
+			prompts.log.success(msg);
+		}
+	},
+	warn: (msg: string): void => {
+		prompts.log.warn(msg);
+	},
+	error: (msg: string): void => {
+		prompts.log.error(msg);
+	},
 });
 
-const getSpinner = (progress: boolean) => {
-	const s = p.spinner();
+const getSpinner = (progress: boolean): {start: (msg: string) => void; stop: (msg: string) => void} => {
+	const s = prompts.spinner();
 	return {
-		start: (msg: string) => (progress ? s.start(msg) : undefined),
-		stop: (msg: string) => (progress ? s.stop(msg) : undefined),
+		start: (msg: string): void => {
+			if (progress) {
+				s.start(msg);
+			}
+		},
+		stop: (msg: string): void => {
+			if (progress) {
+				s.stop(msg);
+			}
+		},
 	};
 };
 
-const isFileRequired = (relativePath: string, type: string) => {
+const isFileRequired = (relativePath: string, type: string): boolean => {
 	if (relativePath === 'vitest.config.ts') {
 		return !['cli', 'web-vanilla', 'web-app', 'web-fullstack'].includes(type);
 	}
 	return true;
 };
 
-export const generateProject = async (opts: ProjectOptions) => {
+type Action = {
+	type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE' | 'UPDATED';
+	path: string;
+	reason?: string;
+	recommendedAction?: string;
+};
+
+type GeneratorState = {
+	gitInitialized: boolean;
+	githubCreated: boolean;
+	githubSkipped: boolean;
+	githubError: string;
+	depsInstalled: boolean;
+	depsSkipped: boolean;
+	ciRun: boolean;
+	ciSkipped: boolean;
+};
+
+type PackageJsonShape = {
+	name: string;
+	version: string;
+	private: boolean;
+	description: string;
+	keywords: string[];
+	homepage: string;
+	bugs: {url: string};
+	license: string;
+	author: string;
+	repository: {type: string; url: string};
+	type: 'module';
+	'create-template-project': {template: ProjectOptions['template']};
+	scripts: Record<string, string>;
+	dependencies: Record<string, string>;
+	devDependencies: Record<string, string>;
+	workspaces?: string[];
+};
+
+type ExistingProjectPackage = Partial<PackageJsonShape> & {
+	'create-template-project'?: {template?: ProjectOptions['template']};
+};
+
+type TemplatePackageJson = {
+	dependencies?: Record<string, string>;
+	devDependencies?: Record<string, string>;
+	[key: string]: unknown;
+};
+
+// eslint-disable-next-line prefer-const -- initialized after helper declaration order
+let getTemplateArchitectureSection: (template: string) => string[];
+// eslint-disable-next-line prefer-const -- initialized after helper declaration order
+let generateGeneratedMd: (
+	projectDir: string,
+	opts: ProjectOptions,
+	pm: string,
+	states: GeneratorState,
+	isUpdate: boolean,
+	status: {hasErrors: boolean; hasWarnings: boolean; errorMessages: string[]},
+	actions: {type: string; path: string; reason?: string; recommendedAction?: string}[],
+) => Promise<void>;
+
+const isTemplateType = (value: string): value is ProjectOptions['template'] =>
+	value === 'cli' || value === 'web-vanilla' || value === 'web-app' || value === 'web-fullstack';
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+const parseStringRecord = (value: unknown): Record<string, string> => {
+	if (!isRecord(value)) {
+		return {};
+	}
+
+	const out: Record<string, string> = {};
+	for (const [key, entry] of Object.entries(value)) {
+		if (typeof entry === 'string') {
+			out[key] = entry;
+		}
+	}
+	return out;
+};
+
+const parseDependencyConfig = (raw: string): DependencyConfig => {
+	const parsed = JSON.parse(raw) as unknown;
+	if (!isRecord(parsed) || !isRecord(parsed.dependencies)) {
+		throw new Error('Invalid dependency configuration file format.');
+	}
+
+	const dependencies: DependencyConfig['dependencies'] = {};
+	for (const [name, value] of Object.entries(parsed.dependencies)) {
+		if (!isRecord(value)) {
+			continue;
+		}
+
+		const {version, description} = value;
+		if (typeof version === 'string' && typeof description === 'string') {
+			dependencies[name] = {version, description};
+		}
+	}
+
+	return {dependencies};
+};
+
+const parseExistingProjectPackage = (raw: string): ExistingProjectPackage => {
+	const parsed = JSON.parse(raw) as unknown;
+	if (!isRecord(parsed)) {
+		return {};
+	}
+
+	const createTemplateProject = isRecord(parsed['create-template-project']) ? parsed['create-template-project'] : undefined;
+	const template = createTemplateProject ? createTemplateProject.template : undefined;
+
+	return {
+		...parsed,
+		scripts: parseStringRecord(parsed.scripts),
+		dependencies: parseStringRecord(parsed.dependencies),
+		devDependencies: parseStringRecord(parsed.devDependencies),
+		'create-template-project': typeof template === 'string' && isTemplateType(template) ? {template} : undefined,
+	};
+};
+
+const parseTemplatePackageJson = (raw: string): TemplatePackageJson => {
+	const parsed = JSON.parse(raw) as unknown;
+	if (!isRecord(parsed)) {
+		return {};
+	}
+
+	return {
+		...parsed,
+		dependencies: parseStringRecord(parsed.dependencies),
+		devDependencies: parseStringRecord(parsed.devDependencies),
+	};
+};
+
+const toErrorDetail = (error: unknown): {message: string; detail: string} => {
+	if (error instanceof Error) {
+		const withOutput = error as Error & {stdout?: string; stderr?: string};
+		const stdout = withOutput.stdout ?? '';
+		const stderr = withOutput.stderr ?? '';
+		const detail = stdout.length > 0 || stderr.length > 0 ? `\n\nOutput:\n${stdout}\n${stderr}` : '';
+		return {message: error.message, detail};
+	}
+	return {message: String(error), detail: ''};
+};
+
+export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 	const {template: type, projectName, author, githubUsername, directory, update, progress} = opts;
-	const isProgress = progress !== false;
+	const isProgress = progress;
 	const log = getLog(isProgress);
-	const spinner = () => getSpinner(isProgress);
+	const spinner = (): ReturnType<typeof getSpinner> => getSpinner(isProgress);
 	const projectDir = directory;
 	debug('Project generation started for: %s', projectName);
 	debug('Options: %O', opts);
 	debug('Project directory: %s', projectDir);
 
-	let isUpdate = !!update;
+	const isUpdate = update;
 
-	if (await pathExists(projectDir)) {
-		if (!isUpdate) {
-			throw new Error(`Directory "${projectDir}" already exists. Use the "update" command to update.`);
-		}
+	if ((await pathExists(projectDir)) && !isUpdate) {
+		throw new Error(`Directory "${projectDir}" already exists. Use the "update" command to update.`);
 	}
-
-	const templates: TemplateDefinition[] = [getBaseTemplate(opts)];
 
 	debug('Applying template: base');
-	switch (type) {
-		case 'cli':
-			debug('Applying template: cli');
-			templates.push(getCliTemplate(opts));
-			break;
-		case 'web-vanilla':
-			debug('Applying template: web-vanilla');
-			templates.push(getWebVanillaTemplate(opts));
-			break;
-		case 'web-app':
-			debug('Applying template: web-app');
-			templates.push(getWebAppTemplate(opts));
-			break;
-		case 'web-fullstack':
-			debug('Applying template: web-fullstack');
-			templates.push(getWebFullstackTemplate(opts));
-			break;
-	}
+	debug('Applying template: %s', type);
+	const templates: TemplateDefinition[] = getProjectTemplates(opts);
 
 	debug('Ensuring directory exists: %s', projectDir);
 	await fs.mkdir(projectDir, {recursive: true});
@@ -95,13 +243,13 @@ export const generateProject = async (opts: ProjectOptions) => {
 	// Load dependency configuration early
 	debug('Loading dependency configuration');
 	const depConfigPath = await getDependencyConfigPath();
-	const depConfig = JSON.parse(await fs.readFile(depConfigPath, 'utf8')) as DependencyConfig;
-	const addedDeps: Array<{name: string; description: string}> = [];
+	const depConfig = parseDependencyConfig(await fs.readFile(depConfigPath, 'utf8'));
+	const addedDeps: {name: string; description: string}[] = [];
 
-	const resolveDeps = (deps: Record<string, string> = {}) => {
+	const resolveDeps = (deps: Record<string, string> = {}): void => {
 		for (const dep of Object.keys(deps)) {
-			const config = depConfig.dependencies[dep];
-			if (config) {
+			if (Object.hasOwn(depConfig.dependencies, dep)) {
+				const config = depConfig.dependencies[dep];
 				deps[dep] = config.version;
 				addedDeps.push({name: dep, description: config.description});
 			} else {
@@ -112,18 +260,18 @@ export const generateProject = async (opts: ProjectOptions) => {
 	};
 
 	// Final consolidated data
-	let finalPkg: any = {
+	let finalPkg: PackageJsonShape = {
 		name: projectName,
 		version: '0.1.0',
 		private: true,
-		description: opts.description || 'TODO: Add project description',
-		keywords: opts.keywords ? opts.keywords.split(',').map((k) => k.trim()) : ['TODO: Add keywords'],
+		description: opts.description ?? 'TODO: Add project description',
+		keywords: opts.keywords !== undefined ? opts.keywords.split(',').map((k) => k.trim()) : ['TODO: Add keywords'],
 		homepage: `https://github.com/${githubUsername}/${projectName}#readme`,
 		bugs: {
 			url: `https://github.com/${githubUsername}/${projectName}/issues`,
 		},
 		license: 'MIT',
-		author: author || '',
+		author,
 		repository: {
 			type: 'git',
 			url: `https://github.com/${githubUsername}/${projectName}.git`,
@@ -141,27 +289,45 @@ export const generateProject = async (opts: ProjectOptions) => {
 	const pkgPath = path.join(projectDir, 'package.json');
 	if (isUpdate && (await pathExists(pkgPath))) {
 		debug('Loading existing package.json for update');
-		const existingPkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+		const existingPkg = parseExistingProjectPackage(await fs.readFile(pkgPath, 'utf8'));
 
-		if (!existingPkg['create-template-project']?.template) {
+		if (!existingPkg['create-template-project']) {
 			throw new Error(
 				`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`,
 			);
 		}
 
-		finalPkg = {...finalPkg, ...existingPkg}; // Keep existing name/version/type if they exist
-		finalPkg['create-template-project'] = {
-			...existingPkg['create-template-project'],
-			template: type,
-		};
-		finalPkg.scripts = {...existingPkg.scripts};
-		finalPkg.dependencies = {...existingPkg.dependencies};
-		finalPkg.devDependencies = {...existingPkg.devDependencies};
+		finalPkg = {
+			...finalPkg,
+			...existingPkg,
+			'create-template-project': {
+				...existingPkg['create-template-project'],
+				template: type,
+			},
+			scripts: {...existingPkg.scripts},
+			dependencies: {...existingPkg.dependencies},
+			devDependencies: {...existingPkg.devDependencies},
+		}; // Keep existing name/version/type if they exist
 		debug('Loaded existing package.json: %O', finalPkg);
 	}
 
+	const templatePackageParts = await Promise.all(
+		templates.map(async (template): Promise<TemplatePackageJson | undefined> => {
+			if (template.templateDir === undefined) {
+				return undefined;
+			}
+
+			const templatePkgPath = path.join(template.templateDir, 'package.json');
+			if (!(await pathExists(templatePkgPath))) {
+				return undefined;
+			}
+
+			return parseTemplatePackageJson(await fs.readFile(templatePkgPath, 'utf8'));
+		}),
+	);
+
 	// First pass: Resolve all dependencies and scripts from all templates
-	for (const t of templates) {
+	for (const [index, t] of templates.entries()) {
 		debug('Collecting dependencies and scripts from template: %s', t.name);
 		const templateDeps = {...t.dependencies};
 		const templateDevDeps = {...t.devDependencies};
@@ -172,36 +338,28 @@ export const generateProject = async (opts: ProjectOptions) => {
 		Object.assign(finalPkg.dependencies, templateDeps);
 		Object.assign(finalPkg.devDependencies, templateDevDeps);
 
-		if (t.workspaces) {
+		if (t.workspaces !== undefined) {
 			finalPkg.workspaces = t.workspaces;
 		}
 
-		// Also check physical package.json files in templates
-		if (t.templateDir) {
-			const templatePkgPath = path.join(t.templateDir, 'package.json');
-			if (await pathExists(templatePkgPath)) {
-				const pkgPart = JSON.parse(await fs.readFile(templatePkgPath, 'utf8'));
-				resolveDeps(pkgPart.dependencies);
-				resolveDeps(pkgPart.devDependencies);
-				mergePackageJson(finalPkg, pkgPart);
-			}
+		const pkgPart = templatePackageParts[index];
+		if (pkgPart !== undefined) {
+			resolveDeps(pkgPart.dependencies);
+			resolveDeps(pkgPart.devDependencies);
+			mergePackageJson(finalPkg, pkgPart);
 		}
 	}
 
 	// Second pass: Collect and report actions
-	const actions: Array<{
-		type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE' | 'UPDATED';
-		path: string;
-		reason?: string;
-		recommendedAction?: string;
-	}> = [];
-	const pendingOperations: Array<() => Promise<void>> = [];
+	const actions: Action[] = [];
+	const pendingOperations: (() => Promise<void>)[] = [];
 
+	/* eslint-disable eslint/no-await-in-loop -- file planning is intentionally sequential to keep action ordering deterministic */
 	for (const t of templates) {
 		debug('Collecting template files for: %s', t.name);
 
 		// Handle physical files
-		if (t.templateDir) {
+		if (t.templateDir !== undefined) {
 			debug('Reading physical files from: %s', t.templateDir);
 			const files = await getAllFiles(t.templateDir);
 			for (const file of files) {
@@ -233,7 +391,7 @@ export const generateProject = async (opts: ProjectOptions) => {
 				}
 
 				if (relativePath.startsWith('_') && relativePath.endsWith('.config.ts')) {
-					relativePath = relativePath.substring(1);
+					relativePath = relativePath.slice(1);
 					targetPath = path.join(projectDir, relativePath);
 				}
 
@@ -366,14 +524,15 @@ export const generateProject = async (opts: ProjectOptions) => {
 			}
 		}
 	}
+	/* eslint-enable eslint/no-await-in-loop */
 
 	// Apply final programmatic overrides
-	const pm = opts.packageManager || 'npm';
+	const pm = opts.packageManager;
 
 	if (pm !== 'npm') {
 		for (const [key, value] of Object.entries(finalPkg.scripts)) {
 			if (typeof value === 'string') {
-				finalPkg.scripts[key] = (value as string).replaceAll('npm run ', `${pm} run `);
+				finalPkg.scripts[key] = value.replaceAll('npm run ', `${pm} run `);
 			}
 		}
 	}
@@ -443,15 +602,15 @@ export const generateProject = async (opts: ProjectOptions) => {
 
 		if (summary) {
 			const relativeProjectDir = path.relative(process.cwd(), projectDir) || '.';
-			p.note(summary, `Planned changes in ${relativeProjectDir}:`);
+			prompts.note(summary, `Planned changes in ${relativeProjectDir}:`);
 
-			const confirm = await p.confirm({
+			const confirm = await prompts.confirm({
 				message: 'Do you want to apply these changes?',
 				initialValue: true,
 			});
 
-			if (p.isCancel(confirm) || !confirm) {
-				p.cancel('Update cancelled.');
+			if (prompts.isCancel(confirm) || !confirm) {
+				prompts.cancel('Update cancelled.');
 				process.exit(0);
 			}
 		} else {
@@ -460,11 +619,12 @@ export const generateProject = async (opts: ProjectOptions) => {
 	}
 
 	// Apply pending operations
-	for (const op of pendingOperations) {
-		await op();
-	}
+	await pendingOperations.reduce(async (previous, operation) => {
+		await previous;
+		await operation();
+	}, Promise.resolve());
 
-	const states = {
+	const states: GeneratorState = {
 		gitInitialized: false,
 		githubCreated: false,
 		githubSkipped: !opts.createGithubRepository || isUpdate,
@@ -489,10 +649,10 @@ export const generateProject = async (opts: ProjectOptions) => {
 			});
 			log.success('Initialized Git repository (main branch).');
 			states.gitInitialized = true;
-		} catch (e: any) {
-			debug('Failed to initialize Git: %O', e);
-			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
-			log.error(`Failed to initialize Git: ${e.message}${detail}`);
+		} catch (error: unknown) {
+			debug('Failed to initialize Git: %O', error);
+			const {message, detail} = toErrorDetail(error);
+			log.error(`Failed to initialize Git: ${message}${detail}`);
 		}
 	} else {
 		states.gitInitialized = true; // Already initialized
@@ -512,12 +672,12 @@ export const generateProject = async (opts: ProjectOptions) => {
 			});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Dependencies installed (${pm} install).`);
 			states.depsInstalled = true;
-		} catch (e: any) {
-			debug('Failed to install dependencies: %O', e);
+		} catch (error: unknown) {
+			debug('Failed to install dependencies: %O', error);
 			s.stop('Failed to install dependencies.');
-			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
-			log.error(`${e.message}${detail}`);
-			throw new Error(`Failed to install dependencies: ${e.message}${detail}`);
+			const {message, detail} = toErrorDetail(error);
+			log.error(`${message}${detail}`);
+			throw new Error(`Failed to install dependencies: ${message}${detail}`, {cause: error});
 		}
 	}
 
@@ -535,11 +695,11 @@ export const generateProject = async (opts: ProjectOptions) => {
 					preferLocal: true,
 				});
 				s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Files formatted (${pm} run format).`);
-			} catch (e: any) {
-				debug('Failed to format files: %O', e);
+			} catch (error: unknown) {
+				debug('Failed to format files: %O', error);
 				s.stop('Failed to format files.');
-				const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
-				log.error(`${e.message}${detail}`);
+				const {message, detail} = toErrorDetail(error);
+				log.error(`${message}${detail}`);
 			}
 		}
 
@@ -553,12 +713,12 @@ export const generateProject = async (opts: ProjectOptions) => {
 			});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  CI script completed (${pm} run ci).`);
 			states.ciRun = true;
-		} catch (e: any) {
-			debug('Failed to run CI script: %O', e);
+		} catch (error: unknown) {
+			debug('Failed to run CI script: %O', error);
 			s.stop('Failed to run CI script.');
-			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
-			log.error(`${e.message}${detail}`);
-			throw new Error(`Failed to run CI script: ${e.message}${detail}`);
+			const {message, detail} = toErrorDetail(error);
+			log.error(`${message}${detail}`);
+			throw new Error(`Failed to run CI script: ${message}${detail}`, {cause: error});
 		}
 	}
 
@@ -590,16 +750,15 @@ export const generateProject = async (opts: ProjectOptions) => {
 			});
 			s.stop(`\x1b[1G\x1b[2K\x1b[32m◆\x1b[39m  Created GitHub repository and pushed initial commit.`);
 			states.githubCreated = true;
-		} catch (e: any) {
-			debug('Failed to create/push GitHub repository: %O', e);
+		} catch (error: unknown) {
+			debug('Failed to create/push GitHub repository: %O', error);
 			s.stop('Failed to create/push GitHub repository.');
-			const detail = e.stdout || e.stderr ? `\n\nOutput:\n${e.stdout}\n${e.stderr}` : '';
-			log.warn(`Failed to create/push GitHub repository: ${e.message}${detail}\nEnsure "gh" CLI is installed and authenticated.`);
-			states.githubError = e.message;
+			const {message, detail} = toErrorDetail(error);
+			log.warn(`Failed to create/push GitHub repository: ${message}${detail}\nEnsure "gh" CLI is installed and authenticated.`);
+			states.githubError = message;
 		}
 	}
 
-	let hasErrors = false;
 	let hasWarnings = false;
 	const errorMessages: string[] = [];
 
@@ -607,6 +766,8 @@ export const generateProject = async (opts: ProjectOptions) => {
 		hasWarnings = true;
 		errorMessages.push(`GitHub repository creation failed: ${states.githubError}`);
 	}
+
+	const hasErrors = errorMessages.some((message) => message.startsWith('ERROR:'));
 
 	await generateGeneratedMd(
 		projectDir,
@@ -632,15 +793,15 @@ export const generateProject = async (opts: ProjectOptions) => {
 	}
 };
 
-async function generateGeneratedMd(
+generateGeneratedMd = async (
 	projectDir: string,
 	opts: ProjectOptions,
 	pm: string,
-	states: any,
+	states: GeneratorState,
 	isUpdate: boolean,
 	status: {hasErrors: boolean; hasWarnings: boolean; errorMessages: string[]},
-	actions: Array<{type: string; path: string; reason?: string; recommendedAction?: string}>,
-) {
+	actions: {type: string; path: string; reason?: string; recommendedAction?: string}[],
+): Promise<void> => {
 	const statusBadge = status.hasErrors
 		? '🔴 **Completed with Errors**'
 		: status.hasWarnings
@@ -689,8 +850,8 @@ async function generateGeneratedMd(
 									CONFLICT: '🔥 CONFLICT',
 									DELETE: '🗑️ DELETE',
 									UPDATED: '✨ UPDATED',
-								}[a.type] || a.type;
-							return `| \`${a.path}\` | ${actionIcon} | ${a.reason || '-'} | ${a.recommendedAction || (a.type === 'CONFLICT' ? '**Resolve conflicts**' : 'Review changes')} |`;
+								}[a.type] ?? a.type;
+							return `| \`${a.path}\` | ${actionIcon} | ${a.reason ?? '-'} | ${a.recommendedAction ?? (a.type === 'CONFLICT' ? '**Resolve conflicts**' : 'Review changes')} |`;
 						}),
 					'',
 				]
@@ -790,11 +951,11 @@ async function generateGeneratedMd(
 	].join('\n');
 
 	await fs.writeFile(path.join(projectDir, 'GENERATED.md'), md);
-}
+};
 
-function getTemplateArchitectureSection(template: string): string[] {
+getTemplateArchitectureSection = (template: string): string[] => {
 	switch (template) {
-		case 'cli':
+		case 'cli': {
 			return [
 				'## 🏗️ CLI Architecture',
 				'This project uses `commander` for argument parsing and `@clack/prompts` for interactive CLI interfaces.',
@@ -807,7 +968,8 @@ function getTemplateArchitectureSection(template: string): string[] {
 				'- Add new sub-commands directly in `src/cli.ts`.',
 				'- Extract logic into a new `src/commands/` directory as your application scales.',
 			];
-		case 'web-vanilla':
+		}
+		case 'web-vanilla': {
 			return [
 				'## 🏗️ Web Vanilla Architecture',
 				'A standalone, blazing fast web application scaffolded with Vite.',
@@ -820,7 +982,8 @@ function getTemplateArchitectureSection(template: string): string[] {
 				'- Add new UI logic or Web Components inside the `src/` directory.',
 				'- Create styling (`.css` or `.scss`) and import them directly into `main.ts`.',
 			];
-		case 'web-app':
+		}
+		case 'web-app': {
 			return [
 				'## 🏗️ Web App Architecture',
 				'A robust React SPA configured with MUI components and TanStack Query.',
@@ -835,7 +998,8 @@ function getTemplateArchitectureSection(template: string): string[] {
 				'- Set up React Router for client-side routing.',
 				'- Manage complex global state with a store like Zustand if needed.',
 			];
-		case 'web-fullstack':
+		}
+		case 'web-fullstack': {
 			return [
 				'## 🏗️ Fullstack Monorepo Architecture',
 				'A modern monorepo combining an Express server with a React client, seamlessly integrated using workspaces.',
@@ -849,7 +1013,9 @@ function getTemplateArchitectureSection(template: string): string[] {
 				'- Consume those routes in the `client` package via TanStack Query.',
 				'- **Tip**: Create a `shared/` workspace package to share types across both frontend and backend for end-to-end type safety.',
 			];
-		default:
+		}
+		default: {
 			return [];
+		}
 	}
-}
+};

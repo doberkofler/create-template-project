@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {webVanillaHtmlProcessor} from './web-vanilla-html.js';
-import {ProjectOptions} from '../../types.js';
+import {type ProjectOptions} from '#shared/types.js';
 
 describe('web vanilla html processor', () => {
 	const baseOpts: ProjectOptions = {

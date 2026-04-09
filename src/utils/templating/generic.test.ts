@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {genericProcessor} from './generic.js';
-import {ProjectOptions} from '../../types.js';
+import {type ProjectOptions} from '#shared/types.js';
 
 describe('generic processor', () => {
 	const baseOpts: ProjectOptions = {

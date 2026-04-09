@@ -1,14 +1,44 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
-import {getAllFiles, isSeedFile, mergeFile, mergePackageJson, processContent} from './file.js';
+import {getAllFiles, isSeedFile, mergeFile, mergePackageJson, processContent} from '#shared/file.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {execa} from 'execa';
 
-vi.mock('execa');
+vi.mock(import('execa'));
+
+type ProjectOptions = Parameters<typeof processContent>[2];
+
+type MergeablePackageJson = {
+	scripts?: Record<string, string>;
+	dependencies?: Record<string, string>;
+	devDependencies?: Record<string, string>;
+	workspaces?: string[];
+	bin?: string;
+};
+
+const baseOptions: ProjectOptions = {
+	template: 'cli',
+	projectName: 'test-project',
+	author: 'Test Author',
+	githubUsername: 'test-user',
+	packageManager: 'pnpm',
+	createGithubRepository: false,
+	directory: '/tmp/test-project',
+	update: false,
+	build: false,
+	progress: false,
+};
+
+const createExecaError = (message: string, exitCode: number): Error & {exitCode: number} => Object.assign(new Error(message), {exitCode});
+
+const setExecaMockImplementation = (implementation: (...args: unknown[]) => unknown): void => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+	(vi.mocked(execa) as unknown as {mockImplementation: (fn: (...args: unknown[]) => unknown) => void}).mockImplementation(implementation);
+};
 
 describe('file utils', () => {
-	const tmpDir = path.join(os.tmpdir(), 'create-template-project-utils-test-' + Math.random().toString(36).slice(2));
+	const tmpDir = path.join(os.tmpdir(), `create-template-project-utils-test-${Math.random().toString(36).slice(2)}`);
 
 	beforeEach(async () => {
 		await fs.mkdir(tmpDir, {recursive: true});
@@ -42,18 +72,18 @@ describe('file utils', () => {
 			expect(isSeedFile('src/index.ts')).toBe(true);
 			expect(isSeedFile('client/src/App.tsx')).toBe(true);
 			expect(isSeedFile('index.html')).toBe(true);
-			expect(isSeedFile('package.json')).toBe(false);
+			expect(isSeedFile('package.json')).not.toBe(true);
 			expect(isSeedFile('README.md')).toBe(true);
 		});
 	});
 
 	describe('mergePackageJson', () => {
 		it('should merge package.json parts correctly', () => {
-			const target: any = {
+			const target: MergeablePackageJson = {
 				scripts: {test: 'old'},
 				dependencies: {dep1: '1.0.0'},
 			};
-			const source: any = {
+			const source: MergeablePackageJson = {
 				scripts: {build: 'new'},
 				dependencies: {dep2: '2.0.0'},
 				devDependencies: {dev1: '3.0.0'},
@@ -70,10 +100,7 @@ describe('file utils', () => {
 	});
 
 	describe('processContent', () => {
-		const opts: any = {
-			projectName: 'test-project',
-			template: 'cli',
-		};
+		const opts = baseOptions;
 
 		it('should replace placeholders', () => {
 			const content = 'Project: {{projectName}}, Description: {{description}}';
@@ -93,20 +120,20 @@ describe('file utils', () => {
 			expect(processed).toContain('## Dependencies');
 			expect(processed).toContain('- **dep1**: desc1');
 			expect(processed).toContain('- **dep2**: desc2');
-			const occurrences = (processed.match(/dep1/g) || []).length;
+			const occurrences = (processed.match(/dep1/g) ?? []).length;
 			expect(occurrences).toBe(1);
 		});
 
 		it('should handle web-vanilla script tag index.html', () => {
 			const content = '<script src="{{scriptSrc}}"></script>';
-			const optsWebpage: any = {...opts, template: 'web-vanilla'};
+			const optsWebpage: ProjectOptions = {...opts, template: 'web-vanilla'};
 			const processed = processContent('index.html', content, optsWebpage, []);
 			expect(processed).toContain('/src/index.ts');
 		});
 
 		it('should handle web-fullstack tsconfig.json overrides', () => {
 			const content = '/* Language and Environment */ "lib": ["ESNext"], "module": "NodeNext" /* Strict Type-Checking Options */, "include": ["src/**/*"]';
-			const optsFullstack: any = {...opts, template: 'web-fullstack'};
+			const optsFullstack: ProjectOptions = {...opts, template: 'web-fullstack'};
 			const processed = processContent('tsconfig.json', content, optsFullstack, []);
 			expect(processed).toContain('"lib": ["ES2023", "DOM", "DOM.Iterable"]');
 			expect(processed).toContain('"jsx": "react-jsx"');
@@ -127,7 +154,7 @@ describe('file utils', () => {
       # [PLAYWRIGHT_SETUP]
       - run: "{{packageManager}} run ci"
 `;
-			const optsFullstack: any = {...opts, template: 'web-fullstack', packageManager: 'pnpm'};
+			const optsFullstack: ProjectOptions = {...opts, template: 'web-fullstack', packageManager: 'pnpm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsFullstack, []);
 			expect(processed).toContain('uses: pnpm/action-setup@v4');
 			expect(processed).toContain('cache: "pnpm"');
@@ -150,7 +177,7 @@ describe('file utils', () => {
       # [PLAYWRIGHT_SETUP]
       - run: "{{packageManager}} run ci"
 `;
-			const optsCli: any = {...opts, template: 'cli', packageManager: 'npm'};
+			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
 			expect(processed).not.toContain('# [PM_SETUP]');
@@ -175,7 +202,7 @@ describe('file utils', () => {
       # [PLAYWRIGHT_SETUP]
       - run: "{{packageManager}} run ci"
 `;
-			const optsWebApp: any = {...opts, template: 'web-app', packageManager: 'yarn'};
+			const optsWebApp: ProjectOptions = {...opts, template: 'web-app', packageManager: 'yarn'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsWebApp, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
 			expect(processed).toContain('cache: "yarn"');
@@ -198,7 +225,7 @@ describe('file utils', () => {
       # [PLAYWRIGHT_SETUP]
       - run: "{{packageManager}} run ci"
 `;
-			const optsCli: any = {...opts, template: 'cli', packageManager: 'npm'};
+			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
 			expect(processed).not.toContain('# [PM_SETUP]');
@@ -223,7 +250,7 @@ describe('file utils', () => {
       # [PLAYWRIGHT_SETUP]
       - run: "{{packageManager}} run ci"
 `;
-			const optsCli: any = {...opts, template: 'cli', packageManager: 'npm'};
+			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
 			expect(processed).not.toContain('# [PM_SETUP]');
@@ -248,7 +275,7 @@ describe('file utils', () => {
 		it('should return merged if git merge-file succeeds with changes', async () => {
 			const filePath = path.join(tmpDir, 'file.txt');
 			await fs.writeFile(filePath, 'merged content');
-			(vi.mocked(execa) as any).mockResolvedValue({exitCode: 0});
+			setExecaMockImplementation(() => ({stdout: '', stderr: ''}));
 			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
@@ -258,9 +285,10 @@ describe('file utils', () => {
 
 		it('should return conflict if git merge-file returns exit code 1', async () => {
 			const filePath = path.join(tmpDir, 'file.txt');
-			const err: any = new Error('conflict');
-			err.exitCode = 1;
-			(vi.mocked(execa) as any).mockRejectedValue(err);
+			const err = createExecaError('conflict', 1);
+			setExecaMockImplementation(() => {
+				throw err;
+			});
 			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
@@ -269,9 +297,10 @@ describe('file utils', () => {
 
 		it('should return conflict if git merge-file returns exit code 2 (multiple conflicts)', async () => {
 			const filePath = path.join(tmpDir, 'file.txt');
-			const err: any = new Error('conflict');
-			err.exitCode = 2;
-			(vi.mocked(execa) as any).mockRejectedValue(err);
+			const err = createExecaError('conflict', 2);
+			setExecaMockImplementation(() => {
+				throw err;
+			});
 			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);
@@ -280,9 +309,10 @@ describe('file utils', () => {
 
 		it('should return error and log message on other git failures', async () => {
 			const filePath = path.join(tmpDir, 'file.txt');
-			const err: any = new Error('fatal error');
-			err.exitCode = 128;
-			(vi.mocked(execa) as any).mockRejectedValue(err);
+			const err = createExecaError('fatal error', 128);
+			setExecaMockImplementation(() => {
+				throw err;
+			});
 			const log = {error: vi.fn<(msg: string) => void>()};
 
 			const result = await mergeFile(filePath, 'old content', 'template content', log);

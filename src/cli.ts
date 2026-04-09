@@ -1,17 +1,104 @@
 import {Command} from 'commander';
 import * as p from '@clack/prompts';
-import {ProjectOptions, ProjectOptionsSchema, TemplateTypeSchema} from './types.js';
+import {type ProjectOptions, ProjectOptionsSchema, TemplateTypeSchema} from '#shared/types.js';
 import {execa} from 'execa';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import debugLib from 'debug';
 import {getAllTemplatesInfo, getTemplateInfo} from './generators/info.js';
 
-const pathExists = (p: string) =>
-	fs
-		.access(p)
-		.then(() => true)
-		.catch(() => false);
+type StoredProjectConfig = {
+	template?: ProjectOptions['template'];
+	githubUsername?: string;
+	author?: string;
+};
+
+type StoredPackageJson = {
+	name?: string;
+	description?: string;
+	keywords?: string[];
+	author?: string;
+	'create-template-project'?: StoredProjectConfig;
+};
+
+type InfoCommandOptions = {
+	template?: string;
+};
+
+type CreateCommandOptions = {
+	template: string;
+	name: string;
+	description?: string;
+	keywords?: string;
+	author?: string;
+	githubUsername?: string;
+	packageManager: ProjectOptions['packageManager'];
+	createGithubRepository?: boolean;
+	path: string;
+	build?: boolean;
+	progress?: boolean;
+};
+
+type UpdateCommandOptions = {
+	template?: string;
+	description?: string;
+	keywords?: string;
+	author?: string;
+	githubUsername?: string;
+	packageManager: ProjectOptions['packageManager'];
+	createGithubRepository?: boolean;
+	directory: string;
+	build?: boolean;
+	progress?: boolean;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+const isPackageManager = (value: string): value is ProjectOptions['packageManager'] => value === 'npm' || value === 'pnpm' || value === 'yarn';
+
+const pathExists = async (filePath: string): Promise<boolean> => {
+	try {
+		await fs.access(filePath);
+		return true;
+	} catch {
+		return false;
+	}
+};
+
+const parseStoredPackageJson = (raw: string): StoredPackageJson => {
+	const parsed = JSON.parse(raw) as unknown;
+	if (!isRecord(parsed)) {
+		return {};
+	}
+
+	const pkg = parsed;
+	const config = pkg['create-template-project'];
+	const configRecord = isRecord(config) ? config : undefined;
+
+	let template: ProjectOptions['template'] | undefined;
+	if (configRecord !== undefined && typeof configRecord.template === 'string') {
+		const result = TemplateTypeSchema.safeParse(configRecord.template);
+		if (result.success) {
+			template = result.data;
+		}
+	}
+
+	return {
+		name: typeof pkg.name === 'string' ? pkg.name : undefined,
+		description: typeof pkg.description === 'string' ? pkg.description : undefined,
+		keywords: Array.isArray(pkg.keywords) ? pkg.keywords.filter((keyword): keyword is string => typeof keyword === 'string') : undefined,
+		author: typeof pkg.author === 'string' ? pkg.author : undefined,
+		'create-template-project': configRecord
+			? {
+					template,
+					githubUsername: typeof configRecord.githubUsername === 'string' ? configRecord.githubUsername : undefined,
+					author: typeof configRecord.author === 'string' ? configRecord.author : undefined,
+				}
+			: undefined,
+	};
+};
+
+const noop = (): undefined => undefined;
 
 const stripQuotes = (str: string | undefined): string | undefined => {
 	if (typeof str !== 'string') {
@@ -19,10 +106,10 @@ const stripQuotes = (str: string | undefined): string | undefined => {
 	}
 	let result = str.trim();
 	while (result.length >= 2) {
-		const first = result[0];
-		const last = result[result.length - 1];
+		const [first] = result;
+		const last = result.at(-1);
 		if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
-			result = result.substring(1, result.length - 1).trim();
+			result = result.slice(1, -1).trim();
 		} else {
 			break;
 		}
@@ -30,20 +117,20 @@ const stripQuotes = (str: string | undefined): string | undefined => {
 	return result;
 };
 
-const getDefaultAuthor = async () => {
+const getDefaultAuthor = async (): Promise<string> => {
 	try {
 		const {stdout} = await execa('git', ['config', 'user.name']);
 		return stdout.trim();
-	} catch (e) {
+	} catch {
 		return '';
 	}
 };
 
-const getDefaultGithubUsername = async () => {
+const getDefaultGithubUsername = async (): Promise<string> => {
 	try {
 		const {stdout} = await execa('git', ['config', 'github.user']);
 		return stdout.trim();
-	} catch (e) {
+	} catch {
 		return '';
 	}
 };
@@ -55,8 +142,8 @@ export const parseArgs = async (): Promise<ProjectOptions> => {
 	const program = new Command();
 	if (process.env.NODE_ENV === 'test') {
 		program.configureOutput({
-			writeOut: () => {},
-			writeErr: () => {},
+			writeOut: noop,
+			writeErr: noop,
 		});
 	}
 
@@ -67,7 +154,7 @@ export const parseArgs = async (): Promise<ProjectOptions> => {
 		.version('0.1.0')
 		.option('--debug', 'Enable debug output')
 		.on('option:debug', () => {
-			process.env['DEBUG'] = 'create-template-project:*';
+			process.env.DEBUG = 'create-template-project:*';
 			debugLib.enable('create-template-project:*');
 		})
 		.addHelpText(
@@ -87,18 +174,19 @@ Templates:
 `,
 		);
 
-	let commandResult: ProjectOptions | undefined;
+	let commandResult: Partial<ProjectOptions> | undefined;
 
 	program
 		.command('info')
 		.description('Show detailed information about available templates and their components')
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
-		.action((opts) => {
+		.action((opts: InfoCommandOptions) => {
 			debug('Executing "info" command with options: %O', opts);
 			p.intro('Template Information');
 
-			if (opts.template) {
-				const typeResult = TemplateTypeSchema.safeParse(opts.template);
+			if (opts.template !== undefined && opts.template.length > 0) {
+				const template = stripQuotes(opts.template);
+				const typeResult = TemplateTypeSchema.safeParse(template);
 				if (!typeResult.success) {
 					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
 					process.exit(1);
@@ -136,21 +224,27 @@ Templates:
 		.requiredOption('--path <path>', 'Output directory')
 		.option('--build', 'Run the CI script (lint, build, test) after scaffolding', false)
 		.option('--no-progress', 'Do not show progress indicators')
-		.action(async (opts) => {
+		.action(async (opts: CreateCommandOptions) => {
 			debug('Executing "create" command with options: %O', opts);
+			const templateInput = stripQuotes(opts.template);
+			const templateResult = TemplateTypeSchema.safeParse(templateInput);
+			if (!templateResult.success) {
+				p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
+				process.exit(1);
+			}
 			commandResult = {
-				...opts,
 				update: false,
-				template: opts.template as ProjectOptions['template'],
+				template: templateResult.data,
 				projectName: opts.name,
 				description: opts.description,
 				keywords: opts.keywords,
-				author: opts.author || (await getDefaultAuthor()),
-				githubUsername: opts.githubUsername || (await getDefaultGithubUsername()),
-				packageManager: opts.packageManager as ProjectOptions['packageManager'],
+				author: opts.author ?? (await getDefaultAuthor()),
+				githubUsername: opts.githubUsername ?? (await getDefaultGithubUsername()),
+				packageManager: opts.packageManager,
 				directory: path.resolve(opts.path),
-				createGithubRepository: !!opts.createGithubRepository,
-				progress: !!opts.progress,
+				createGithubRepository: Boolean(opts.createGithubRepository),
+				build: Boolean(opts.build),
+				progress: Boolean(opts.progress),
 			};
 			debug('Processed "create" options: %O', commandResult);
 		});
@@ -184,7 +278,7 @@ Restrictions & Behavior:
 		.option('--dev', 'Run the dev server after scaffolding', false)
 		.option('--open', 'Open the browser after scaffolding', false)
 		.option('--no-progress', 'Do not show progress indicators')
-		.action(async (opts) => {
+		.action(async (opts: UpdateCommandOptions) => {
 			debug('Executing "update" command with options: %O', opts);
 
 			const directory = path.resolve(opts.directory);
@@ -195,37 +289,52 @@ Restrictions & Behavior:
 				process.exit(1);
 			}
 
-			let pkg: any;
+			let pkg: StoredPackageJson;
 			try {
-				pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
-			} catch (e: any) {
-				p.log.error(`Failed to read or parse package.json at ${pkgPath}: ${e.message}`);
+				pkg = parseStoredPackageJson(await fs.readFile(pkgPath, 'utf8'));
+			} catch (error: unknown) {
+				const message = error instanceof Error ? error.message : String(error);
+				p.log.error(`Failed to read or parse package.json at ${pkgPath}: ${message}`);
 				process.exit(1);
 			}
 
-			if (!pkg.name) {
+			if (pkg.name === undefined || pkg.name.length === 0) {
 				p.log.error(`No name property found in ${pkgPath}.`);
 				process.exit(1);
 			}
 
-			if (!pkg['create-template-project']?.template) {
+			const projectConfig = pkg['create-template-project'];
+			// eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+			if (projectConfig === undefined || projectConfig.template === undefined) {
 				p.log.error(`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`);
 				process.exit(1);
 			}
 
+			const storedTemplate = projectConfig.template;
+			let template = storedTemplate;
+			if (opts.template !== undefined) {
+				const templateInput = stripQuotes(opts.template);
+				const templateResult = TemplateTypeSchema.safeParse(templateInput);
+				if (!templateResult.success) {
+					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
+					process.exit(1);
+				}
+				template = templateResult.data;
+			}
 			commandResult = {
 				...opts,
 				update: true,
-				template: (opts.template || pkg['create-template-project']?.template) as ProjectOptions['template'],
+				template,
 				projectName: pkg.name,
-				description: opts.description || pkg.description,
-				keywords: opts.keywords || (pkg.keywords ? pkg.keywords.join(', ') : undefined),
-				author: opts.author || pkg.author || (await getDefaultAuthor()),
-				githubUsername: opts.githubUsername || pkg['create-template-project']?.githubUsername || (await getDefaultGithubUsername()),
-				packageManager: opts.packageManager as ProjectOptions['packageManager'],
+				description: opts.description ?? pkg.description,
+				keywords: opts.keywords ?? (pkg.keywords !== undefined ? pkg.keywords.join(', ') : undefined),
+				author: opts.author ?? pkg.author ?? (await getDefaultAuthor()),
+				githubUsername: opts.githubUsername ?? projectConfig.githubUsername ?? (await getDefaultGithubUsername()),
+				packageManager: opts.packageManager,
 				directory: directory,
-				createGithubRepository: !!opts.createGithubRepository,
-				progress: !!opts.progress,
+				createGithubRepository: Boolean(opts.createGithubRepository),
+				build: Boolean(opts.build),
+				progress: Boolean(opts.progress),
 			};
 			debug('Processed "update" options: %O', commandResult);
 		});
@@ -240,7 +349,7 @@ Restrictions & Behavior:
 				message: 'Project name:',
 				placeholder: 'my-app',
 				defaultValue: 'my-app',
-				validate: (value) => (value && value.length > 0 ? undefined : 'Project name is required'),
+				validate: (value = '') => (value.length > 0 ? undefined : 'Project name is required'),
 			});
 
 			if (p.isCancel(projectName)) {
@@ -258,34 +367,34 @@ Restrictions & Behavior:
 				process.exit(0);
 			}
 
-			const projectDir = path.resolve(directory as string, projectName as string);
+			const projectDir = path.resolve(directory, projectName);
 			const exists = await pathExists(projectDir);
 			const pkgPath = path.join(projectDir, 'package.json');
 			const pkgExists = await pathExists(pkgPath);
 
-			let existingConfig: any = {};
+			let existingConfig: StoredProjectConfig = {};
 			let existingAuthor = '';
 			let existingGithubUsername = '';
 			let existingDescription = '';
-			let existingKeywords = [];
+			let existingKeywords: string[] = [];
 			if (pkgExists) {
 				try {
-					const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
-					existingConfig = pkg['create-template-project'] || {};
-					existingAuthor = pkg.author;
-					existingGithubUsername = existingConfig.githubUsername;
-					existingDescription = pkg.description;
-					existingKeywords = pkg.keywords || [];
+					const pkg = parseStoredPackageJson(await fs.readFile(pkgPath, 'utf8'));
+					existingConfig = pkg['create-template-project'] ?? {};
+					existingAuthor = pkg.author ?? '';
+					existingGithubUsername = existingConfig.githubUsername ?? '';
+					existingDescription = pkg.description ?? '';
+					existingKeywords = pkg.keywords ?? [];
 					debug('Found existing project config: %O', existingConfig);
-				} catch (e) {
-					debug('Failed to read existing package.json: %O', e);
+				} catch (error) {
+					debug('Failed to read existing package.json: %O', error);
 				}
 			}
 
 			const projectDescription = await p.text({
 				message: 'Project description:',
 				placeholder: 'A new project',
-				defaultValue: existingDescription || '',
+				defaultValue: existingDescription,
 			});
 
 			if (p.isCancel(projectDescription)) {
@@ -296,7 +405,7 @@ Restrictions & Behavior:
 			const projectKeywords = await p.text({
 				message: 'Project keywords (comma separated):',
 				placeholder: 'cli, nodejs, typescript',
-				defaultValue: existingKeywords ? existingKeywords.join(', ') : '',
+				defaultValue: existingKeywords.join(', '),
 			});
 
 			if (p.isCancel(projectKeywords)) {
@@ -305,11 +414,12 @@ Restrictions & Behavior:
 			}
 
 			const defaultAuthor = await getDefaultAuthor();
+			const authorDefault = existingAuthor.length > 0 ? existingAuthor : (existingConfig.author ?? defaultAuthor);
 			const author = await p.text({
 				message: 'Author name:',
 				placeholder: 'Your Name',
-				defaultValue: existingAuthor || existingConfig.author || defaultAuthor,
-				validate: (value) => (value && value.length > 0 ? undefined : 'Author name is required'),
+				defaultValue: authorDefault,
+				validate: (value = '') => (value.length > 0 ? undefined : 'Author name is required'),
 			});
 
 			if (p.isCancel(author)) {
@@ -318,11 +428,12 @@ Restrictions & Behavior:
 			}
 
 			const defaultGithubUsername = await getDefaultGithubUsername();
+			const githubDefault = existingGithubUsername.length > 0 ? existingGithubUsername : defaultGithubUsername;
 			const githubUsername = await p.text({
 				message: 'GitHub username:',
 				placeholder: 'your-github-username',
-				defaultValue: existingGithubUsername || defaultGithubUsername,
-				validate: (value) => (value && value.length > 0 ? undefined : 'GitHub username is required'),
+				defaultValue: githubDefault,
+				validate: (value = '') => (value.length > 0 ? undefined : 'GitHub username is required'),
 			});
 
 			if (p.isCancel(githubUsername)) {
@@ -345,22 +456,21 @@ Restrictions & Behavior:
 					process.exit(0);
 				}
 
-				if (action === 'update') {
-					if (!existingConfig.template) {
-						p.log.error(
-							`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`,
-						);
-						process.exit(1);
-					}
-					update = true;
+				if (!existingConfig.template) {
+					p.log.error(
+						`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`,
+					);
+					process.exit(1);
 				}
+				update = true;
 			}
 
-			let template = existingConfig.template;
+			const {template: existingTemplate} = existingConfig;
+			let template: ProjectOptions['template'] | undefined = existingTemplate;
 			if (!update || !template) {
-				template = await p.select({
+				const selectedTemplate = await p.select({
 					message: 'Select project template:',
-					initialValue: template || 'cli',
+					initialValue: template ?? 'cli',
 					options: [
 						{label: 'CLI Application (Node.js)', value: 'cli'},
 						{label: 'Web-Vanilla (Standalone)', value: 'web-vanilla'},
@@ -372,17 +482,29 @@ Restrictions & Behavior:
 					],
 				});
 
-				if (p.isCancel(template)) {
+				if (p.isCancel(selectedTemplate)) {
 					p.cancel('Operation cancelled.');
 					process.exit(0);
 				}
+
+				if (typeof selectedTemplate !== 'string') {
+					p.cancel('Invalid template selection.');
+					process.exit(1);
+				}
+
+				const templateResult = TemplateTypeSchema.safeParse(selectedTemplate);
+				if (!templateResult.success) {
+					p.cancel('Invalid template selection.');
+					process.exit(1);
+				}
+				template = templateResult.data;
 			} else {
 				p.log.info(`Using existing template type: ${template}`);
 			}
 
-			let packageManager = 'pnpm';
+			let packageManager: ProjectOptions['packageManager'] = 'pnpm';
 			if (!update) {
-				packageManager = (await p.select({
+				const selectedPackageManager = await p.select({
 					message: 'Select package manager:',
 					initialValue: 'pnpm',
 					options: [
@@ -390,12 +512,19 @@ Restrictions & Behavior:
 						{label: 'pnpm', value: 'pnpm'},
 						{label: 'yarn', value: 'yarn'},
 					],
-				})) as string;
+				});
 
-				if (p.isCancel(packageManager)) {
+				if (p.isCancel(selectedPackageManager)) {
 					p.cancel('Operation cancelled.');
 					process.exit(0);
 				}
+
+				if (typeof selectedPackageManager !== 'string' || !isPackageManager(selectedPackageManager)) {
+					p.cancel('Invalid package manager selection.');
+					process.exit(1);
+				}
+
+				packageManager = selectedPackageManager;
 			}
 
 			const build = await p.confirm({
@@ -417,20 +546,20 @@ Restrictions & Behavior:
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
-			const createGithubRepository = createGithubRepositoryRes as boolean;
+			const createGithubRepository = createGithubRepositoryRes;
 
 			commandResult = {
-				template: template as ProjectOptions['template'],
-				projectName: projectName as string,
-				description: projectDescription as string,
-				keywords: projectKeywords as string,
-				author: author as string,
-				githubUsername: githubUsername as string,
-				packageManager: packageManager as ProjectOptions['packageManager'],
+				template,
+				projectName,
+				description: projectDescription,
+				keywords: projectKeywords,
+				author,
+				githubUsername,
+				packageManager,
 				createGithubRepository,
 				directory: projectDir,
 				update,
-				build: build as boolean,
+				build,
 				progress: true,
 			};
 		});
@@ -442,14 +571,16 @@ Restrictions & Behavior:
 
 	try {
 		await program.parseAsync(process.argv);
-	} catch (e: any) {
-		if (e.code === 'commander.helpDisplayed' || e.code === 'commander.version' || e.code === 'PROCESS_EXIT_0') {
+	} catch (error: unknown) {
+		const code = typeof error === 'object' && error !== null && 'code' in error ? String((error as {code: unknown}).code) : '';
+		if (code === 'commander.helpDisplayed' || code === 'commander.version' || code === 'PROCESS_EXIT_0') {
 			process.exit(0);
 		}
-		if (e.code === 'PROCESS_EXIT_1') {
+		if (code === 'PROCESS_EXIT_1') {
 			process.exit(1);
 		}
-		p.cancel(e.message);
+		const message = error instanceof Error ? error.message : String(error);
+		p.cancel(message);
 		process.exit(1);
 	}
 
@@ -460,26 +591,42 @@ Restrictions & Behavior:
 	}
 
 	// Sanitize string inputs (strip surrounding quotes)
-	if (commandResult.template) {
-		commandResult.template = stripQuotes(commandResult.template) as any;
+	const template = stripQuotes(commandResult.template);
+	if (template !== undefined) {
+		const templateResult = TemplateTypeSchema.safeParse(template);
+		if (templateResult.success) {
+			commandResult.template = templateResult.data;
+		}
 	}
-	if (commandResult.projectName) {
-		commandResult.projectName = stripQuotes(commandResult.projectName) as any;
+	if (commandResult.projectName !== undefined) {
+		const projectName = stripQuotes(commandResult.projectName);
+		if (projectName !== undefined) {
+			commandResult.projectName = projectName;
+		}
 	}
-	if (commandResult.description) {
+	if (commandResult.description !== undefined) {
 		commandResult.description = stripQuotes(commandResult.description);
 	}
-	if (commandResult.keywords) {
+	if (commandResult.keywords !== undefined) {
 		commandResult.keywords = stripQuotes(commandResult.keywords);
 	}
-	if (commandResult.author) {
-		commandResult.author = stripQuotes(commandResult.author) as any;
+	if (commandResult.author !== undefined) {
+		const author = stripQuotes(commandResult.author);
+		if (author !== undefined) {
+			commandResult.author = author;
+		}
 	}
-	if (commandResult.githubUsername) {
-		commandResult.githubUsername = stripQuotes(commandResult.githubUsername) as any;
+	if (commandResult.githubUsername !== undefined) {
+		const githubUsername = stripQuotes(commandResult.githubUsername);
+		if (githubUsername !== undefined) {
+			commandResult.githubUsername = githubUsername;
+		}
 	}
-	if (commandResult.packageManager) {
-		commandResult.packageManager = stripQuotes(commandResult.packageManager) as any;
+	if (commandResult.packageManager !== undefined) {
+		const packageManager = stripQuotes(commandResult.packageManager);
+		if (packageManager !== undefined && isPackageManager(packageManager)) {
+			commandResult.packageManager = packageManager;
+		}
 	}
 
 	// Validation using Zod
@@ -491,15 +638,15 @@ Restrictions & Behavior:
 		process.exit(1);
 	}
 
-	commandResult = validationResult.data;
+	const validated = validationResult.data;
 
-	const projectDir = commandResult.directory;
+	const projectDir = validated.directory;
 	const exists = await pathExists(projectDir);
 
-	if (exists && !commandResult.update) {
+	if (exists && !validated.update) {
 		p.cancel(`Directory "${projectDir}" already exists. Use the "update" command to update.`);
 		process.exit(1);
 	}
 
-	return commandResult;
+	return validated;
 };

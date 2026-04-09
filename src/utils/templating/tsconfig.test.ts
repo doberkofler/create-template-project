@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {tsconfigProcessor} from './tsconfig.js';
-import {ProjectOptions} from '../../types.js';
+import {type ProjectOptions} from '#shared/types.js';
 
 describe('tsconfig processor', () => {
 	const baseOpts: ProjectOptions = {

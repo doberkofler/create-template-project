@@ -5,38 +5,30 @@ import path from 'node:path';
 import os from 'node:os';
 import * as p from '@clack/prompts';
 
-vi.mock('execa', () => ({
-	execa: vi.fn<any>(async () => ({stdout: '', stderr: ''})),
-}));
+type ProjectOptions = Parameters<typeof generateProject>[0];
 
-vi.mock('@clack/prompts', async (importOriginal) => {
-	const actual: any = await importOriginal();
-	return {
-		...actual,
-		intro: vi.fn<any>(),
-		outro: vi.fn<any>(),
-		select: vi.fn<any>(),
-		text: vi.fn<any>(),
-		confirm: vi.fn<any>(),
-		isCancel: vi.fn<any>(() => false),
-		cancel: vi.fn<any>(),
-		note: vi.fn<any>(),
-		spinner: vi.fn<any>(() => ({
-			start: vi.fn<any>(),
-			stop: vi.fn<any>(),
-			message: vi.fn<any>(),
-		})),
-		log: {
-			success: vi.fn<any>(),
-			error: vi.fn<any>(),
-			warn: vi.fn<any>(),
-			info: vi.fn<any>(),
-		},
-	};
+const getOpts = (projectName: string, directory: string, update = false): ProjectOptions => ({
+	template: 'cli',
+	projectName,
+	author: 'Test Author',
+	githubUsername: 'test-user',
+	packageManager: 'pnpm',
+	createGithubRepository: false,
+	directory,
+	update,
+	build: false,
+	progress: true,
+});
+
+vi.mock(import('execa'));
+vi.mock(import('@clack/prompts'), async (importOriginal) => {
+	const {createPromptsMock} = await import('./test-mocks.js');
+	const promptModuleMock = await createPromptsMock(importOriginal as () => Promise<Record<string, unknown>>);
+	return promptModuleMock;
 });
 
 describe('generateProject Update Logic', () => {
-	const tmpDir = path.join(os.tmpdir(), 'create-template-project-update-test-' + Math.random().toString(36).slice(2));
+	const tmpDir = path.join(os.tmpdir(), `create-template-project-update-test-${Math.random().toString(36).slice(2)}`);
 
 	beforeEach(async () => {
 		vi.clearAllMocks();
@@ -46,12 +38,7 @@ describe('generateProject Update Logic', () => {
 	it('should run a clean update with no changes and report nothing', async () => {
 		const projectName = 'clean-update-test';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
-			projectName,
-			directory: projectPath,
-			update: false,
-		};
+		const opts = getOpts(projectName, projectPath);
 
 		// 1. Initial Scaffold
 		await generateProject(opts);
@@ -64,23 +51,18 @@ describe('generateProject Update Logic', () => {
 		logWarn.mockClear();
 
 		// 2. Run Update
-		await generateProject({...opts, update: true} as any);
+		await generateProject({...opts, update: true});
 
 		// 3. Verify: No files should be reported as updated or merged because they are identical
 		const infoLogs = logInfo.mock.calls.map((call) => call[0]);
-		expect(infoLogs.some((log) => log.includes('Updated:'))).toBe(false);
-		expect(infoLogs.some((log) => log.includes('Merged:'))).toBe(false);
+		expect(infoLogs.some((log) => log.includes('Updated:'))).not.toBe(true);
+		expect(infoLogs.some((log) => log.includes('Merged:'))).not.toBe(true);
 	});
 
 	it('should report Merged when a managed file is modified locally', async () => {
 		const projectName = 'merge-update-test';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
-			projectName,
-			directory: projectPath,
-			update: false,
-		};
+		const opts = getOpts(projectName, projectPath);
 
 		// 1. Initial Scaffold
 		await generateProject(opts);
@@ -103,12 +85,7 @@ describe('generateProject Update Logic', () => {
 	it('should NOT touch seed files during update', async () => {
 		const projectName = 'seed-update-test';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
-			projectName,
-			directory: projectPath,
-			update: false,
-		};
+		const opts = getOpts(projectName, projectPath);
 
 		// 1. Initial Scaffold
 		await generateProject(opts);
@@ -138,12 +115,7 @@ describe('generateProject Update Logic', () => {
 			}),
 		);
 
-		const opts: any = {
-			template: 'cli' as const,
-			projectName,
-			directory: projectPath,
-			update: true,
-		};
+		const opts = getOpts(projectName, projectPath, true);
 
 		await expect(generateProject(opts)).rejects.toThrow(/No "create-template-project" configuration found/);
 	});

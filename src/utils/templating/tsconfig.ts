@@ -1,4 +1,4 @@
-import {ContentProcessor} from './types.js';
+import {type ContentProcessor} from './types.js';
 
 const WEB_ENV = `/* Language and Environment */
 		"target": "ES2023" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
@@ -23,7 +23,7 @@ export const tsconfigProcessor: ContentProcessor = (content, {filePath, opts}) =
 	if (template === 'web-fullstack' || template === 'web-vanilla' || template === 'web-app') {
 		processed = processed.replace(
 			/\/\* Language and Environment \*\/[\s\S]*?\/\* Strict Type-Checking Options \*\//,
-			WEB_ENV + '\n\n\t\t/* Strict Type-Checking Options */',
+			`${WEB_ENV}\n\n\t\t/* Strict Type-Checking Options */`,
 		);
 	}
 

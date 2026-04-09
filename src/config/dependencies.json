@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.0.3",
+			"version": "8.0.5",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -57,7 +57,7 @@
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "0.19.0",
+			"version": "0.20.0",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {

@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {githubWorkflowProcessor} from './github-workflow.js';
-import {ProjectOptions} from '../../types.js';
+import {type ProjectOptions} from '#shared/types.js';
 
 describe('github workflow processor', () => {
 	const baseOpts: ProjectOptions = {

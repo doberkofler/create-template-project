@@ -1,4 +1,4 @@
-import {ContentProcessor} from './types.js';
+import {type ContentProcessor} from './types.js';
 
 export const contributingProcessor: ContentProcessor = (content, {filePath, addedDeps}) => {
 	if (filePath !== 'CONTRIBUTING.md' || addedDeps.length === 0) {
@@ -7,10 +7,8 @@ export const contributingProcessor: ContentProcessor = (content, {filePath, adde
 
 	let processed = content;
 	processed += '\n## Dependencies\n\n';
-	const uniqueDeps = Array.from(new Set(addedDeps.map((d) => JSON.stringify(d)))).map((s) => JSON.parse(s)) as Array<{
-		name: string;
-		description: string;
-	}>;
+	const uniqueDepsByName = new Map(addedDeps.map((dep) => [dep.name, dep]));
+	const uniqueDeps = [...uniqueDepsByName.values()];
 	for (const dep of uniqueDeps) {
 		processed += `- **${dep.name}**: ${dep.description}\n`;
 	}

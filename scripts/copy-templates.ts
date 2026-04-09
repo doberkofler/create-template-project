@@ -2,18 +2,21 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const pathExists = (p: string) =>
-	fs
-		.access(p)
-		.then(() => true)
-		.catch(() => false);
+const pathExists = async (p: string): Promise<boolean> => {
+	try {
+		await fs.access(p);
+		return true;
+	} catch {
+		return false;
+	}
+};
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const src = path.join(root, 'src/templates');
 const dist = path.join(root, 'dist/templates');
 
-async function copyTemplates() {
+const copyTemplates = async (): Promise<void> => {
 	// Copy config
 	const srcConfig = path.join(root, 'src/config');
 	const distConfig = path.join(root, 'dist/config');
@@ -24,17 +27,18 @@ async function copyTemplates() {
 	}
 
 	const templates = ['base', 'cli', 'web-vanilla', 'web-app', 'web-fullstack'];
-
-	for (const t of templates) {
-		const srcFiles = path.join(src, t, 'files');
-		const distFiles = path.join(dist, t, 'files');
+	const copyOperations = templates.map(async (templateName): Promise<void> => {
+		const srcFiles = path.join(src, templateName, 'files');
+		const distFiles = path.join(dist, templateName, 'files');
 
 		if (await pathExists(srcFiles)) {
 			await fs.mkdir(distFiles, {recursive: true});
 			await fs.cp(srcFiles, distFiles, {recursive: true});
-			console.log(`Copied ${t} template files to dist`);
+			console.log(`Copied ${templateName} template files to dist`);
 		}
-	}
-}
+	});
 
-copyTemplates().catch(console.error);
+	await Promise.all(copyOperations);
+};
+
+await copyTemplates();

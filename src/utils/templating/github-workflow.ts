@@ -1,4 +1,4 @@
-import {ContentProcessor} from './types.js';
+import {type ContentProcessor} from './types.js';
 
 const WORKFLOW_PNPM_SETUP = `      - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -14,7 +14,7 @@ export const githubWorkflowProcessor: ContentProcessor = (content, {filePath, op
 		return content;
 	}
 
-	const {template, packageManager: pm = 'npm'} = opts;
+	const {template, packageManager: pm} = opts;
 
 	let installCommand = 'npm ci';
 	let pmSetup = '';

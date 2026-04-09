@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {contributingProcessor} from './contributing.js';
-import {ProjectOptions} from '../../types.js';
+import {type ProjectOptions} from '#shared/types.js';
 
 describe('contributing processor', () => {
 	const baseOpts: ProjectOptions = {

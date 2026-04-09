@@ -1,9 +1,6 @@
-import {TemplateType, TemplateDefinition, ProjectOptions} from '../types.js';
-import {getBaseTemplate} from '../templates/base/index.js';
-import {getCliTemplate} from '../templates/cli/index.js';
-import {getWebVanillaTemplate} from '../templates/web-vanilla/index.js';
-import {getWebAppTemplate} from '../templates/web-app/index.js';
-import {getWebFullstackTemplate} from '../templates/web-fullstack/index.js';
+import {type TemplateType, type ProjectOptions} from '#shared/types.js';
+import {getBaseTemplate} from '#templates/base/index.js';
+import {getTemplateByType, getTemplateTypes} from '#templates/registry.js';
 
 const MOCK_OPTS: ProjectOptions = {
 	template: 'cli',
@@ -18,31 +15,16 @@ const MOCK_OPTS: ProjectOptions = {
 	createGithubRepository: false,
 };
 
-export interface AggregatedTemplateInfo {
+export type AggregatedTemplateInfo = {
 	name: string;
 	description: string;
 	components: {name: string; description: string}[];
-}
+};
 
 export const getTemplateInfo = (type: TemplateType): AggregatedTemplateInfo => {
 	const opts = {...MOCK_OPTS, template: type};
 	const base = getBaseTemplate(opts);
-	let template: TemplateDefinition;
-
-	switch (type) {
-		case 'cli':
-			template = getCliTemplate(opts);
-			break;
-		case 'web-vanilla':
-			template = getWebVanillaTemplate(opts);
-			break;
-		case 'web-app':
-			template = getWebAppTemplate(opts);
-			break;
-		case 'web-fullstack':
-			template = getWebFullstackTemplate(opts);
-			break;
-	}
+	const template = getTemplateByType(type, opts);
 
 	return {
 		name: template.name,
@@ -51,6 +33,4 @@ export const getTemplateInfo = (type: TemplateType): AggregatedTemplateInfo => {
 	};
 };
 
-export const getAllTemplatesInfo = (): AggregatedTemplateInfo[] => {
-	return ['cli', 'web-vanilla', 'web-app', 'web-fullstack'].map((type) => getTemplateInfo(type as TemplateType));
-};
+export const getAllTemplatesInfo = (): AggregatedTemplateInfo[] => getTemplateTypes().map((type) => getTemplateInfo(type));

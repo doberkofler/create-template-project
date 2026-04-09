@@ -1,7 +1,7 @@
-import {ProjectOptions, TemplateDefinition} from '../../types.js';
+import {type ProjectOptions, type TemplateDefinition} from '#shared/types.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {getTemplateDir} from '../../utils/file.js';
+import {getTemplateDir} from '#shared/file.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

@@ -1,91 +1,54 @@
 import {describe, it, expect, vi, beforeEach, type MockInstance} from 'vitest';
 import * as p from '@clack/prompts';
 import debugLib from 'debug';
-import {execa} from 'execa';
+import {parseArgs} from './cli.js';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import {createCodedError} from './test/mocks.js';
 
-vi.mock('execa');
+vi.mock(import('execa'));
 
-vi.mock('debug', () => {
-	const debugMock = vi.fn<any>(() => vi.fn<any>());
+// eslint-disable-next-line vitest/prefer-import-in-mock
+vi.mock('debug', async (importOriginal) => {
+	const actual = await importOriginal<{
+		default: ((namespace: string) => (...args: unknown[]) => void) & {
+			enable: (namespaces: string) => void;
+			disable: () => string;
+		};
+	}>();
+	const debugFactory = vi.fn<(namespace: string) => (...args: unknown[]) => void>(() => vi.fn<(...args: unknown[]) => void>());
+
 	return {
-		default: Object.assign(debugMock, {
-			enable: vi.fn<any>(),
-			disable: vi.fn<any>(),
+		...actual,
+		default: Object.assign(debugFactory, {
+			enable: vi.fn<(namespaces: string) => void>(),
+			disable: vi.fn<() => string>(() => ''),
 		}),
 	};
 });
 
-import {parseArgs} from './cli.js';
-import path from 'node:path';
-import fs from 'node:fs/promises';
-
-vi.mock('@clack/prompts', async (importOriginal) => {
-	const actual = (await importOriginal()) as any;
-	return {
-		...actual,
-		intro: vi.fn<any>(),
-		outro: vi.fn<any>(),
-		select: vi.fn<any>(),
-		text: vi.fn<any>(),
-		confirm: vi.fn<any>(),
-		isCancel: vi.fn<any>(() => false),
-		cancel: vi.fn<any>(),
-		note: vi.fn<any>(),
-		spinner: vi.fn<any>(() => ({
-			start: vi.fn<any>(),
-			stop: vi.fn<any>(),
-			message: vi.fn<any>(),
-		})),
-		log: {
-			success: vi.fn<any>(),
-			error: vi.fn<any>(),
-			warn: vi.fn<any>(),
-			info: vi.fn<any>(),
-		},
-	};
+vi.mock(import('@clack/prompts'), async (importOriginal) => {
+	const {createPromptsMock} = await import('./test/mocks.js');
+	return createPromptsMock(importOriginal as () => Promise<Record<string, unknown>>);
 });
 
-vi.mock('./generators/info.js', () => ({
-	getAllTemplatesInfo: vi.fn<any>(() => [
-		{
-			name: 'cli',
-			description: 'desc',
-			components: [{name: 'c1', description: 'd1'}],
-		},
-	]),
-	getTemplateInfo: vi.fn<any>(() => ({
-		name: 'cli',
-		description: 'desc',
-		components: [{name: 'c1', description: 'd1'}],
-	})),
-}));
+vi.mock(import('./generators/info.js'), async () => {
+	const {createTemplateInfoMock} = await import('./test/mocks.js');
+	return createTemplateInfoMock();
+});
 
 describe('cli', () => {
 	const originalArgv = process.argv;
-	let exitSpy: MockInstance<any>;
+	let exitSpy: MockInstance<(code?: string | number | null) => never>;
 
 	beforeEach(() => {
 		vi.resetAllMocks();
 		process.argv = originalArgv.slice(0, 2);
-		delete process.env['DEBUG'];
+		delete process.env.DEBUG;
 		debugLib.disable();
 
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'git' && args[0] === 'config') {
-				if (args[1] === 'user.name') {
-					return {stdout: 'Mock Author'};
-				}
-				if (args[1] === 'github.user') {
-					return {stdout: 'mock-github-user'};
-				}
-			}
-			return {stdout: ''};
-		});
-
 		exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
-			const err: any = new Error(`Process exited with code ${code}`);
-			err.code = code === 0 ? 'PROCESS_EXIT_0' : 'PROCESS_EXIT_1';
-			err.exitCode = code;
+			const err = createCodedError(`Process exited with code ${code}`, code === 0 ? 'PROCESS_EXIT_0' : 'PROCESS_EXIT_1', Number(code));
 			throw err;
 		});
 		vi.mocked(p.isCancel).mockReturnValue(false);
@@ -330,8 +293,7 @@ describe('cli', () => {
 		vi.resetAllMocks();
 		process.argv = [...originalArgv.slice(0, 2), 'interactive'];
 		const exitSpyLocal = vi.spyOn(process, 'exit').mockImplementation((code) => {
-			const err: any = new Error(`Process exited with code ${code}`);
-			err.code = code === 0 ? 'PROCESS_EXIT_0' : 'PROCESS_EXIT_1';
+			const err = createCodedError(`Process exited with code ${code}`, code === 0 ? 'PROCESS_EXIT_0' : 'PROCESS_EXIT_1');
 			throw err;
 		});
 
@@ -373,7 +335,7 @@ describe('cli', () => {
 			JSON.stringify({
 				name: 'upd-test',
 				author: 'Test Author',
-				'create-template-project': {template: 'web-app'},
+				'create-template-project': {template: 'web-app', githubUsername: 'test-github-user'},
 			}),
 		);
 
@@ -381,6 +343,7 @@ describe('cli', () => {
 		const result = await parseArgs();
 		expect(result.update).toBe(true);
 		expect(result.template).toBe('web-app');
+		// eslint-disable-next-line vitest/prefer-strict-boolean-matchers, vitest/prefer-to-be-falsy
 		expect(result.progress).toBe(false);
 		expect(result.projectName).toBe('upd-test');
 		expect(result.author).toBe('Test Author');
@@ -457,12 +420,23 @@ describe('cli', () => {
 
 	it('should validate project name in interactive mode', async () => {
 		process.argv.push('interactive');
-		let capturedValidate: any;
-		vi.mocked(p.text).mockImplementation(async (opts: any) => {
+		let capturedValidate: ((value: string) => string | undefined) | undefined;
+		vi.mocked(p.text).mockImplementation(async (opts) => {
+			await Promise.resolve();
 			if (opts.message === 'Project name:') {
-				capturedValidate = opts.validate;
+				const {validate} = opts;
+
+				if (typeof validate !== 'function') {
+					return 'mock-response';
+				}
+
+				capturedValidate = (value: string): string | undefined => {
+					const validationResult = validate(value);
+					return typeof validationResult === 'string' ? validationResult : undefined;
+				};
 				return 'valid-name';
 			}
+
 			return 'mock-response';
 		});
 		vi.mocked(p.select)
@@ -474,6 +448,9 @@ describe('cli', () => {
 		const result = await parseArgs();
 
 		expect(capturedValidate).toBeDefined();
+		if (capturedValidate === undefined) {
+			throw new Error('Expected project name validate callback to be captured');
+		}
 		expect(capturedValidate('')).toBe('Project name is required');
 		expect(result.projectName).toBe('valid-name');
 		expect(result.author).toBe('mock-response');
@@ -481,9 +458,22 @@ describe('cli', () => {
 	});
 
 	it('should handle --debug option', async () => {
-		process.argv.push('create', '-t', 'cli', '-n', 'debug-test', '--path', './debug-test-dir', '-a', 'Test Author', '--debug');
+		process.argv.push(
+			'create',
+			'-t',
+			'cli',
+			'-n',
+			'debug-test',
+			'--path',
+			'./debug-test-dir',
+			'-a',
+			'Test Author',
+			'--github-username',
+			'test-github-user',
+			'--debug',
+		);
 		await parseArgs();
-		expect(process.env['DEBUG']).toContain('create-template-project:*');
+		expect(process.env.DEBUG).toContain('create-template-project:*');
 		expect(debugLib.enable).toHaveBeenCalledWith('create-template-project:*');
 	});
 

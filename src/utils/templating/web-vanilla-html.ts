@@ -1,4 +1,4 @@
-import {ContentProcessor} from './types.js';
+import {type ContentProcessor} from './types.js';
 
 export const webVanillaHtmlProcessor: ContentProcessor = (content, {filePath, opts}) => {
 	if (opts.template === 'web-vanilla' && filePath === 'index.html') {

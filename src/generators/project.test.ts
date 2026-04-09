@@ -1,89 +1,122 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {generateProject} from './project.js';
 import fs from 'node:fs/promises';
-import {execa} from 'execa';
-
-const pathExists = (p: string) =>
-	fs
-		.access(p)
-		.then(() => true)
-		.catch(() => false);
 import path from 'node:path';
 import os from 'node:os';
+import {execa} from 'execa';
 import * as p from '@clack/prompts';
-import {getBaseTemplate} from '../templates/base/index.js';
-import {isSeedFile} from '../utils/file.js';
+import {z} from 'zod';
+import {getBaseTemplate} from '#templates/base/index.js';
+import {isSeedFile} from '#shared/file.js';
+import {type ProjectOptions, type TemplateDefinition} from '#shared/types.js';
 
-const spinnerMock = {
-	start: vi.fn<any>(),
-	stop: vi.fn<any>(),
-	message: vi.fn<any>(),
+const pathExists = async (filePath: string): Promise<boolean> => {
+	try {
+		await fs.access(filePath);
+		return true;
+	} catch {
+		return false;
+	}
 };
 
-vi.mock('execa');
-vi.mock('@clack/prompts', async (importOriginal) => {
-	const actual: any = await importOriginal();
-	return {
-		...actual,
-		intro: vi.fn<any>(),
-		outro: vi.fn<any>(),
-		select: vi.fn<any>(),
-		text: vi.fn<any>(),
-		confirm: vi.fn<any>(),
-		isCancel: vi.fn<any>(),
-		cancel: vi.fn<any>(),
-		note: vi.fn<any>(),
-		spinner: vi.fn<any>(() => spinnerMock),
-		log: {
-			success: vi.fn<any>(),
-			error: vi.fn<any>(),
-			warn: vi.fn<any>(),
-			info: vi.fn<any>(),
-		},
-	};
+const createProjectOptions = (overrides: Partial<ProjectOptions> & Pick<ProjectOptions, 'template' | 'projectName' | 'directory'>): ProjectOptions => ({
+	author: 'Test Author',
+	githubUsername: 'test-user',
+	packageManager: 'npm',
+	createGithubRepository: false,
+	update: false,
+	build: false,
+	progress: true,
+	...overrides,
 });
 
-vi.mock('../templates/base/index.js', async (importOriginal) => {
-	const actual: any = await importOriginal();
+const createExitCodeError = (message: string, exitCode: number): Error & {exitCode: number} => Object.assign(new Error(message), {exitCode});
+
+const templateDefinitionFactory = (overrides: Partial<TemplateDefinition>): TemplateDefinition => ({
+	name: 'base',
+	description: 'base template',
+	components: [],
+	dependencies: {},
+	devDependencies: {},
+	files: [],
+	scripts: {},
+	...overrides,
+});
+
+const packageJsonSchema = z
+	.object({
+		name: z.string().optional(),
+		author: z.string().optional(),
+		bin: z.string().optional(),
+		version: z.string().optional(),
+		scripts: z.record(z.string(), z.string()).default({}),
+		dependencies: z.record(z.string(), z.unknown()).default({}),
+		workspaces: z.array(z.string()).optional(),
+	})
+	.loose();
+
+const readPackageJson = async (projectPath: string): Promise<z.infer<typeof packageJsonSchema>> => {
+	const raw = await fs.readFile(path.join(projectPath, 'package.json'), 'utf8');
+	const parsed = JSON.parse(raw) as unknown;
+	return packageJsonSchema.parse(parsed);
+};
+
+const setExecaMock = (implementation: (cmd: string, args?: string[]) => {stdout: string; stderr: string} | Promise<{stdout: string; stderr: string}>): void => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+	vi.mocked(execa).mockImplementation(implementation as unknown as typeof execa);
+};
+
+const spinnerMock: ReturnType<typeof p.spinner> = {
+	start: vi.fn<(message?: string) => void>(),
+	stop: vi.fn<(message?: string, code?: number) => void>(),
+	message: vi.fn<(message: string) => void>(),
+	cancel: vi.fn<(message?: string) => void>(),
+	error: vi.fn<(message?: string) => void>(),
+	clear: vi.fn<() => void>(),
+	isCancelled: false,
+};
+
+vi.mock(import('execa'));
+vi.mock(import('@clack/prompts'), async (importOriginal) => {
+	const {createPromptsMock} = await import('./test-mocks.js');
+	return createPromptsMock(importOriginal as () => Promise<Record<string, unknown>>);
+});
+
+vi.mock(import('#templates/base/index.js'), async (importOriginal) => {
+	const actual = await importOriginal();
 	return {
 		...actual,
-		getBaseTemplate: vi.fn<any>(actual.getBaseTemplate),
+		getBaseTemplate: vi.fn<(opts: ProjectOptions) => TemplateDefinition>(actual.getBaseTemplate as (opts: ProjectOptions) => TemplateDefinition),
 	};
 });
 
 describe('generateProject', () => {
-	const tmpDir = path.join(os.tmpdir(), 'create-template-project-test-' + Math.random().toString(36).slice(2));
+	const tmpDir = path.join(os.tmpdir(), `create-template-project-test-${Math.random().toString(36).slice(2)}`);
 
 	beforeEach(async () => {
 		vi.clearAllMocks();
-		const actual = (await vi.importActual('../templates/base/index.js')) as {
-			getBaseTemplate: any;
-		};
+		const actual = await vi.importActual<{getBaseTemplate: (opts: ProjectOptions) => TemplateDefinition}>('#templates/base/index.js');
 		vi.mocked(getBaseTemplate).mockImplementation(actual.getBaseTemplate);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string) => {
-			if (cmd === 'npm' || cmd === 'pnpm' || cmd === 'yarn' || cmd === 'git' || cmd === 'gh') {
-				return {stdout: '', stderr: ''};
-			}
-			return {stdout: '', stderr: ''};
-		});
+		vi.mocked(p.spinner).mockReturnValue(spinnerMock);
+		setExecaMock(() => ({stdout: '', stderr: ''}));
 		await fs.mkdir(tmpDir, {recursive: true});
 	});
 
 	it('should scaffold a cli project correctly', async () => {
 		const projectName = 'test-cli-project';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			author: 'Test Author',
 			createGithubRepository: true,
 			directory: projectPath,
 			update: false,
 			build: true,
-		};
+		});
 		await generateProject(opts);
 		expect(await pathExists(projectPath)).toBe(true);
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
+		const pkg = await readPackageJson(projectPath);
 		expect(pkg.name).toBe(projectName);
 		expect(pkg.author).toBe('Test Author');
 		expect(pkg.bin).toBe('./dist/index.js');
@@ -125,18 +158,18 @@ describe('generateProject', () => {
 	it('should handle git init failure', async () => {
 		const projectName = 'test-git-fail';
 		const projectPath = path.join(tmpDir, projectName);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'git' && args?.[0] === 'init') {
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'git' && args[0] === 'init') {
 				throw new Error('git fail');
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('git fail'));
 	});
@@ -144,13 +177,13 @@ describe('generateProject', () => {
 	it('should scaffold a web-vanilla project correctly', async () => {
 		const projectName = 'test-web-vanilla-project';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'web-vanilla' as const,
+		const opts = createProjectOptions({
+			template: 'web-vanilla',
 			projectName,
 			createGithubRepository: false,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(await pathExists(projectPath)).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'index.html'))).toBe(true);
@@ -159,13 +192,13 @@ describe('generateProject', () => {
 	it('should scaffold a web-app project correctly', async () => {
 		const projectName = 'test-web-app-project';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'web-app' as const,
+		const opts = createProjectOptions({
+			template: 'web-app',
 			projectName,
 			createGithubRepository: false,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(await pathExists(projectPath)).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'src/index.tsx'))).toBe(true);
@@ -174,19 +207,19 @@ describe('generateProject', () => {
 	it('should scaffold a web-fullstack project correctly', async () => {
 		const projectName = 'test-web-fullstack-project';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'web-fullstack' as const,
+		const opts = createProjectOptions({
+			template: 'web-fullstack',
 			projectName,
 			createGithubRepository: false,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(await pathExists(projectPath)).toBe(true);
 		expect(await pathExists(path.join(projectPath, 'client/vite.config.ts'))).toBe(true);
 
 		// Verify package.json content
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
+		const pkg = await readPackageJson(projectPath);
 		expect(pkg.dependencies).toHaveProperty('@mui/icons-material');
 		expect(pkg.dependencies).toHaveProperty('@trpc/react-query');
 		expect(pkg.dependencies).not.toHaveProperty('@trpc/tanstack-react-query');
@@ -209,40 +242,42 @@ describe('generateProject', () => {
 	it('should warn and use empty version if dependency is missing in config', async () => {
 		const projectName = 'test-missing-dep';
 		const projectPath = path.join(tmpDir, projectName);
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {'missing-dep': ''},
-			devDependencies: {},
-			scripts: {},
-			files: [],
-			templateDir: undefined,
-		} as any);
-		const opts: any = {
-			template: 'cli' as const,
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {'missing-dep': ''},
+				devDependencies: {},
+				scripts: {},
+				files: [],
+				templateDir: undefined,
+			}),
+		);
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Dependency "missing-dep" not found'));
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
+		const pkg = await readPackageJson(projectPath);
 		expect(pkg.dependencies).toHaveProperty('missing-dep', '');
 	});
 
 	it('should handle pnpm workspaces correctly', async () => {
 		const projectName = 'test-pnpm-workspaces';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'web-fullstack' as const,
+		const opts = createProjectOptions({
+			template: 'web-fullstack',
 			projectName,
-			packageManager: 'pnpm' as const,
+			packageManager: 'pnpm',
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 
 		// Verify package.json does NOT have workspaces
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
+		const pkg = await readPackageJson(projectPath);
 		expect(pkg.workspaces).toBeUndefined();
 
 		// Verify pnpm-workspace.yaml exists
@@ -271,34 +306,34 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			createGithubRepository: false,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
+		const pkg = await readPackageJson(projectPath);
 		expect(pkg.version).toBe('1.0.0');
 	});
 
 	it('should handle gh repo create failure', async () => {
 		const projectName = 'test-github-fail';
 		const projectPath = path.join(tmpDir, projectName);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'gh' && args?.[0] === 'repo') {
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'gh' && args[0] === 'repo') {
 				throw new Error('GH failed');
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			createGithubRepository: true,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to create/push GitHub repository'));
 	});
@@ -308,11 +343,9 @@ describe('generateProject', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'tsconfig.json'), 'old');
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'git' && args?.[0] === 'merge-file') {
-				const err = new Error('conflict');
-				(err as any).exitCode = 1;
-				throw err;
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'git' && args[0] === 'merge-file') {
+				throw createExitCodeError('conflict', 1);
 			}
 			return {stdout: '', stderr: ''};
 		});
@@ -323,12 +356,12 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Conflict: tsconfig.json'));
 	});
@@ -338,8 +371,8 @@ describe('generateProject', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'tsconfig.json'), 'old');
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'git' && args?.[0] === 'merge-file') {
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'git' && args[0] === 'merge-file') {
 				throw new Error('fatal');
 			}
 			return {stdout: '', stderr: ''};
@@ -351,12 +384,12 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('Failed to merge'));
 	});
@@ -364,19 +397,19 @@ describe('generateProject', () => {
 	it('should handle ci script failure', async () => {
 		const projectName = 'test-ci-fail';
 		const projectPath = path.join(tmpDir, projectName);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'ci') {
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'npm' && args[1] === 'ci') {
 				throw new Error('fail');
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
 			build: true,
-		};
+		});
 		await expect(generateProject(opts)).rejects.toThrow(/Failed to run CI script:?/);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('fail'));
 	});
@@ -392,12 +425,12 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
 		expect(execa).not.toHaveBeenCalledWith('git', ['init', '--initial-branch=main'], expect.anything());
 	});
@@ -405,20 +438,22 @@ describe('generateProject', () => {
 	it('should handle programmatic files', async () => {
 		const projectName = 'test-prog';
 		const projectPath = path.join(tmpDir, projectName);
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {},
-			files: [{path: 'p.txt', content: 'hello'}],
-			templateDir: undefined,
-		} as any);
-		const opts: any = {
-			template: 'cli' as const,
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'p.txt', content: 'hello'}],
+				templateDir: undefined,
+			}),
+		);
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(await fs.readFile(path.join(projectPath, 'p.txt'), 'utf8')).toBe('hello');
 	});
@@ -428,14 +463,16 @@ describe('generateProject', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'p.txt'), 'old');
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {},
-			files: [{path: 'p.txt', content: 'new'}],
-			templateDir: undefined,
-		} as any);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'p.txt', content: 'new'}],
+				templateDir: undefined,
+			}),
+		);
 		await fs.writeFile(
 			path.join(projectPath, 'package.json'),
 			JSON.stringify({
@@ -443,12 +480,12 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
 		expect(execa).toHaveBeenCalledWith('git', ['merge-file', path.join(projectPath, 'p.txt'), expect.anything(), expect.anything()], expect.anything());
 	});
@@ -458,14 +495,16 @@ describe('generateProject', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'p.txt'), 'same');
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {},
-			files: [{path: 'p.txt', content: 'same'}],
-			templateDir: undefined,
-		} as any);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'p.txt', content: 'same'}],
+				templateDir: undefined,
+			}),
+		);
 		await fs.writeFile(
 			path.join(projectPath, 'package.json'),
 			JSON.stringify({
@@ -473,12 +512,12 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
 		expect(execa).not.toHaveBeenCalledWith('git', ['merge-file', expect.anything(), expect.anything(), expect.anything()]);
 	});
@@ -486,19 +525,19 @@ describe('generateProject', () => {
 	it('should handle npm install failure', async () => {
 		const projectName = 'test-inst-fail';
 		const projectPath = path.join(tmpDir, projectName);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string) => {
+		setExecaMock((cmd: string) => {
 			if (cmd === 'npm') {
 				throw new Error('inst fail');
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
 			build: true,
-		};
+		});
 		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
 	});
@@ -506,34 +545,37 @@ describe('generateProject', () => {
 	it('should handle format failure', async () => {
 		const projectName = 'test-format-fail';
 		const projectPath = path.join(tmpDir, projectName);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'npm' && args?.[1] === 'format') {
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'npm' && args[1] === 'format') {
 				throw new Error('format fail');
 			}
 			return {stdout: '', stderr: ''};
 		});
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
 			build: true,
-		};
+		});
 		// We need to make sure format script exists in the package
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {
-				format: 'oxfmt --write .',
-				ci: 'npm run lint && npm run test',
-			},
-			files: [],
-			templateDir: undefined,
-		} as any);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {
+					format: 'oxfmt --write .',
+					ci: 'npm run lint && npm run test',
+				},
+				files: [],
+				templateDir: undefined,
+			}),
+		);
 
 		await generateProject(opts);
 		// Should NOT throw but log error
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		expect(spinnerMock.stop).toHaveBeenCalledWith('Failed to format files.');
 	});
 
@@ -542,19 +584,19 @@ describe('generateProject', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'p.txt'), 'old');
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {},
-			files: [{path: 'p.txt', content: 'new'}],
-			templateDir: undefined,
-		} as any);
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'git' && args?.[0] === 'merge-file') {
-				const err = new Error('conflict');
-				(err as any).exitCode = 1;
-				throw err;
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'p.txt', content: 'new'}],
+				templateDir: undefined,
+			}),
+		);
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'git' && args[0] === 'merge-file') {
+				throw createExitCodeError('conflict', 1);
 			}
 			return {stdout: '', stderr: ''};
 		});
@@ -565,12 +607,12 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining('Conflict: p.txt'));
 	});
@@ -580,17 +622,19 @@ describe('generateProject', () => {
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
 		await fs.writeFile(path.join(projectPath, 'p.txt'), 'old');
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {},
-			files: [{path: 'p.txt', content: 'new'}],
-			templateDir: undefined,
-		} as any);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'p.txt', content: 'new'}],
+				templateDir: undefined,
+			}),
+		);
 		// Mock file write after git merge-file to match template
-		(vi.mocked(execa) as any).mockImplementation(async (cmd: string, args: string[]) => {
-			if (cmd === 'git' && args?.[0] === 'merge-file') {
+		setExecaMock(async (cmd: string, args: string[] = []) => {
+			if (cmd === 'git' && args[0] === 'merge-file') {
 				await fs.writeFile(args[1], 'new');
 				return {stdout: '', stderr: ''};
 			}
@@ -603,12 +647,12 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Updated: p.txt'));
 	});
@@ -617,49 +661,51 @@ describe('generateProject', () => {
 		const projectName = 'test-exists-error';
 		const projectPath = path.join(tmpDir, projectName);
 		await fs.mkdir(projectPath, {recursive: true});
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await expect(generateProject(opts)).rejects.toThrow('already exists');
 	});
 
 	it('should transform npm scripts to yarn correctly', async () => {
 		const projectName = 'test-yarn-scripts';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
-			packageManager: 'yarn' as const,
+			packageManager: 'yarn',
 			directory: projectPath,
 			update: false,
-		};
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {
-				test: 'npm run lint && npm run test',
-			},
-			files: [],
-			templateDir: undefined,
-		} as any);
+		});
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {
+					test: 'npm run lint && npm run test',
+				},
+				files: [],
+				templateDir: undefined,
+			}),
+		);
 		await generateProject(opts);
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
+		const pkg = await readPackageJson(projectPath);
 		expect(pkg.scripts.test).toBe('yarn run lint && yarn run test');
 	});
 
 	it('should create GENERATED.md and show success message', async () => {
 		const projectName = 'test-summary';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
-		};
+		});
 		await generateProject(opts);
 		expect(p.log.success).toHaveBeenCalledWith(
 			expect.stringContaining(`Project "${projectName}" scaffolded successfully in ${projectPath}. A detailed setup guide has been generated at GENERATED.md`),
@@ -672,13 +718,13 @@ describe('generateProject', () => {
 	it('should create GENERATED.md even when progress is false', async () => {
 		const projectName = 'test-no-summary-no-progress';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
 			progress: false,
-		};
+		});
 		await generateProject(opts);
 		expect(await pathExists(path.join(projectPath, 'GENERATED.md'))).toBe(true);
 	});
@@ -686,14 +732,15 @@ describe('generateProject', () => {
 	it('should not show progress when progress is false', async () => {
 		const projectName = 'test-no-progress';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'cli' as const,
+		const opts = createProjectOptions({
+			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: false,
 			progress: false,
-		};
+		});
 		await generateProject(opts);
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		expect(spinnerMock.start).not.toHaveBeenCalled();
 		expect(p.note).not.toHaveBeenCalled();
 	});
@@ -701,27 +748,29 @@ describe('generateProject', () => {
 	it('should transform npm scripts to pnpm correctly', async () => {
 		const projectName = 'test-pnpm-scripts';
 		const projectPath = path.join(tmpDir, projectName);
-		const opts: any = {
-			template: 'web-fullstack' as const,
+		const opts = createProjectOptions({
+			template: 'web-fullstack',
 			projectName,
-			packageManager: 'pnpm' as const,
+			packageManager: 'pnpm',
 			directory: projectPath,
 			update: false,
-		};
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {
-				test: 'npm run test --workspaces',
-				build: 'npm run build --workspaces',
-			},
-			workspaces: ['client', 'server'],
-			files: [],
-			templateDir: undefined,
-		} as any);
+		});
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {
+					test: 'npm run test --workspaces',
+					build: 'npm run build --workspaces',
+				},
+				workspaces: ['client', 'server'],
+				files: [],
+				templateDir: undefined,
+			}),
+		);
 		await generateProject(opts);
-		const pkg = JSON.parse(await fs.readFile(path.join(projectPath, 'package.json'), 'utf8'));
+		const pkg = await readPackageJson(projectPath);
 		expect(pkg.scripts.test).toBe('pnpm -r run test');
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
 		expect(pkg.workspaces).toBeUndefined(); // Deleted for pnpm
@@ -741,16 +790,16 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
+		const opts = createProjectOptions({
 			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
 			progress: false,
-		};
+		});
 
 		await generateProject(opts);
-		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).toBe(false);
+		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).not.toBe(true);
 	});
 
 	it('should handle deleting programmatic files during update if no longer required', async () => {
@@ -760,14 +809,16 @@ describe('generateProject', () => {
 		// vitest.config.ts is NOT required for cli
 		await fs.writeFile(path.join(projectPath, 'vitest.config.ts'), 'content');
 
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {},
-			files: [{path: 'vitest.config.ts', content: 'test'}],
-			templateDir: undefined,
-		} as any);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'vitest.config.ts', content: 'test'}],
+				templateDir: undefined,
+			}),
+		);
 
 		await fs.writeFile(
 			path.join(projectPath, 'package.json'),
@@ -776,16 +827,16 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
+		const opts = createProjectOptions({
 			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
 			progress: false,
-		};
+		});
 
 		await generateProject(opts);
-		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).toBe(false);
+		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).not.toBe(true);
 	});
 
 	it('should handle skipping seed files and markdown files during update', async () => {
@@ -796,17 +847,19 @@ describe('generateProject', () => {
 		await fs.writeFile(path.join(projectPath, 'src/main.ts'), 'my code');
 		await fs.writeFile(path.join(projectPath, 'README.md'), 'my readme');
 
-		vi.mocked(getBaseTemplate).mockReturnValue({
-			name: 'base',
-			dependencies: {},
-			devDependencies: {},
-			scripts: {},
-			files: [
-				{path: 'src/main.ts', content: 'template code'},
-				{path: 'README.md', content: 'template readme'},
-			],
-			templateDir: undefined,
-		} as any);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [
+					{path: 'src/main.ts', content: 'template code'},
+					{path: 'README.md', content: 'template readme'},
+				],
+				templateDir: undefined,
+			}),
+		);
 
 		await fs.writeFile(
 			path.join(projectPath, 'package.json'),
@@ -815,13 +868,13 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'cli'},
 			}),
 		);
-		const opts: any = {
+		const opts = createProjectOptions({
 			template: 'cli',
 			projectName,
 			directory: projectPath,
 			update: true,
 			progress: false,
-		};
+		});
 
 		await generateProject(opts);
 		const content = await fs.readFile(path.join(projectPath, 'src/main.ts'), 'utf8');
@@ -842,8 +895,8 @@ describe('generateProject', () => {
 		expect(isSeedFile('main.tsx')).toBe(true);
 		expect(isSeedFile('index.tsx')).toBe(true);
 		expect(isSeedFile('README.md')).toBe(true);
-		expect(isSeedFile('package.json')).toBe(false);
-		expect(isSeedFile('src.ts')).toBe(false);
+		expect(isSeedFile('package.json')).not.toBe(true);
+		expect(isSeedFile('src.ts')).not.toBe(true);
 	});
 
 	it('should handle updating pnpm-workspace.yaml when content changes', async () => {
@@ -859,14 +912,14 @@ describe('generateProject', () => {
 				'create-template-project': {template: 'web-fullstack'},
 			}),
 		);
-		const opts: any = {
+		const opts = createProjectOptions({
 			template: 'web-fullstack',
 			projectName,
 			packageManager: 'pnpm',
 			directory: projectPath,
 			update: true,
 			progress: false,
-		};
+		});
 
 		await generateProject(opts);
 		const content = await fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8');
@@ -877,39 +930,43 @@ describe('generateProject', () => {
 	it('should include "lcov" reporter in all vitest/vite coverage configurations', async () => {
 		const templates = ['cli', 'web-vanilla', 'web-app', 'web-fullstack'] as const;
 
-		for (const template of templates) {
-			const projectName = `test-lcov-${template}`;
-			const projectPath = path.join(tmpDir, projectName);
-			const opts: any = {
-				template,
-				projectName,
-				directory: projectPath,
-				update: false,
-				progress: false,
-			};
-			await generateProject(opts);
+		await Promise.all(
+			templates.map(async (template) => {
+				const projectName = `test-lcov-${template}`;
+				const projectPath = path.join(tmpDir, projectName);
+				const opts = createProjectOptions({
+					template,
+					projectName,
+					directory: projectPath,
+					update: false,
+					progress: false,
+				});
+				await generateProject(opts);
 
-			const configFiles = [
-				path.join(projectPath, 'vite.config.ts'),
-				path.join(projectPath, 'vitest.config.ts'),
-				path.join(projectPath, 'client/vite.config.ts'),
-				path.join(projectPath, 'server/vite.config.ts'),
-			];
+				const configFiles = [
+					path.join(projectPath, 'vite.config.ts'),
+					path.join(projectPath, 'vitest.config.ts'),
+					path.join(projectPath, 'client/vite.config.ts'),
+					path.join(projectPath, 'server/vite.config.ts'),
+				];
 
-			for (const configFile of configFiles) {
-				if (!(await pathExists(configFile))) {
-					continue;
-				}
+				await Promise.all(
+					configFiles.map(async (configFile) => {
+						if (!(await pathExists(configFile))) {
+							return;
+						}
 
-				const content = await fs.readFile(configFile, 'utf8');
-				if (!content.includes('coverage:')) {
-					continue;
-				}
+						const content = await fs.readFile(configFile, 'utf8');
+						if (!content.includes('coverage:')) {
+							return;
+						}
 
-				// Ensure "lcov" is present if "coverage" is configured
-				expect(content).toContain("'lcov'");
-			}
-		}
+						// Ensure "lcov" is present if "coverage" is configured
+						expect(content).toContain("'lcov'");
+					}),
+				);
+			}),
+		);
 
 		// Also check the root vite.config.ts of THIS project
 		const rootConfig = path.resolve(__dirname, '../../vite.config.ts');

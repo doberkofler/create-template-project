@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {processContent} from './index.js';
-import {ProjectOptions} from '../../types.js';
+import {type ProjectOptions} from '#shared/types.js';
 
 describe('templating orchestrator', () => {
 	const baseOpts: ProjectOptions = {
