@@ -1,6 +1,5 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import {fileURLToPath} from 'node:url';
 import {type ProjectOptions, type TemplateDefinition, type DependencyConfig} from '#shared/types.js';
 import {execa} from 'execa';
 import * as prompts from '@clack/prompts';
@@ -9,7 +8,7 @@ import {getAllFiles, isSeedFile, mergeFile, mergePackageJson, processContent} fr
 import {getProjectTemplates} from '#templates/registry.js';
 
 const debug = debugLib('create-template-project:generator');
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const moduleDir = import.meta.dirname;
 
 const pathExists = async (filePath: string): Promise<boolean> => {
 	try {
@@ -21,8 +20,8 @@ const pathExists = async (filePath: string): Promise<boolean> => {
 };
 
 const getDependencyConfigPath = async (): Promise<string> => {
-	const sourcePath = path.resolve(__dirname, '../config/dependencies.json');
-	const distPath = path.resolve(__dirname, 'config/dependencies.json');
+	const sourcePath = path.resolve(moduleDir, '../config/dependencies.json');
+	const distPath = path.resolve(moduleDir, 'config/dependencies.json');
 	return (await pathExists(distPath)) ? distPath : sourcePath;
 };
 

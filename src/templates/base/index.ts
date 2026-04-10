@@ -1,9 +1,5 @@
 import {type ProjectOptions, type TemplateDefinition} from '#shared/types.js';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import {getTemplateDir} from '#shared/file.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const getBaseTemplate = (_opts: ProjectOptions): TemplateDefinition => ({
 	name: 'base',
@@ -41,5 +37,5 @@ export const getBaseTemplate = (_opts: ProjectOptions): TemplateDefinition => ({
 	},
 	scripts: {},
 	files: [],
-	templateDir: getTemplateDir(__dirname, 'base'),
+	templateDir: getTemplateDir(import.meta.dirname, 'base'),
 });

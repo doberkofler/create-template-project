@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 
 const pathExists = async (p: string): Promise<boolean> => {
 	try {
@@ -11,8 +10,7 @@ const pathExists = async (p: string): Promise<boolean> => {
 	}
 };
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(import.meta.dirname, '..');
 const src = path.join(root, 'src/templates');
 const dist = path.join(root, 'dist/templates');
 

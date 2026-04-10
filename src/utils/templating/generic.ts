@@ -29,14 +29,7 @@ export const genericProcessor: ContentProcessor = (content, {opts}) => {
 	}
 
 	const pm = opts.packageManager;
-	let lockfileRules = '';
-	if (pm === 'pnpm') {
-		lockfileRules = 'package-lock.json\nyarn.lock';
-	} else if (pm === 'yarn') {
-		lockfileRules = 'package-lock.json\npnpm-lock.yaml';
-	} else {
-		lockfileRules = 'yarn.lock\npnpm-lock.yaml';
-	}
+	const lockfileRules = pm === 'pnpm' ? 'package-lock.json\nyarn.lock' : pm === 'yarn' ? 'package-lock.json\npnpm-lock.yaml' : 'yarn.lock\npnpm-lock.yaml';
 
 	return content
 		.replaceAll('{{projectName}}', projectName)

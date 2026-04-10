@@ -1,9 +1,5 @@
 import {type ProjectOptions, type TemplateDefinition} from '#shared/types.js';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import {getTemplateDir} from '#shared/file.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefinition => ({
 	name: 'web-fullstack',
@@ -53,5 +49,5 @@ export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefiniti
 		'integration-test': 'playwright test',
 	},
 	files: [],
-	templateDir: getTemplateDir(__dirname, 'web-fullstack'),
+	templateDir: getTemplateDir(import.meta.dirname, 'web-fullstack'),
 });

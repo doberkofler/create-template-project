@@ -331,7 +331,7 @@ Restrictions & Behavior:
 				author: opts.author ?? pkg.author ?? (await getDefaultAuthor()),
 				githubUsername: opts.githubUsername ?? projectConfig.githubUsername ?? (await getDefaultGithubUsername()),
 				packageManager: opts.packageManager,
-				directory: directory,
+				directory,
 				createGithubRepository: Boolean(opts.createGithubRepository),
 				build: Boolean(opts.build),
 				progress: Boolean(opts.progress),

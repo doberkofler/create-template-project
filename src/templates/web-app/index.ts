@@ -1,9 +1,5 @@
 import {type ProjectOptions, type TemplateDefinition} from '#shared/types.js';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import {getTemplateDir} from '#shared/file.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const getWebAppTemplate = (_opts: ProjectOptions): TemplateDefinition => ({
 	name: 'web-app',
@@ -47,5 +43,5 @@ export const getWebAppTemplate = (_opts: ProjectOptions): TemplateDefinition => 
 		start: 'vite preview',
 	},
 	files: [],
-	templateDir: getTemplateDir(__dirname, 'web-app'),
+	templateDir: getTemplateDir(import.meta.dirname, 'web-app'),
 });

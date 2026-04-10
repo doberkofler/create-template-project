@@ -1,9 +1,5 @@
 import {type ProjectOptions, type TemplateDefinition} from '#shared/types.js';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import {getTemplateDir} from '#shared/file.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const getCliTemplate = (_opts: ProjectOptions): TemplateDefinition => {
 	const components = [
@@ -20,6 +16,6 @@ export const getCliTemplate = (_opts: ProjectOptions): TemplateDefinition => {
 		devDependencies: {vite: 'vite'},
 		scripts: {},
 		files: [],
-		templateDir: getTemplateDir(__dirname, 'cli'),
+		templateDir: getTemplateDir(import.meta.dirname, 'cli'),
 	};
 };
