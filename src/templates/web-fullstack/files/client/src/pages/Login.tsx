@@ -36,7 +36,7 @@ export const Login = (): ReactNode => {
 			<form onSubmit={handleSubmit}>
 				<DialogTitle>Login</DialogTitle>
 				<DialogContent>
-					<Box display="flex" flexDirection="column" gap={2} pt={1}>
+					<Box sx={{display: 'flex', flexDirection: 'column', gap: 2, pt: 1}}>
 						{error !== null && <Alert severity="error">{error}</Alert>}
 						<Typography variant="body2" color="textSecondary">
 							Use <b>demo@example.com</b> / <b>password</b> to login.

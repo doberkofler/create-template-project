@@ -142,6 +142,7 @@ export const linter = defineConfig({
 		'unicorn/no-array-reduce': 'off', // TODO: consider enabling
 		'unicorn/no-array-sort': 'off', // TODO: consider enabling
 		'unicorn/no-hex-escape': 'off',
+		'unicorn/no-immediate-mutation': 'off',
 		'unicorn/no-nested-ternary': 'off',
 		'unicorn/no-null': 'off', // TODO: consider enabling
 		'unicorn/no-process-exit': 'off', // TODO: consider enabling
@@ -152,6 +153,14 @@ export const linter = defineConfig({
 		'vitest/prefer-to-be-truthy': 'off', // FIXME: Conflict Detected: prefer-strict-boolean-matchers enforces toBe(true), but prefer-to-be-truthy enforces toBeTruthy().
 		'vitest/require-test-timeout': 'off',
 	},
+	overrides: [
+		{
+			files: ['tests/e2e/**/*.e2e-test.ts', '**/*.e2e-test.ts'],
+			rules: {
+				'vitest/prefer-importing-vitest-globals': 'off',
+			},
+		},
+	],
 	settings: {
 		'jsx-a11y': {
 			polymorphicPropName: undefined,

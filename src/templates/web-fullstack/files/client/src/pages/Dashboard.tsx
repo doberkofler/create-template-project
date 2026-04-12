@@ -18,9 +18,9 @@ export const Dashboard = (): ReactNode => {
 
 	return (
 		<Container maxWidth="md">
-			<Box mt={4}>
+			<Box sx={{mt: 4}}>
 				<Paper elevation={3}>
-					<Box p={4}>
+					<Box sx={{p: 4}}>
 						<Typography variant="h4" gutterBottom>
 							Dashboard
 						</Typography>
@@ -28,7 +28,7 @@ export const Dashboard = (): ReactNode => {
 						<Typography variant="body1" color="textSecondary" gutterBottom>
 							Email: {user?.email ?? ''}
 						</Typography>
-						<Box mt={4}>
+						<Box sx={{mt: 4}}>
 							<Typography variant="body2" gutterBottom>
 								This is a protected page. You can only see this because you are logged in.
 							</Typography>

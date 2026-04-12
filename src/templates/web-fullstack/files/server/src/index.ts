@@ -4,9 +4,8 @@ import * as trpcExpress from '@trpc/server/adapters/express';
 import {appRouter} from './routers/_app.js';
 import {createContext} from './context.js';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const app = express();
 const port = Number(process.env['PORT'] ?? 3001);
 

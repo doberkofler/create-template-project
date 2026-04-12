@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.0.5",
+			"version": "8.0.8",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -9,11 +9,11 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "4.1.2",
+			"version": "4.1.4",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "4.1.2",
+			"version": "4.1.4",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
@@ -41,7 +41,7 @@
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "4.1.2",
+			"version": "4.1.4",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -53,7 +53,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.58.0",
+			"version": "1.59.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -61,7 +61,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.43.0",
+			"version": "0.44.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -69,7 +69,7 @@
 			"description": "A superset of JavaScript that compiles to clean JavaScript output."
 		},
 		"vitest": {
-			"version": "4.1.2",
+			"version": "4.1.4",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
@@ -93,19 +93,19 @@
 			"description": "TypeScript definitions for Express."
 		},
 		"react": {
-			"version": "19.2.4",
+			"version": "19.2.5",
 			"description": "A JavaScript library for building user interfaces."
 		},
 		"react-dom": {
-			"version": "19.2.4",
+			"version": "19.2.5",
 			"description": "React package for working with the DOM."
 		},
 		"@mui/material": {
-			"version": "7.3.9",
+			"version": "9.0.0",
 			"description": "Material UI components."
 		},
 		"@mui/icons-material": {
-			"version": "7.3.9",
+			"version": "9.0.0",
 			"description": "Material Design icons distributed as SVG React components."
 		},
 		"@emotion/react": {
