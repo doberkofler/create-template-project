@@ -720,6 +720,8 @@ describe('generateProject', () => {
 		const generatedMd = await fs.readFile(path.join(projectPath, 'GENERATED.md'), 'utf8');
 		expect(generatedMd).toContain(`# 🚀 Project Setup Guide: ${projectName}`);
 		expect(generatedMd).toContain('## 📋 Initialization Checklist');
+		expect(generatedMd).toContain('## ⏭️ Complete Skipped Steps Manually');
+		expect(generatedMd).toContain(`gh repo create ${projectName} --public --source=. --remote=origin --push`);
 	});
 
 	it('should create GENERATED.md even when progress is false', async () => {

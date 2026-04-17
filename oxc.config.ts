@@ -80,6 +80,7 @@ export const linter = defineConfig({
 		// FIXME: remove all jest rules
 		'jest/consistent-test-it': 'off',
 		'jest/expect-expect': 'off',
+		'jest/prefer-ending-with-an-expect': 'off',
 		'jest/max-expects': 'off',
 		'jest/max-nested-describe': 'off',
 		'jest/no-alias-methods': 'off',

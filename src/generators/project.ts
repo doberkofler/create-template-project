@@ -807,6 +807,16 @@ generateGeneratedMd = async (
 			? '🟡 **Completed with Warnings**'
 			: '🟢 **Successfully Completed**';
 
+	const skippedStepInstructions: string[] = [
+		...(states.depsSkipped ? [`- [ ] **Install dependencies manually:** Run \`${pm} install\` from the project root.`] : []),
+		...(states.githubSkipped
+			? [
+					`- [ ] **Create and push GitHub repository manually:** Verify GitHub CLI auth with \`gh auth status\`, then run \`gh repo create ${opts.projectName} --public --source=. --remote=origin --push\`.`,
+				]
+			: []),
+		...(states.ciSkipped ? [`- [ ] **Run CI checks manually:** After dependencies are installed, run \`${pm} run ci\`.`] : []),
+	];
+
 	const md = [
 		`# 🚀 Project Setup Guide: ${opts.projectName}`,
 		'',
@@ -831,6 +841,14 @@ generateGeneratedMd = async (
 		`- [${states.githubCreated ? 'x' : ' '}] Create and push GitHub repository${states.githubSkipped ? ' *(Skipped)*' : states.githubError ? ' *(Failed)*' : ''}`,
 		`- [${states.ciRun ? 'x' : ' '}] Run initial CI pipeline (lint, build, test)${states.ciSkipped ? ' *(Skipped)*' : ''}`,
 		'',
+		...(skippedStepInstructions.length > 0
+			? [
+					'## ⏭️ Complete Skipped Steps Manually',
+					'Some initialization steps were marked as *(Skipped)*. Use the guidance below to complete them yourself:',
+					...skippedStepInstructions,
+					'',
+				]
+			: []),
 		...(isUpdate
 			? [
 					'### 🛠️ Upgrade Details',
@@ -926,6 +944,7 @@ generateGeneratedMd = async (
 		'| Command | Description |',
 		'| :--- | :--- |',
 		'| `gh repo view --web` | Open the repository in your default web browser |',
+		'| `gh repo create <name> --public --source=. --remote=origin --push` | Create and push a new GitHub repository |',
 		'| `gh pr create` | Create a new Pull Request |',
 		'| `gh pr checkout <pr-number>` | Checkout a Pull Request branch locally |',
 		'| `gh issue create` | Create a new Issue |',
