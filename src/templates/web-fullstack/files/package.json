@@ -27,8 +27,8 @@
 		"@playwright/test": ""
 	},
 	"scripts": {
-		"build": "npm run build --workspaces",
-		"dev": "npm run dev --workspaces",
+		"build": "{{packageManager}} run build --workspaces",
+		"dev": "{{packageManager}} run dev --workspaces",
 		"integration-test": "playwright test"
 	}
 }

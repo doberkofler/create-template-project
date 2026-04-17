@@ -677,31 +677,20 @@ describe('generateProject', () => {
 		await expect(generateProject(opts)).rejects.toThrow('already exists');
 	});
 
-	it('should transform npm scripts to yarn correctly', async () => {
+	it('should scaffold web-fullstack scripts for yarn explicitly', async () => {
 		const projectName = 'test-yarn-scripts';
 		const projectPath = path.join(tmpDir, projectName);
 		const opts = createProjectOptions({
-			template: 'cli',
+			template: 'web-fullstack',
 			projectName,
 			packageManager: 'yarn',
 			directory: projectPath,
 			update: false,
 		});
-		vi.mocked(getBaseTemplate).mockReturnValue(
-			templateDefinitionFactory({
-				name: 'base',
-				dependencies: {},
-				devDependencies: {},
-				scripts: {
-					test: 'npm run lint && npm run test',
-				},
-				files: [],
-				templateDir: undefined,
-			}),
-		);
 		await generateProject(opts);
 		const pkg = await readPackageJson(projectPath);
-		expect(pkg.scripts.test).toBe('yarn run lint && yarn run test');
+		expect(pkg.scripts.test).toBe('yarn run test --workspaces');
+		expect(pkg.scripts.build).toBe('yarn run build --workspaces');
 	});
 
 	it('should create GENERATED.md and show success message', async () => {
@@ -754,7 +743,7 @@ describe('generateProject', () => {
 		expect(p.note).not.toHaveBeenCalled();
 	});
 
-	it('should transform npm scripts to pnpm correctly', async () => {
+	it('should transform workspace scripts to pnpm recursive run', async () => {
 		const projectName = 'test-pnpm-scripts';
 		const projectPath = path.join(tmpDir, projectName);
 		const opts = createProjectOptions({
@@ -764,24 +753,11 @@ describe('generateProject', () => {
 			directory: projectPath,
 			update: false,
 		});
-		vi.mocked(getBaseTemplate).mockReturnValue(
-			templateDefinitionFactory({
-				name: 'base',
-				dependencies: {},
-				devDependencies: {},
-				scripts: {
-					test: 'npm run test --workspaces',
-					build: 'npm run build --workspaces',
-				},
-				workspaces: ['client', 'server'],
-				files: [],
-				templateDir: undefined,
-			}),
-		);
 		await generateProject(opts);
 		const pkg = await readPackageJson(projectPath);
 		expect(pkg.scripts.test).toBe('pnpm -r run test');
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
+		expect(pkg.scripts.dev).toBe('pnpm -r run dev');
 		expect(pkg.workspaces).toBeUndefined(); // Deleted for pnpm
 	});
 

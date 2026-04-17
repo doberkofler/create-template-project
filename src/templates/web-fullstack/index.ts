@@ -1,7 +1,7 @@
 import {type ProjectOptions, type TemplateDefinition} from '#shared/types.js';
 import {getTemplateDir} from '#shared/file.js';
 
-export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefinition => ({
+export const getWebFullstackTemplate = (opts: ProjectOptions): TemplateDefinition => ({
 	name: 'web-fullstack',
 	description: 'A comprehensive full-stack monorepo featuring an Express backend with tRPC and a modern React client with MUI.',
 	components: [
@@ -43,9 +43,9 @@ export const getWebFullstackTemplate = (_opts: ProjectOptions): TemplateDefiniti
 		'vitest-browser-react': 'vitest-browser-react',
 	},
 	scripts: {
-		build: 'npm run build --workspaces',
-		dev: 'npm run dev --workspaces',
-		test: 'npm run test --workspaces',
+		build: `${opts.packageManager} run build --workspaces`,
+		dev: `${opts.packageManager} run dev --workspaces`,
+		test: `${opts.packageManager} run test --workspaces`,
 		'integration-test': 'playwright test',
 	},
 	files: [],

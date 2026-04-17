@@ -321,7 +321,9 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 				return undefined;
 			}
 
-			return parseTemplatePackageJson(await fs.readFile(templatePkgPath, 'utf8'));
+			const templatePkgContent = await fs.readFile(templatePkgPath, 'utf8');
+			const processedTemplatePkgContent = processContent('package.json', templatePkgContent, opts, addedDeps);
+			return parseTemplatePackageJson(processedTemplatePkgContent);
 		}),
 	);
 
@@ -527,14 +529,6 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 
 	// Apply final programmatic overrides
 	const pm = opts.packageManager;
-
-	if (pm !== 'npm') {
-		for (const [key, value] of Object.entries(finalPkg.scripts)) {
-			if (typeof value === 'string') {
-				finalPkg.scripts[key] = value.replaceAll('npm run ', `${pm} run `);
-			}
-		}
-	}
 
 	if (pm === 'pnpm' && finalPkg.workspaces) {
 		debug('Creating pnpm-workspace.yaml');
