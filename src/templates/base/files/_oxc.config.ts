@@ -164,6 +164,16 @@ export const linter = defineConfig({
 	},
 	overrides: [
 		{
+			// Relax strict type rules for unit tests to allow easier mocking and test scaffolding
+			files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+			rules: {
+				'typescript/no-unsafe-type-assertion': 'off',
+				'typescript/no-explicit-any': 'off',
+				'typescript/no-unsafe-assignment': 'off',
+				'typescript/no-unsafe-member-access': 'off',
+			},
+		},
+		{
 			files: ['tests/e2e/**/*.e2e-test.ts', '**/*.e2e-test.ts'],
 			rules: {
 				'vitest/prefer-importing-vitest-globals': 'off',
