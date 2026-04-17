@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/doberkofler/create-template-project/compare/v1.2.0...v1.2.1) (2026-04-17)
+
+
+### Features
+
+* improved documentation files ([4d4a120](https://github.com/doberkofler/create-template-project/commit/4d4a120d361533066e7cf17b7ebbffe2fd9e7614))
+
 # [1.2.0](https://github.com/doberkofler/create-template-project/compare/v1.1.3...v1.2.0) (2026-04-17)
 
 
