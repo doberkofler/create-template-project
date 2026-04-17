@@ -89,7 +89,8 @@ We follow the **Conventional Commits** specification. This is **enforced** by `c
 To release a new version:
 
 ```sh
-pnpm release -- patch   # or minor / major
+# To ensure release-it works silently with GitHub, pass your gh CLI token:
+GITHUB_TOKEN=$(gh auth token) pnpm release -- patch   # or minor / major
 ```
 
 This will automatically:
@@ -97,8 +98,10 @@ This will automatically:
 2. Bump the version in `package.json`.
 3. Update the `CHANGELOG.md`.
 4. Commit, tag, and push the changes.
-5. Create a GitHub release with auto-generated notes.
+5. Create a GitHub release with auto-generated notes (silently, using the provided `GITHUB_TOKEN`).
 6. Publish to npm (if configured).
+
+> **Note:** If you don't provide the `GITHUB_TOKEN` environment variable, `release-it` will fallback to manual mode and open a browser window for you to create the GitHub release manually.
 
 ## Project Structure
 

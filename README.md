@@ -132,6 +132,16 @@ A full-stack monorepo featuring:
 - **Server**: Express.js backend with tRPC for end-to-end type safety.
 - **E2E**: Playwright for end-to-end testing.
 
+## Release Process
+
+To cut a new release and automatically create a GitHub Release securely:
+
+```bash
+GITHUB_TOKEN=$(gh auth token) pnpm release -- patch # minor, or major
+```
+
+For more details on the release flow, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Contributing
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
