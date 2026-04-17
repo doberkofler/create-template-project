@@ -1,4 +1,5 @@
-// oxlint-disable-next-line import/no-anonymous-default-export
-export default {
+const config = {
 	extends: ['@commitlint/config-conventional'],
 };
+
+export default config;
