@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/doberkofler/create-template-project/compare/v1.1.3...v1.2.0) (2026-04-17)
+
+
+### Features
+
+* the file GENERATED.md how has section on manual steps for skipped steps ([5ab5122](https://github.com/doberkofler/create-template-project/commit/5ab5122e7bdd5917e6d4e52f517055776d475788))
+
 ## [1.1.3](https://github.com/doberkofler/create-template-project/compare/v1.1.2...v1.1.3) (2026-04-09)
 
 ## [1.1.2](https://github.com/doberkofler/create-template-project/compare/v1.1.1...v1.1.2) (2026-04-08)
