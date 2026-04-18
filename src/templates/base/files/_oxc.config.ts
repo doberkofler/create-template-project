@@ -159,7 +159,8 @@ export const linter = defineConfig({
 		'react/react-in-jsx-scope': 'off',
 		'vitest/no-importing-vitest-globals': 'off',
 		'vitest/prefer-describe-function-title': 'off',
-		'vitest/prefer-to-be-truthy': 'off', // FIXME: Conflict Detected: prefer-strict-boolean-matchers enforces toBe(true), but prefer-to-be-truthy enforces toBeTruthy().
+		'vitest/prefer-to-be-falsy': 'off', // NOTE: Pick strictness: keep prefer-strict-boolean-matchers, disable truthy/falsy rules.
+		'vitest/prefer-to-be-truthy': 'off', // NOTE: Pick strictness: keep prefer-strict-boolean-matchers, disable truthy/falsy rules.
 		'vitest/require-test-timeout': 'off',
 	},
 	overrides: [
