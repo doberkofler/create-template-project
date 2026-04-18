@@ -1,3 +1,17 @@
+## [1.2.2](https://github.com/doberkofler/create-template-project/compare/v1.2.1...v1.2.2) (2026-04-18)
+
+
+### Bug Fixes
+
+* relaxed vitest lint rules ([5bb01c4](https://github.com/doberkofler/create-template-project/commit/5bb01c47cbff1c007981170f26781e5c908cf4a9))
+* replace inline lint disable comment ([249fdf0](https://github.com/doberkofler/create-template-project/commit/249fdf07a42734ece94d6b96f331bb65b26ece41))
+
+
+### Features
+
+* improved generated packge scripts ([831fd98](https://github.com/doberkofler/create-template-project/commit/831fd982128fa7102f38d4f47d0b6d6a2ec73775))
+* relax the lint roles for unit tests to prevent unnecessary verbosity ([e9217cd](https://github.com/doberkofler/create-template-project/commit/e9217cdd49a62013d34b394c2712b76a6dfd1b6d))
+
 ## [1.2.1](https://github.com/doberkofler/create-template-project/compare/v1.2.0...v1.2.1) (2026-04-17)
 
 
