@@ -172,6 +172,7 @@ export const linter = defineConfig({
 				'typescript/no-explicit-any': 'off',
 				'typescript/no-unsafe-assignment': 'off',
 				'typescript/no-unsafe-member-access': 'off',
+				'no-useless-undefined': 'off',
 			},
 		},
 		{
