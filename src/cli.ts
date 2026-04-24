@@ -358,7 +358,7 @@ Restrictions & Behavior:
 			}
 
 			const directory = await p.text({
-				message: 'Target directory:',
+				message: 'Target parent directory (project name will be appended):',
 				initialValue: '.',
 			});
 
