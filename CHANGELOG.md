@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/doberkofler/create-template-project/compare/v1.2.2...v1.2.3) (2026-05-02)
+
+
+### Bug Fixes
+
+* improve target directory prompt in interactive mode ([c9329d8](https://github.com/doberkofler/create-template-project/commit/c9329d8c17e7294aeadfdeb18012950380e5f4b2))
+
 ## [1.2.2](https://github.com/doberkofler/create-template-project/compare/v1.2.1...v1.2.2) (2026-04-18)
 
 
