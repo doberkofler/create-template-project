@@ -84,7 +84,6 @@ export const linter = defineConfig({
 		'import/no-nodejs-modules': 'off',
 		'import/prefer-default-export': 'off',
 		'import/no-default-export': 'off',
-		// FIXME: remove all jest rules
 		'jest/consistent-test-it': 'off',
 		'jest/expect-expect': 'off',
 		'jest/max-expects': 'off',
@@ -113,12 +112,12 @@ export const linter = defineConfig({
 		'jest/no-test-return-statement': 'off',
 		'jest/no-unneeded-async-expect-function': 'off',
 		'jest/no-untyped-mock-factory': 'off',
-		//'jest/padding-around-after-all-blocks': 'off',
 		'jest/padding-around-test-blocks': 'off',
 		'jest/prefer-called-with': 'off',
 		'jest/prefer-comparison-matcher': 'off',
 		'jest/prefer-each': 'off',
 		'jest/prefer-equality-matcher': 'off',
+		'jest/prefer-expect-assertions': 'off',
 		'jest/prefer-expect-resolves': 'off',
 		'jest/prefer-hooks-in-order': 'off',
 		'jest/prefer-hooks-on-top': 'off',
@@ -126,7 +125,6 @@ export const linter = defineConfig({
 		'jest/prefer-lowercase-title': 'off',
 		'jest/prefer-mock-promise-shorthand': 'off',
 		'jest/prefer-mock-return-shorthand': 'off',
-		//'jest/prefer-snapshot-hint': 'off',
 		'jest/prefer-spy-on': 'off',
 		'jest/prefer-strict-equal': 'off',
 		'jest/prefer-to-be': 'off',
@@ -157,8 +155,11 @@ export const linter = defineConfig({
 		'unicorn/prefer-module': 'off', // TODO: consider enabling
 		'react/jsx-filename-extension': 'off',
 		'react/react-in-jsx-scope': 'off',
+		'vitest/max-expects': 'off',
+		'vitest/no-hooks': 'off',
 		'vitest/no-importing-vitest-globals': 'off',
 		'vitest/prefer-describe-function-title': 'off',
+		'vitest/prefer-expect-assertions': 'off',
 		'vitest/prefer-to-be-falsy': 'off', // NOTE: Pick strictness: keep prefer-strict-boolean-matchers, disable truthy/falsy rules.
 		'vitest/prefer-to-be-truthy': 'off', // NOTE: Pick strictness: keep prefer-strict-boolean-matchers, disable truthy/falsy rules.
 		'vitest/require-test-timeout': 'off',

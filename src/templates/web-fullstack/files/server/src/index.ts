@@ -5,7 +5,7 @@ import {appRouter} from './routers/_app.js';
 import {createContext} from './context.js';
 import path from 'node:path';
 
-const __dirname = import.meta.dirname;
+const rootDir = import.meta.dirname;
 const app = express();
 const port = Number(process.env['PORT'] ?? 3001);
 
@@ -20,10 +20,10 @@ app.use(
 	}),
 );
 
-app.use(express.static(path.join(__dirname, '../../client/dist')));
+app.use(express.static(path.join(rootDir, '../../client/dist')));
 
 app.get('*', (_req, res) => {
-	res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
+	res.sendFile(path.join(rootDir, '../../client/dist/index.html'));
 });
 
 app.listen(port, () => {

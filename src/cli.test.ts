@@ -280,7 +280,7 @@ describe('cli', () => {
 		await fs.rm(projectDir, {recursive: true, force: true});
 	});
 
-	it('should exit if directory exists in create', async () => {
+	it('should exit in non-interactive create when target directory exists', async () => {
 		const projectName = 'exists-non-interactive';
 		const projectDir = path.resolve('.', projectName);
 		await fs.mkdir(projectDir, {recursive: true});

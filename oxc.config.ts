@@ -107,12 +107,12 @@ export const linter = defineConfig({
 		'jest/no-test-return-statement': 'off',
 		'jest/no-unneeded-async-expect-function': 'off',
 		'jest/no-untyped-mock-factory': 'off',
-		//'jest/padding-around-after-all-blocks': 'off',
 		'jest/padding-around-test-blocks': 'off',
 		'jest/prefer-called-with': 'off',
 		'jest/prefer-comparison-matcher': 'off',
 		'jest/prefer-each': 'off',
 		'jest/prefer-equality-matcher': 'off',
+		'jest/prefer-expect-assertions': 'off',
 		'jest/prefer-expect-resolves': 'off',
 		'jest/prefer-hooks-in-order': 'off',
 		'jest/prefer-hooks-on-top': 'off',
@@ -120,7 +120,6 @@ export const linter = defineConfig({
 		'jest/prefer-lowercase-title': 'off',
 		'jest/prefer-mock-promise-shorthand': 'off',
 		'jest/prefer-mock-return-shorthand': 'off',
-		//'jest/prefer-snapshot-hint': 'off',
 		'jest/prefer-spy-on': 'off',
 		'jest/prefer-strict-equal': 'off',
 		'jest/prefer-to-be': 'off',
@@ -149,8 +148,12 @@ export const linter = defineConfig({
 		'unicorn/no-process-exit': 'off', // TODO: consider enabling
 		'unicorn/no-typeof-undefined': 'off', // TODO: consider enabling
 		'unicorn/prefer-module': 'off', // TODO: consider enabling
+		'vitest/max-expects': 'off',
+		'vitest/no-conditional-in-test': 'off',
+		'vitest/no-hooks': 'off',
 		'vitest/no-importing-vitest-globals': 'off',
 		'vitest/prefer-describe-function-title': 'off',
+		'vitest/prefer-expect-assertions': 'off',
 		'vitest/prefer-to-be-truthy': 'off', // FIXME: Conflict Detected: prefer-strict-boolean-matchers enforces toBe(true), but prefer-to-be-truthy enforces toBeTruthy().
 		'vitest/require-test-timeout': 'off',
 	},

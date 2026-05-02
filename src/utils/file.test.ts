@@ -163,7 +163,7 @@ describe('file utils', () => {
 			expect(processed).toContain('run: "pnpm run ci"');
 		});
 
-		it('should handle GitHub Actions workflow generation for cli with npm', () => {
+		it('should handle GitHub Actions workflow generation for cli with npm from generic workflow template', () => {
 			const content = `
     steps:
       - uses: actions/checkout@v4
@@ -211,7 +211,7 @@ describe('file utils', () => {
 			expect(processed).toContain('run: "yarn run ci"');
 		});
 
-		it('should handle GitHub Actions workflow generation for cli with npm', () => {
+		it('should handle GitHub Actions workflow generation for cli with npm (without pnpm setup block)', () => {
 			const content = `
     steps:
       - uses: actions/checkout@v4
@@ -236,7 +236,7 @@ describe('file utils', () => {
 			expect(processed).toContain('run: "npm run ci"');
 		});
 
-		it('should handle GitHub Actions workflow generation for cli with npm', () => {
+		it('should handle GitHub Actions workflow generation for cli with npm and strip Playwright block', () => {
 			const content = `
     steps:
       - uses: actions/checkout@v4
