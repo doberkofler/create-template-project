@@ -143,6 +143,7 @@ export const linter = defineConfig({
 		'jest/valid-title': 'off',
 		'oxc/no-async-await': 'off',
 		'oxc/no-map-spread': 'off', // TODO: consider enabling
+		'oxc/no-optional-chaining': 'off',
 		'oxc/no-rest-spread-properties': 'off',
 		'unicorn/escape-case': 'off',
 		'unicorn/filename-case': 'off', // TODO: consider enabling
