@@ -1,6 +1,6 @@
 {
 	"name": "create-template-project",
-	"version": "1.2.5",
+	"version": "1.2.6",
 	"private": false,
 	"description": "An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Webpage, Webapp, Fullstack) with best-practice configurations pre-installed.",
 	"keywords": [
