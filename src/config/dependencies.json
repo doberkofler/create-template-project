@@ -25,11 +25,11 @@
 			"description": "A tiny JavaScript debugging utility modelled after Node.js core debugging technique."
 		},
 		"@commitlint/cli": {
-			"version": "20.5.0",
+			"version": "20.5.3",
 			"description": "Lint commit messages to ensure they follow conventional commits."
 		},
 		"@commitlint/config-conventional": {
-			"version": "20.5.0",
+			"version": "20.5.3",
 			"description": "Shareable commitlint config enforcing conventional commits."
 		},
 		"@types/debug": {
