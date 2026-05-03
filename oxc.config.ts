@@ -77,10 +77,8 @@ export const linter = defineConfig({
 		'import/no-nodejs-modules': 'off',
 		'import/prefer-default-export': 'off',
 		'import/no-default-export': 'off',
-		// FIXME: remove all jest rules
 		'jest/consistent-test-it': 'off',
 		'jest/expect-expect': 'off',
-		'jest/prefer-ending-with-an-expect': 'off',
 		'jest/max-expects': 'off',
 		'jest/max-nested-describe': 'off',
 		'jest/no-alias-methods': 'off',
@@ -111,6 +109,7 @@ export const linter = defineConfig({
 		'jest/prefer-called-with': 'off',
 		'jest/prefer-comparison-matcher': 'off',
 		'jest/prefer-each': 'off',
+		'jest/prefer-ending-with-an-expect': 'off',
 		'jest/prefer-equality-matcher': 'off',
 		'jest/prefer-expect-assertions': 'off',
 		'jest/prefer-expect-resolves': 'off',

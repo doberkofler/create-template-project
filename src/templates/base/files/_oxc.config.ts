@@ -116,6 +116,7 @@ export const linter = defineConfig({
 		'jest/prefer-called-with': 'off',
 		'jest/prefer-comparison-matcher': 'off',
 		'jest/prefer-each': 'off',
+		'jest/prefer-ending-with-an-expect': 'off',
 		'jest/prefer-equality-matcher': 'off',
 		'jest/prefer-expect-assertions': 'off',
 		'jest/prefer-expect-resolves': 'off',
@@ -153,9 +154,11 @@ export const linter = defineConfig({
 		'unicorn/no-process-exit': 'off', // TODO: consider enabling
 		'unicorn/no-typeof-undefined': 'off', // TODO: consider enabling
 		'unicorn/prefer-module': 'off', // TODO: consider enabling
-		'react/jsx-filename-extension': 'off',
+		'react/jsx-filename-extension': ['error', {extensions: ['.tsx']}],
+		'react/jsx-max-depth': ['error', {max: 5}],
 		'react/react-in-jsx-scope': 'off',
 		'vitest/max-expects': 'off',
+		'vitest/no-conditional-in-test': 'off',
 		'vitest/no-hooks': 'off',
 		'vitest/no-importing-vitest-globals': 'off',
 		'vitest/prefer-describe-function-title': 'off',
