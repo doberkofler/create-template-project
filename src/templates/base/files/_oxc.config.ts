@@ -82,6 +82,7 @@ export const linter = defineConfig({
 		'import/no-named-export': 'off',
 		'import/no-namespace': 'off', // TODO: consider enabling
 		'import/no-nodejs-modules': 'off',
+		'import/no-unassigned-import': ['error', {'allow': ['**/*.css']}],
 		'import/prefer-default-export': 'off',
 		'import/no-default-export': 'off',
 		'jest/consistent-test-it': 'off',
