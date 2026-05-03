@@ -1,10 +1,23 @@
+## [1.2.5](https://github.com/doberkofler/create-template-project/compare/v1.2.4...v1.2.5) (2026-05-03)
+
+
+### Bug Fixes
+
+* improve oxlint rules ([6906698](https://github.com/doberkofler/create-template-project/commit/69066989292f9a689189c7818fbc64115a064d74))
+
 ## [1.2.4](https://github.com/doberkofler/create-template-project/compare/v1.2.3...v1.2.4) (2026-05-03)
 
 
 ### Bug Fixes
 
-* improve target directory prompt in interactive mode ([c9329d8](https://github.com/doberkofler/create-template-project/commit/c9329d8c17e7294aeadfdeb18012950380e5f4b2))
 * improved oxlint rules ([a4ec243](https://github.com/doberkofler/create-template-project/commit/a4ec24332905c5549f88e4a822d70683330fedaa))
+
+## [1.2.3](https://github.com/doberkofler/create-template-project/compare/v1.2.2...v1.2.3) (2026-05-02)
+
+
+### Bug Fixes
+
+* improve target directory prompt in interactive mode ([c9329d8](https://github.com/doberkofler/create-template-project/commit/c9329d8c17e7294aeadfdeb18012950380e5f4b2))
 
 ## [1.2.2](https://github.com/doberkofler/create-template-project/compare/v1.2.1...v1.2.2) (2026-04-18)
 
