@@ -664,6 +664,41 @@ describe('generateProject', () => {
 		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Updated: p.txt'));
 	});
 
+	it('should allow showing diffs before applying update', async () => {
+		const previousNodeEnv = process.env.NODE_ENV;
+		process.env.NODE_ENV = 'development';
+		const projectName = 'test-dry-run';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(path.join(projectPath, '.gitignore'), 'node_modules\n');
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli', githubUsername: 'test-user'},
+			}),
+		);
+
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			directory: projectPath,
+			update: true,
+		});
+		vi.mocked(p.select).mockResolvedValueOnce('show-diff').mockResolvedValueOnce('apply');
+
+		try {
+			await generateProject(opts);
+			const gitignoreAfter = await fs.readFile(path.join(projectPath, '.gitignore'), 'utf8');
+			expect(gitignoreAfter).toBeTypeOf('string');
+			expect(p.select).toHaveBeenCalled();
+			expect(p.confirm).not.toHaveBeenCalled();
+			expect(p.note).toHaveBeenCalledWith(expect.stringContaining('--- a/'), expect.stringContaining('Diff preview:'));
+		} finally {
+			process.env.NODE_ENV = previousNodeEnv;
+		}
+	});
+
 	it('should throw if directory exists and no update', async () => {
 		const projectName = 'test-exists-error';
 		const projectPath = path.join(tmpDir, projectName);

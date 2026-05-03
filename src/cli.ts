@@ -263,8 +263,8 @@ Restrictions & Behavior:
   - Seed Files: Files in 'src/', 'client/src/', etc., and ALL markdown files (*.md) are considered "seed" files and are NEVER overwritten or modified during an update to protect your application logic and documentation.
   - package.json: Dependencies and scripts are merged. Existing versions are preserved unless they are missing.
   - Merging: For non-seed files, the tool attempts to merge template changes. If a conflict occurs, it will be marked with standard git conflict markers.
-  - Confirmation: The command will always show a summary of proposed changes (ADD, MODIFY) and ask for your confirmation before applying them.
-`,
+			  - Confirmation: The command will show a summary of proposed changes and lets you preview diffs before applying.
+ `,
 		)
 		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
 		.option('--description <description>', 'Project description')

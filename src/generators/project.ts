@@ -92,6 +92,34 @@ type GeneratorState = {
 	ciSkipped: boolean;
 };
 
+type PlannedDiff = {
+	path: string;
+	before: string;
+	after: string;
+};
+
+const buildSimpleUnifiedDiff = (filePath: string, before: string, after: string): string => {
+	const beforeLines = before.split('\n');
+	const afterLines = after.split('\n');
+	const diffLines = [`--- a/${filePath}`, `+++ b/${filePath}`, '@@'];
+	const max = Math.max(beforeLines.length, afterLines.length);
+	for (let i = 0; i < max; i += 1) {
+		const oldLine = i < beforeLines.length ? beforeLines[i] : undefined;
+		const newLine = i < afterLines.length ? afterLines[i] : undefined;
+		if (oldLine === newLine) {
+			diffLines.push(` ${oldLine ?? ''}`);
+			continue;
+		}
+		if (oldLine !== undefined) {
+			diffLines.push(`-${oldLine}`);
+		}
+		if (newLine !== undefined) {
+			diffLines.push(`+${newLine}`);
+		}
+	}
+	return diffLines.join('\n');
+};
+
 type PackageJsonShape = {
 	name: string;
 	version: string;
@@ -354,6 +382,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 	// Second pass: Collect and report actions
 	const actions: Action[] = [];
 	const pendingOperations: (() => Promise<void>)[] = [];
+	const plannedDiffs: PlannedDiff[] = [];
 
 	/* eslint-disable eslint/no-await-in-loop -- file planning is intentionally sequential to keep action ordering deterministic */
 	for (const t of templates) {
@@ -410,6 +439,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 				if (isUpdate && exists) {
 					const existingContent = await fs.readFile(finalTargetPath, 'utf8');
 					if (existingContent.trim() !== content.trim()) {
+						plannedDiffs.push({path: finalRelativePath, before: existingContent, after: content});
 						// For now, we assume it's a MERGE or MODIFY
 						const action: (typeof actions)[0] = {
 							type: 'MODIFY',
@@ -437,6 +467,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 						});
 					}
 				} else if (!exists) {
+					plannedDiffs.push({path: finalRelativePath, before: '', after: content});
 					actions.push({
 						type: 'ADD',
 						path: finalRelativePath,
@@ -487,6 +518,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 			if (isUpdate && exists) {
 				const existingContent = await fs.readFile(targetPath, 'utf8');
 				if (existingContent.trim() !== content.trim()) {
+					plannedDiffs.push({path: file.path, before: existingContent, after: content});
 					const action: (typeof actions)[0] = {
 						type: 'MODIFY',
 						path: file.path,
@@ -513,6 +545,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 					});
 				}
 			} else if (!exists) {
+				plannedDiffs.push({path: file.path, before: '', after: content});
 				actions.push({
 					type: 'ADD',
 					path: file.path,
@@ -543,6 +576,8 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		}
 
 		if (workspaceChanged) {
+			const oldWorkspaceContent = workspaceExists ? await fs.readFile(workspacePath, 'utf8') : '';
+			plannedDiffs.push({path: 'pnpm-workspace.yaml', before: oldWorkspaceContent, after: workspaceYaml});
 			actions.push({
 				type: workspaceExists ? 'MODIFY' : 'ADD',
 				path: 'pnpm-workspace.yaml',
@@ -571,6 +606,8 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 	}
 
 	if (pkgChanged) {
+		const oldPkgContent = isUpdate && (await pathExists(pkgPath)) ? await fs.readFile(pkgPath, 'utf8') : '';
+		plannedDiffs.push({path: 'package.json', before: oldPkgContent, after: newPkgContent});
 		if (isUpdate) {
 			actions.push({
 				type: 'MODIFY',
@@ -597,15 +634,31 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 			const relativeProjectDir = path.relative(process.cwd(), projectDir) || '.';
 			prompts.note(summary, `Planned changes in ${relativeProjectDir}:`);
 
-			const confirm = await prompts.confirm({
-				message: 'Do you want to apply these changes?',
-				initialValue: true,
-			});
-
-			if (prompts.isCancel(confirm) || !confirm) {
-				prompts.cancel('Update cancelled.');
-				process.exit(0);
+			let confirmed = false;
+			/* eslint-disable eslint/no-await-in-loop -- prompt loop is intentionally sequential */
+			while (!confirmed) {
+				const action = await prompts.select({
+					message: 'Choose next step:',
+					options: [
+						{label: 'Show diff', value: 'show-diff'},
+						{label: 'Apply changes', value: 'apply'},
+						{label: 'Cancel update', value: 'cancel'},
+					],
+				});
+				if (prompts.isCancel(action) || action === 'cancel') {
+					prompts.cancel('Update cancelled.');
+					process.exit(0);
+				}
+				if (action === 'show-diff') {
+					for (const entry of plannedDiffs) {
+						const diff = buildSimpleUnifiedDiff(entry.path, entry.before, entry.after);
+						prompts.note(diff, `Diff preview: ${entry.path}`);
+					}
+					continue;
+				}
+				confirmed = true;
 			}
+			/* eslint-enable eslint/no-await-in-loop */
 		} else {
 			log.info('No changes detected.');
 		}
