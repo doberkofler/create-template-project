@@ -1,9 +1,14 @@
-## [1.2.6](https://github.com/doberkofler/create-template-project/compare/v1.2.5...v1.2.6) (2026-05-03)
+# [1.3.0](https://github.com/doberkofler/create-template-project/compare/v1.2.6...v1.3.0) (2026-05-03)
 
 
 ### Bug Fixes
 
 * improve oxlint rules ([7dacf93](https://github.com/doberkofler/create-template-project/commit/7dacf93157d7004a92d10b5252f793a62f9658b1))
+
+
+### Features
+
+* **update:** add interactive diff preview before applying changes ([305667c](https://github.com/doberkofler/create-template-project/commit/305667c374b4981edf062cc1ab6ae0277e8b1e9d))
 
 ## [1.2.5](https://github.com/doberkofler/create-template-project/compare/v1.2.4...v1.2.5) (2026-05-03)
 
