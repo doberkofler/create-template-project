@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/doberkofler/create-template-project/compare/v1.3.3...v1.4.0) (2026-05-09)
+
+
+### Features
+
+* split the oxlint configuration into a static part and a custom part ([7f960bf](https://github.com/doberkofler/create-template-project/commit/7f960bf3e79e0b4033aa618da7a281dd60574c54))
+
 ## [1.3.3](https://github.com/doberkofler/create-template-project/compare/v1.3.2...v1.3.3) (2026-05-05)
 
 ## [1.3.2](https://github.com/doberkofler/create-template-project/compare/v1.3.1...v1.3.2) (2026-05-03)
