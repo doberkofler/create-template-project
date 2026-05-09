@@ -993,4 +993,122 @@ describe('generateProject', () => {
 		const rootContent = await fs.readFile(rootConfig, 'utf8');
 		expect(rootContent).toContain("'lcov'");
 	});
+
+	it('should overwrite oxc.config.ts on update instead of merging', async () => {
+		const projectName = 'test-owr-oxc-config';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(path.join(projectPath, 'oxc.config.ts'), 'old config');
+
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'oxc.config.ts', content: 'new template config'}],
+				templateDir: undefined,
+			}),
+		);
+
+		setExecaMock((cmd: string, args: string[] = []) => {
+			if (cmd === 'git' && args[0] === 'merge-file') {
+				throw new Error('merge-file should not be called for oxc.config.ts');
+			}
+			return {stdout: '', stderr: ''};
+		});
+
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			directory: projectPath,
+			update: true,
+			progress: false,
+		});
+
+		await generateProject(opts);
+		const content = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
+		expect(content).toBe('new template config');
+	});
+
+	it('should preserve oxlint.config.ts on update', async () => {
+		const projectName = 'test-skip-oxlint';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(path.join(projectPath, 'oxlint.config.ts'), 'user custom config');
+
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'oxlint.config.ts', content: 'template config override'}],
+				templateDir: undefined,
+			}),
+		);
+
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			directory: projectPath,
+			update: true,
+			progress: false,
+		});
+
+		await generateProject(opts);
+		const content = await fs.readFile(path.join(projectPath, 'oxlint.config.ts'), 'utf8');
+		expect(content).toBe('user custom config');
+	});
+
+	it('should preserve oxfmt.config.ts on update', async () => {
+		const projectName = 'test-skip-oxfmt';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(path.join(projectPath, 'oxfmt.config.ts'), 'user custom config');
+
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [{path: 'oxfmt.config.ts', content: 'template config override'}],
+				templateDir: undefined,
+			}),
+		);
+
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			directory: projectPath,
+			update: true,
+			progress: false,
+		});
+
+		await generateProject(opts);
+		const content = await fs.readFile(path.join(projectPath, 'oxfmt.config.ts'), 'utf8');
+		expect(content).toBe('user custom config');
+	});
 });

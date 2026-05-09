@@ -74,6 +74,8 @@ const isFileRequired = (relativePath: string, type: string): boolean => {
 	return true;
 };
 
+const isCustomConfigFile = (relativePath: string): boolean => relativePath === 'oxlint.config.ts' || relativePath === 'oxfmt.config.ts';
+
 type Action = {
 	type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE' | 'UPDATED';
 	path: string;
@@ -425,6 +427,16 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 					targetPath = path.join(projectDir, relativePath);
 				}
 
+				// Custom config files (oxlint.config.ts, oxfmt.config.ts): preserved on update
+				if (isUpdate && (relativePath === 'oxlint.config.ts' || relativePath === 'oxfmt.config.ts')) {
+					actions.push({
+						type: 'SKIP',
+						path: relativePath,
+						reason: 'Custom config file - preserved on update',
+					});
+					continue;
+				}
+
 				if (relativePath === 'package.json') {
 					continue;
 				}
@@ -448,21 +460,28 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 						};
 						actions.push(action);
 						pendingOperations.push(async () => {
-							const result = await mergeFile(finalTargetPath, existingContent, content, log);
-							if (result === 'merged') {
-								action.type = 'MERGE';
-								action.reason = 'Merged template updates with your manual changes';
-								action.recommendedAction = 'Review changes for correct integration';
-								log.info(`ℹ Merged: ${finalRelativePath}`);
-							} else if (result === 'conflict') {
-								action.type = 'CONFLICT';
-								action.reason = 'Conflicting changes between template and your code';
-								action.recommendedAction = 'Resolve git conflict markers in this file';
-								log.warn(`⚠ Conflict: ${finalRelativePath}`);
-							} else if (result === 'updated') {
+							if (finalRelativePath === 'oxc.config.ts') {
+								await fs.writeFile(finalTargetPath, content);
 								action.type = 'UPDATED';
-								action.reason = 'File was updated to the latest template version';
+								action.reason = 'Default config was updated to the latest template version';
 								log.info(`✔ Updated: ${finalRelativePath}`);
+							} else {
+								const result = await mergeFile(finalTargetPath, existingContent, content, log);
+								if (result === 'merged') {
+									action.type = 'MERGE';
+									action.reason = 'Merged template updates with your manual changes';
+									action.recommendedAction = 'Review changes for correct integration';
+									log.info(`ℹ Merged: ${finalRelativePath}`);
+								} else if (result === 'conflict') {
+									action.type = 'CONFLICT';
+									action.reason = 'Conflicting changes between template and your code';
+									action.recommendedAction = 'Resolve git conflict markers in this file';
+									log.warn(`⚠ Conflict: ${finalRelativePath}`);
+								} else if (result === 'updated') {
+									action.type = 'UPDATED';
+									action.reason = 'File was updated to the latest template version';
+									log.info(`✔ Updated: ${finalRelativePath}`);
+								}
 							}
 						});
 					}
@@ -497,6 +516,15 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 				continue;
 			}
 
+			if (isUpdate && isCustomConfigFile(file.path)) {
+				actions.push({
+					type: 'SKIP',
+					path: file.path,
+					reason: 'Custom config file - preserved on update',
+				});
+				continue;
+			}
+
 			if (!isFileRequired(file.path, type)) {
 				if (isUpdate && (await pathExists(targetPath))) {
 					actions.push({
@@ -526,21 +554,28 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 					};
 					actions.push(action);
 					pendingOperations.push(async () => {
-						const result = await mergeFile(targetPath, existingContent, content, log);
-						if (result === 'merged') {
-							action.type = 'MERGE';
-							action.reason = 'Merged template updates with your manual changes';
-							action.recommendedAction = 'Review changes for correct integration';
-							log.info(`ℹ Merged: ${file.path}`);
-						} else if (result === 'conflict') {
-							action.type = 'CONFLICT';
-							action.reason = 'Conflicting changes between template and your code';
-							action.recommendedAction = 'Resolve git conflict markers in this file';
-							log.warn(`⚠ Conflict: ${file.path}`);
-						} else if (result === 'updated') {
+						if (file.path === 'oxc.config.ts') {
+							await fs.writeFile(targetPath, content);
 							action.type = 'UPDATED';
-							action.reason = 'File was updated to the latest template version';
+							action.reason = 'Default config was updated to the latest template version';
 							log.info(`✔ Updated: ${file.path}`);
+						} else {
+							const result = await mergeFile(targetPath, existingContent, content, log);
+							if (result === 'merged') {
+								action.type = 'MERGE';
+								action.reason = 'Merged template updates with your manual changes';
+								action.recommendedAction = 'Review changes for correct integration';
+								log.info(`ℹ Merged: ${file.path}`);
+							} else if (result === 'conflict') {
+								action.type = 'CONFLICT';
+								action.reason = 'Conflicting changes between template and your code';
+								action.recommendedAction = 'Resolve git conflict markers in this file';
+								log.warn(`⚠ Conflict: ${file.path}`);
+							} else if (result === 'updated') {
+								action.type = 'UPDATED';
+								action.reason = 'File was updated to the latest template version';
+								log.info(`✔ Updated: ${file.path}`);
+							}
 						}
 					});
 				}
