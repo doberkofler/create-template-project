@@ -92,7 +92,6 @@
 		"oxfmt": "0.48.0",
 		"oxlint": "1.63.0",
 		"oxlint-tsgolint": "0.22.1",
-		"pnpm": "11.0.6",
 		"release-it": "20.0.1",
 		"rimraf": "6.1.3",
 		"typescript": "6.0.3",
@@ -101,5 +100,6 @@
 	},
 	"engines": {
 		"node": ">=22"
-	}
+	},
+	"packageManager": "pnpm@11.0.6"
 }
