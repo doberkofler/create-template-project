@@ -117,6 +117,6 @@ describe('generateProject Update Logic', () => {
 
 		const opts = getOpts(projectName, projectPath, true);
 
-		await expect(generateProject(opts)).rejects.toThrow(/No "create-template-project" configuration found/);
+		await expect(generateProject(opts)).rejects.toThrow(/No "create-template-project" configuration found/u);
 	});
 });

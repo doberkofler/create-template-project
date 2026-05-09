@@ -115,7 +115,7 @@ describe('generateProject', () => {
 			build: true,
 		});
 		await generateProject(opts);
-		expect(await pathExists(projectPath)).toBe(true);
+		await expect(pathExists(projectPath)).resolves.toBe(true);
 		const pkg = await readPackageJson(projectPath);
 		expect(pkg.name).toBe(projectName);
 		expect(pkg.author).toBe('Test Author');
@@ -128,7 +128,7 @@ describe('generateProject', () => {
 		expect(indexContent).toContain('#!/usr/bin/env node');
 
 		// Verify oxc.config.ts exists
-		expect(await pathExists(path.join(projectPath, 'oxc.config.ts'))).toBe(true);
+		await expect(pathExists(path.join(projectPath, 'oxc.config.ts'))).resolves.toBe(true);
 		const cliOxcConfig = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
 		expect(cliOxcConfig).toContain('node: true');
 
@@ -137,14 +137,14 @@ describe('generateProject', () => {
 		expect(readme).toContain(projectName);
 
 		// Verify LICENSE exists and contains author/year
-		expect(await pathExists(path.join(projectPath, 'LICENSE'))).toBe(true);
+		await expect(pathExists(path.join(projectPath, 'LICENSE'))).resolves.toBe(true);
 		const license = await fs.readFile(path.join(projectPath, 'LICENSE'), 'utf8');
 		expect(license).toContain('Test Author');
 		expect(license).toContain(new Date().getFullYear().toString());
 
 		// Verify Husky hooks exist and are executable (simulated by checking if chmod was called or just if file exists in test)
-		expect(await pathExists(path.join(projectPath, '.husky/pre-commit'))).toBe(true);
-		expect(await pathExists(path.join(projectPath, '.husky/commit-msg'))).toBe(true);
+		await expect(pathExists(path.join(projectPath, '.husky/pre-commit'))).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, '.husky/commit-msg'))).resolves.toBe(true);
 
 		const preCommit = await fs.readFile(path.join(projectPath, '.husky/pre-commit'), 'utf8');
 		expect(preCommit).toContain('npm run ci');
@@ -187,8 +187,8 @@ describe('generateProject', () => {
 			update: false,
 		});
 		await generateProject(opts);
-		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'index.html'))).toBe(true);
+		await expect(pathExists(projectPath)).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'index.html'))).resolves.toBe(true);
 	});
 
 	it('should scaffold a web-app project correctly', async () => {
@@ -202,8 +202,8 @@ describe('generateProject', () => {
 			update: false,
 		});
 		await generateProject(opts);
-		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'src/index.tsx'))).toBe(true);
+		await expect(pathExists(projectPath)).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'src/index.tsx'))).resolves.toBe(true);
 		const webAppOxcConfig = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
 		expect(webAppOxcConfig).not.toContain('node: true');
 	});
@@ -219,8 +219,8 @@ describe('generateProject', () => {
 			update: false,
 		});
 		await generateProject(opts);
-		expect(await pathExists(projectPath)).toBe(true);
-		expect(await pathExists(path.join(projectPath, 'client/vite.config.ts'))).toBe(true);
+		await expect(pathExists(projectPath)).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'client/vite.config.ts'))).resolves.toBe(true);
 
 		// Verify package.json content
 		const pkg = await readPackageJson(projectPath);
@@ -417,7 +417,7 @@ describe('generateProject', () => {
 			update: false,
 			build: true,
 		});
-		await expect(generateProject(opts)).rejects.toThrow(/Failed to run CI script:?/);
+		await expect(generateProject(opts)).rejects.toThrow(/Failed to run CI script:?/u);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('fail'));
 	});
 
@@ -462,7 +462,7 @@ describe('generateProject', () => {
 			update: false,
 		});
 		await generateProject(opts);
-		expect(await fs.readFile(path.join(projectPath, 'p.txt'), 'utf8')).toBe('hello');
+		await expect(fs.readFile(path.join(projectPath, 'p.txt'), 'utf8')).resolves.toBe('hello');
 	});
 
 	it('should handle programmatic update merge', async () => {
@@ -545,7 +545,7 @@ describe('generateProject', () => {
 			update: false,
 			build: true,
 		});
-		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/);
+		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/u);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
 	});
 
@@ -691,7 +691,7 @@ describe('generateProject', () => {
 			await generateProject(opts);
 			const gitignoreAfter = await fs.readFile(path.join(projectPath, '.gitignore'), 'utf8');
 			expect(gitignoreAfter).toBeTypeOf('string');
-			expect(p.select).toHaveBeenCalled();
+			expect(p.select).toHaveBeenCalledWith(expect.objectContaining({message: 'Choose next step:'}));
 			expect(p.confirm).not.toHaveBeenCalled();
 			expect(p.note).toHaveBeenCalledWith(expect.stringContaining('--- a/'), expect.stringContaining('Diff preview:'));
 		} finally {
@@ -759,7 +759,7 @@ describe('generateProject', () => {
 			progress: false,
 		});
 		await generateProject(opts);
-		expect(await pathExists(path.join(projectPath, 'GENERATED.md'))).toBe(true);
+		await expect(pathExists(path.join(projectPath, 'GENERATED.md'))).resolves.toBe(true);
 	});
 
 	it('should not show progress when progress is false', async () => {
@@ -819,7 +819,7 @@ describe('generateProject', () => {
 		});
 
 		await generateProject(opts);
-		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).not.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'vitest.config.ts'))).resolves.not.toBe(true);
 	});
 
 	it('should handle deleting programmatic files during update if no longer required', async () => {
@@ -856,7 +856,7 @@ describe('generateProject', () => {
 		});
 
 		await generateProject(opts);
-		expect(await pathExists(path.join(projectPath, 'vitest.config.ts'))).not.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'vitest.config.ts'))).resolves.not.toBe(true);
 	});
 
 	it('should handle skipping seed files and markdown files during update', async () => {

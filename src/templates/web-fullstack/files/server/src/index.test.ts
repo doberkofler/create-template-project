@@ -23,6 +23,6 @@ describe('auth router', () => {
 				email: 'wrong@example.com',
 				password: 'password123',
 			}),
-		).rejects.toThrow(/Invalid email or password/);
+		).rejects.toThrow(/Invalid email or password/u);
 	});
 });

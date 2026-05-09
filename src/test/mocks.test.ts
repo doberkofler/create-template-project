@@ -44,20 +44,20 @@ describe('test/mocks', () => {
 		debugModule.disable();
 
 		expect(debugModule.enable).toHaveBeenCalledWith('my:*');
-		expect(debugModule.disable).toHaveBeenCalled();
+		expect(debugModule.disable).toHaveBeenCalledWith();
 	});
 
 	it('creates template info mocks for list and single template lookups', () => {
 		const templateInfo = createTemplateInfoMock();
 
-		expect(templateInfo.getAllTemplatesInfo()).toEqual([
+		expect(templateInfo.getAllTemplatesInfo()).toStrictEqual([
 			{
 				name: 'cli',
 				description: 'desc',
 				components: [{name: 'c1', description: 'd1'}],
 			},
 		]);
-		expect(templateInfo.getTemplateInfo()).toEqual({
+		expect(templateInfo.getTemplateInfo()).toStrictEqual({
 			name: 'cli',
 			description: 'desc',
 			components: [{name: 'c1', description: 'd1'}],

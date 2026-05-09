@@ -92,10 +92,10 @@ describe('file utils', () => {
 
 			mergePackageJson(target, source);
 
-			expect(target.scripts).toEqual({test: 'old', build: 'new'});
-			expect(target.dependencies).toEqual({dep1: '1.0.0', dep2: '2.0.0'});
-			expect(target.devDependencies).toEqual({dev1: '3.0.0'});
-			expect(target.workspaces).toEqual(['client']);
+			expect(target.scripts).toStrictEqual({test: 'old', build: 'new'});
+			expect(target.dependencies).toStrictEqual({dep1: '1.0.0', dep2: '2.0.0'});
+			expect(target.devDependencies).toStrictEqual({dev1: '3.0.0'});
+			expect(target.workspaces).toStrictEqual(['client']);
 		});
 	});
 
@@ -120,7 +120,7 @@ describe('file utils', () => {
 			expect(processed).toContain('## Dependencies');
 			expect(processed).toContain('- **dep1**: desc1');
 			expect(processed).toContain('- **dep2**: desc2');
-			const occurrences = (processed.match(/dep1/g) ?? []).length;
+			const occurrences = (processed.match(/dep1/gu) ?? []).length;
 			expect(occurrences).toBe(1);
 		});
 

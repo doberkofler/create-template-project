@@ -6,6 +6,6 @@ import {App} from './App.js';
 describe('App', () => {
 	it('renders hello message in the browser', async () => {
 		await render(<App />);
-		await expect.element(page.getByText(/Hello from React!/i)).toBeVisible();
+		await expect.element(page.getByText(/Hello from React!/iu)).toBeVisible();
 	});
 });

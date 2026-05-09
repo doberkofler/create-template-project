@@ -57,9 +57,9 @@ describe('cli', () => {
 	it('should handle info command', async () => {
 		process.argv.push('info');
 		await expect(parseArgs()).rejects.toThrow('Process exited with code 0');
-		expect(p.intro).toHaveBeenCalled();
-		expect(p.note).toHaveBeenCalled();
-		expect(p.outro).toHaveBeenCalled();
+		expect(p.intro).toHaveBeenCalledWith('Template Information');
+		expect(p.note).toHaveBeenCalledWith(expect.any(String), expect.any(String));
+		expect(p.outro).toHaveBeenCalledWith('Use "create" to scaffold a new project.');
 	});
 
 	it('should handle info command with specific template', async () => {

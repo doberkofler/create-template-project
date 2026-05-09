@@ -40,10 +40,10 @@ describe('index', () => {
 
 		await main();
 
-		expect(p.intro).toHaveBeenCalled();
-		expect(parseArgs).toHaveBeenCalled();
+		expect(p.intro).toHaveBeenCalledWith('create-template-project');
+		expect(parseArgs).toHaveBeenCalledWith();
 		expect(generateProject).toHaveBeenCalledWith(opts);
-		expect(p.outro).toHaveBeenCalled();
+		expect(p.outro).toHaveBeenCalledWith('Done!');
 	});
 
 	it('should handle errors and exit', async () => {

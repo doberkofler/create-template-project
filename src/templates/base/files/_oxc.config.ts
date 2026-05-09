@@ -65,6 +65,10 @@ export const linter = defineConfig({
 		'eslint/sort-imports': 'off',
 		'eslint/sort-keys': 'off',
 		'eslint/no-ternary': 'off',
+		'eslint/no-void': ['error', {allowAsStatement: true}],
+		'typescript/consistent-type-definitions': ['error', 'type'],
+		'typescript/dot-notation': ['error', {allowPattern: '^[a-zA-Z]+(_[a-zA-Z]+)+$'}],
+		'typescript/no-import-type-side-effects': 'off',
 		'typescript/no-unused-vars': [
 			'error',
 			{
@@ -72,8 +76,6 @@ export const linter = defineConfig({
 				argsIgnorePattern: '^_',
 			},
 		],
-		'typescript/consistent-type-definitions': ['error', 'type'],
-		'typescript/no-import-type-side-effects': 'off',
 		'typescript/prefer-readonly-parameter-types': 'off',
 		'import/consistent-type-specifier-style': ['error', 'prefer-inline'],
 		'import/exports-last': 'off',
@@ -151,6 +153,7 @@ export const linter = defineConfig({
 		'unicorn/no-array-sort': 'off', // TODO: consider enabling
 		'unicorn/no-hex-escape': 'off',
 		'unicorn/no-immediate-mutation': 'off',
+		'unicorn/no-negated-condition': 'off',
 		'unicorn/no-nested-ternary': 'off',
 		'unicorn/no-null': 'off', // TODO: consider enabling
 		'unicorn/no-process-exit': 'off', // TODO: consider enabling
@@ -165,8 +168,10 @@ export const linter = defineConfig({
 		'vitest/no-importing-vitest-globals': 'off',
 		'vitest/prefer-describe-function-title': 'off',
 		'vitest/prefer-expect-assertions': 'off',
+		'vitest/prefer-lowercase-title': 'off',
 		'vitest/prefer-to-be-falsy': 'off', // NOTE: Pick strictness: keep prefer-strict-boolean-matchers, disable truthy/falsy rules.
 		'vitest/prefer-to-be-truthy': 'off', // NOTE: Pick strictness: keep prefer-strict-boolean-matchers, disable truthy/falsy rules.
+		'vitest/require-hook': 'off',
 		'vitest/require-test-timeout': 'off',
 	},
 	overrides: [

@@ -111,7 +111,7 @@ const main = async (): Promise<void> => {
 	const updatesRaw = await Promise.all(
 		packageNames.map(async (pkg): Promise<DependencyUpdate | null> => {
 			const currentVersionStr = dependencies[pkg].version;
-			const currentVersion = currentVersionStr.replace(/^[\^~]/, '');
+			const currentVersion = currentVersionStr.replace(/^[\^~]/u, '');
 
 			const latestInfo = await getLatestVersionInfo(pkg);
 			if (latestInfo === null || latestInfo.version === currentVersion) {

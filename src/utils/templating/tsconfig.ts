@@ -22,13 +22,13 @@ export const tsconfigProcessor: ContentProcessor = (content, {filePath, opts}) =
 	// Web-Fullstack/Web-Vanilla/Web-App tsconfig.json overrides
 	if (template === 'web-fullstack' || template === 'web-vanilla' || template === 'web-app') {
 		processed = processed.replace(
-			/\/\* Language and Environment \*\/[\s\S]*?\/\* Strict Type-Checking Options \*\//,
+			/\/\* Language and Environment \*\/[\s\S]*?\/\* Strict Type-Checking Options \*\//u,
 			`${WEB_ENV}\n\n\t\t/* Strict Type-Checking Options */`,
 		);
 	}
 
 	if (template === 'web-fullstack') {
-		processed = processed.replace(/"include":\s*\[\s*"src\/\*\*\/\*"\s*\]/, '"include": ["client/src/**/*", "server/src/**/*"]');
+		processed = processed.replace(/"include":\s*\[\s*"src\/\*\*\/\*"\s*\]/u, '"include": ["client/src/**/*", "server/src/**/*"]');
 	}
 
 	return processed;

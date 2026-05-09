@@ -36,8 +36,8 @@ export const githubWorkflowProcessor: ContentProcessor = (content, {filePath, op
 		.replaceAll('# [PLAYWRIGHT_SETUP]', playwrightSetup);
 
 	// Clean up empty lines from empty placeholders
-	processed = processed.replace(/^\s*# \[PM_SETUP\]\s*\n/m, '');
-	processed = processed.replace(/^\s*# \[PLAYWRIGHT_SETUP\]\s*\n/m, '');
+	processed = processed.replace(/^\s*# \[PM_SETUP\]\s*\n/mu, '');
+	processed = processed.replace(/^\s*# \[PLAYWRIGHT_SETUP\]\s*\n/mu, '');
 
 	return processed;
 };
