@@ -92,7 +92,7 @@ const getLatestVersionInfo = async (packageName: string): Promise<{version: stri
 const main = async (): Promise<void> => {
 	const args = process.argv.slice(2);
 	const updateMode = args.includes('--update');
-	let minReleaseAge = 3;
+	let minReleaseAge = 1;
 	const minAgeIndex = args.indexOf('--min-release-age');
 	if (minAgeIndex !== -1 && minAgeIndex + 1 < args.length) {
 		const parsed = Number.parseInt(args[minAgeIndex + 1], 10);
