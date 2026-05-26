@@ -1,19 +1,19 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.0.12",
+			"version": "8.0.14",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
-			"version": "6.0.1",
+			"version": "6.0.2",
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "4.1.6",
+			"version": "4.1.7",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "4.1.6",
+			"version": "4.1.7",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
@@ -37,11 +37,11 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "25.7.0",
+			"version": "25.9.1",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "4.1.6",
+			"version": "4.1.7",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -53,15 +53,15 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.64.0",
+			"version": "1.66.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "0.22.1",
+			"version": "0.23.0",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.49.0",
+			"version": "0.51.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -69,7 +69,7 @@
 			"description": "A superset of JavaScript that compiles to clean JavaScript output."
 		},
 		"vitest": {
-			"version": "4.1.6",
+			"version": "4.1.7",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
@@ -117,7 +117,7 @@
 			"description": "Styled components for Emotion."
 		},
 		"@types/react": {
-			"version": "19.2.14",
+			"version": "19.2.15",
 			"description": "TypeScript definitions for React."
 		},
 		"@types/react-dom": {
@@ -141,7 +141,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.100.10",
+			"version": "5.100.14",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
@@ -149,7 +149,7 @@
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
-			"version": "7.15.0",
+			"version": "7.15.1",
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
