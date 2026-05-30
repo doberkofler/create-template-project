@@ -25,11 +25,11 @@
 			"description": "A tiny JavaScript debugging utility modelled after Node.js core debugging technique."
 		},
 		"@commitlint/cli": {
-			"version": "21.0.1",
+			"version": "21.0.2",
 			"description": "Lint commit messages to ensure they follow conventional commits."
 		},
 		"@commitlint/config-conventional": {
-			"version": "21.0.1",
+			"version": "21.0.2",
 			"description": "Shareable commitlint config enforcing conventional commits."
 		},
 		"@types/debug": {
@@ -73,7 +73,7 @@
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
-			"version": "14.0.3",
+			"version": "15.0.0",
 			"description": "The complete solution for node.js command-line interfaces."
 		},
 		"cli-progress": {
@@ -149,7 +149,7 @@
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
-			"version": "7.15.1",
+			"version": "7.16.0",
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {

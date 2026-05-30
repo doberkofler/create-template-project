@@ -73,14 +73,14 @@
 	},
 	"dependencies": {
 		"@clack/prompts": "1.4.0",
-		"commander": "14.0.3",
+		"commander": "15.0.0",
 		"debug": "4.4.3",
 		"execa": "9.6.1",
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@commitlint/cli": "21.0.1",
-		"@commitlint/config-conventional": "21.0.1",
+		"@commitlint/cli": "21.0.2",
+		"@commitlint/config-conventional": "21.0.2",
 		"@types/cli-progress": "3.11.6",
 		"@types/debug": "4.1.13",
 		"@types/node": "25.9.1",
