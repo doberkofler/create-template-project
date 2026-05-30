@@ -72,7 +72,7 @@
 		"release": "release-it"
 	},
 	"dependencies": {
-		"@clack/prompts": "1.4.0",
+		"@clack/prompts": "1.5.0",
 		"commander": "15.0.0",
 		"debug": "4.4.3",
 		"execa": "9.6.1",
