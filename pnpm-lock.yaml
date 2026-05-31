@@ -64,8 +64,8 @@ importers:
         specifier: 0.23.0
         version: 0.23.0
       release-it:
-        specifier: 20.0.1
-        version: 20.0.1(@types/node@25.9.1)(magicast@0.5.2)
+        specifier: 20.2.0
+        version: 20.2.0(@types/node@25.9.1)(magicast@0.5.2)
       rimraf:
         specifier: 6.1.3
         version: 6.1.3
@@ -1931,8 +1931,8 @@ packages:
     resolution: {integrity: sha512-sZuz1dYW/ZsfG17WSAG7eS85r5a0dDsvg+7BiiYR5o6lKCAtUrEwdmRmaGF6rwVj3LcmAeYkOWKEPlbPzN3Y3A==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
 
-  release-it@20.0.1:
-    resolution: {integrity: sha512-3ob1P1aV+3+ZOoR7qgobfYyMlQbpitzOK09iKTtQ145vFi4rWxlRTgHwtVl8kokCvqiF/cJPxRlfcmZmF5aDJA==}
+  release-it@20.2.0:
+    resolution: {integrity: sha512-9ZTk9ripgctC6VTqH+P54KuboK29A5mG/I3tFfS5hnoAnkwtFFAMHRidYz93ylrW995vF50Ny1aOGJiyRmEN7w==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
     hasBin: true
 
@@ -3961,7 +3961,7 @@ snapshots:
       '@eslint-community/regexpp': 4.12.2
       refa: 0.12.1
 
-  release-it@20.0.1(@types/node@25.9.1)(magicast@0.5.2):
+  release-it@20.2.0(@types/node@25.9.1)(magicast@0.5.2):
     dependencies:
       '@inquirer/prompts': 8.4.2(@types/node@25.9.1)
       '@octokit/rest': 22.0.1
