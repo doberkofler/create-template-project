@@ -1,8 +1,7 @@
 /* eslint-disable import/no-relative-parent-imports */
 /* eslint-disable react/only-export-components */
 /* eslint-disable react/jsx-no-constructed-context-values */
-/* eslint-disable typescript/no-unnecessary-condition */
-import {createContext, useContext, useState, useEffect, type ReactNode} from 'react';
+import {createContext, useContext, useState, type ReactNode} from 'react';
 import {trpc} from '../trpc.js';
 
 type User = {
@@ -23,32 +22,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({children}: {children: ReactNode}): ReactNode => {
 	const [token, setToken] = useState(localStorage.getItem('token'));
-	const [user, setUser] = useState<User | null>(null);
+	const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
 	const {data: me, isLoading} = trpc.auth.me.useQuery(undefined, {
 		enabled: Boolean(token),
 		retry: false,
 	});
+	const user = me ?? loggedInUser;
 
 	const logout = (): void => {
 		localStorage.removeItem('token');
 		setToken(null);
-		setUser(null);
+		setLoggedInUser(null);
 	};
-
-	useEffect(() => {
-		if (me !== undefined && me !== null) {
-			setUser(me);
-		} else if (!isLoading && token !== null && token !== '') {
-			// Token might be invalid
-			logout();
-		}
-	}, [me, isLoading, token]);
 
 	const login = (newToken: string, newUser: User): void => {
 		localStorage.setItem('token', newToken);
 		setToken(newToken);
-		setUser(newUser);
+		setLoggedInUser(newUser);
 	};
 
 	return <AuthContext.Provider value={{user, token, isLoading, login, logout}}>{children}</AuthContext.Provider>;

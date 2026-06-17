@@ -7,8 +7,8 @@ test('has title', async ({page}) => {
 
 test('can login', async ({page}) => {
 	await page.goto('/login');
-	await page.fill('input[name="username"]', 'admin');
-	await page.fill('input[name="password"]', 'password');
+	await page.fill('input[type="email"]', 'demo@example.com');
+	await page.fill('input[type="password"]', 'password');
 	await page.click('button[type="submit"]');
-	await expect(page).toHaveURL('/');
+	await expect(page).toHaveURL('/dashboard');
 });

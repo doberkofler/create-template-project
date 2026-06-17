@@ -5,7 +5,7 @@ import {useAuth} from '../contexts/AuthContext.js';
 import {CircularProgress, Box} from '@mui/material';
 
 export const ProtectedRoute = (): ReactNode => {
-	const {token, isLoading} = useAuth();
+	const {token, user, isLoading} = useAuth();
 
 	if (isLoading) {
 		return (
@@ -15,7 +15,7 @@ export const ProtectedRoute = (): ReactNode => {
 		);
 	}
 
-	if (token === null || token === '') {
+	if (token === null || token === '' || user === null) {
 		return <Navigate to="/login" replace />;
 	}
 

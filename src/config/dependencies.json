@@ -9,15 +9,15 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "4.1.8",
+			"version": "4.1.9",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "4.1.8",
+			"version": "4.1.9",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
-			"version": "1.60.0",
+			"version": "1.61.0",
 			"description": "Framework for Web-browser automation."
 		},
 		"debug": {
@@ -37,11 +37,11 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "25.9.1",
+			"version": "25.9.3",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "4.1.8",
+			"version": "4.1.9",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -53,7 +53,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.68.0",
+			"version": "1.70.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -61,7 +61,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.53.0",
+			"version": "0.55.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -69,7 +69,7 @@
 			"description": "A superset of JavaScript that compiles to clean JavaScript output."
 		},
 		"vitest": {
-			"version": "4.1.8",
+			"version": "4.1.9",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
@@ -101,11 +101,11 @@
 			"description": "React package for working with the DOM."
 		},
 		"@mui/material": {
-			"version": "9.0.1",
+			"version": "9.1.1",
 			"description": "Material UI components."
 		},
 		"@mui/icons-material": {
-			"version": "9.0.1",
+			"version": "9.1.1",
 			"description": "Material Design icons distributed as SVG React components."
 		},
 		"@emotion/react": {
@@ -117,7 +117,7 @@
 			"description": "Styled components for Emotion."
 		},
 		"@types/react": {
-			"version": "19.2.16",
+			"version": "19.2.17",
 			"description": "TypeScript definitions for React."
 		},
 		"@types/react-dom": {
@@ -125,7 +125,7 @@
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
-			"version": "1.60.0",
+			"version": "1.61.0",
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
@@ -141,7 +141,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.100.14",
+			"version": "5.101.0",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
