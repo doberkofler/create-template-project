@@ -72,7 +72,7 @@
 		"release": "release-it"
 	},
 	"dependencies": {
-		"@clack/prompts": "1.5.1",
+		"@clack/prompts": "1.6.0",
 		"commander": "15.0.0",
 		"debug": "4.4.3",
 		"execa": "9.6.1",
@@ -83,7 +83,7 @@
 		"@commitlint/config-conventional": "21.0.2",
 		"@types/cli-progress": "3.11.6",
 		"@types/debug": "4.1.13",
-		"@types/node": "25.9.3",
+		"@types/node": "26.0.0",
 		"@vitest/coverage-v8": "4.1.9",
 		"conventional-changelog": "7.2.0",
 		"conventional-changelog-angular": "8.3.1",
