@@ -1,4 +1,13 @@
+## [1.5.10](https://github.com/doberkofler/create-template-project/compare/v1.5.9...v1.5.10) (2026-06-24)
+
+
+### Features
+
+* show template name as debug message ([731d22e](https://github.com/doberkofler/create-template-project/commit/731d22e542080b74e005253214779f28c9ea9228))
+
 ## [1.5.9](https://github.com/doberkofler/create-template-project/compare/v1.5.8...v1.5.9) (2026-06-22)
+
+## [1.5.8](https://github.com/doberkofler/create-template-project/compare/v1.5.7...v1.5.8) (2026-06-17)
 
 ## [1.5.7](https://github.com/doberkofler/create-template-project/compare/v1.5.6...v1.5.7) (2026-06-02)
 
