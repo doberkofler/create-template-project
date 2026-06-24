@@ -44,6 +44,9 @@ export const main = async (): Promise<void> => {
 			intro('create-template-project');
 		}
 
+		debug('*'.repeat(60));
+		debug(`* TEMPLATE: ${options.template}`);
+		debug('*'.repeat(60));
 		debug('Arguments parsed: %O', options);
 		debug('Generating project');
 		await generateProject(options);
