@@ -135,6 +135,10 @@ export const linter = defineConfig({
 		'jest/valid-describe-callback': 'off',
 		'jest/valid-expect': 'off',
 		'jest/valid-title': 'off',
+		'jsdoc/require-param': 'error',
+		'jsdoc/require-param-type': 'off',
+		'jsdoc/require-returns': 'warn',
+		'jsdoc/require-returns-type': 'off',
 		'oxc/no-async-await': 'off',
 		'oxc/no-map-spread': 'off', // TODO: consider enabling
 		'oxc/no-optional-chaining': 'off',
