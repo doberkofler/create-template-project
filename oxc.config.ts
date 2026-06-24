@@ -151,6 +151,7 @@ export const linter = defineConfig({
 		'unicorn/no-process-exit': 'off', // TODO: consider enabling
 		'unicorn/no-typeof-undefined': 'off', // TODO: consider enabling
 		'unicorn/prefer-module': 'off', // TODO: consider enabling
+		'unicorn/prefer-number-coercion': 'off', // TODO: consider enabling
 		'vitest/max-expects': 'off',
 		'vitest/no-conditional-in-test': 'off',
 		'vitest/no-hooks': 'off',

@@ -45,7 +45,7 @@
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
-			"version": "7.2.0",
+			"version": "7.2.1",
 			"description": "Generate a changelog from git metadata."
 		},
 		"husky": {
@@ -53,7 +53,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.70.0",
+			"version": "1.71.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -61,7 +61,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.55.0",
+			"version": "0.56.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {

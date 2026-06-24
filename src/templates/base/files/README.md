@@ -42,7 +42,7 @@ This project is built using **Vite 8** for high-performance development and bund
 - **Vite 8**: Modern, ultra-fast development and build tool.
 - **Vitest**: Vite-native testing framework with browser support.
 - **Playwright**: Reliable E2E and browser automation.
-- **oxlint**: Extremely fast JavaScript/TypeScript linter.
-- **oxfmt**: High performance JavaScript / TypeScript formatter.
+- **oxlint**: Extremely fast JavaScript/TypeScript linter. Default rules live in `oxc.config.ts` (managed); customize overrides in `oxlint.config.ts`.
+- **oxfmt**: High performance JavaScript / TypeScript formatter. Default settings live in `oxc.config.ts` (managed); customize overrides in `oxfmt.config.ts`.
 - **Husky & Commitlint**: Ensuring high-quality commit messages.
 - **Conventional Changelog**: Automated changelog generation.
