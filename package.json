@@ -79,8 +79,8 @@
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@commitlint/cli": "21.0.2",
-		"@commitlint/config-conventional": "21.0.2",
+		"@commitlint/cli": "21.1.0",
+		"@commitlint/config-conventional": "21.1.0",
 		"@types/cli-progress": "3.11.6",
 		"@types/debug": "4.1.13",
 		"@types/node": "26.0.0",
@@ -95,7 +95,7 @@
 		"release-it": "20.2.0",
 		"rimraf": "6.1.3",
 		"typescript": "6.0.3",
-		"vite": "8.0.16",
+		"vite": "8.1.0",
 		"vitest": "4.1.9"
 	},
 	"engines": {
