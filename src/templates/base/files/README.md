@@ -45,4 +45,4 @@ This project is built using **Vite 8** for high-performance development and bund
 - **oxlint**: Extremely fast JavaScript/TypeScript linter. Default rules live in `oxc.config.ts` (managed); customize overrides in `oxlint.config.ts`.
 - **oxfmt**: High performance JavaScript / TypeScript formatter. Default settings live in `oxc.config.ts` (managed); customize overrides in `oxfmt.config.ts`.
 - **Husky & Commitlint**: Ensuring high-quality commit messages.
-- **Conventional Changelog**: Automated changelog generation.
+- **Conventional Changelog**: Automated changelog generation with the Angular preset.

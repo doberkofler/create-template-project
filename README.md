@@ -20,7 +20,7 @@ pnpm dlx create-template-project interactive
 
 ## ✨ Features
 
-- **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `oxfmt`, and `typescript` (strict mode).
+- **Modern Tech Stack:** All templates come with `commitlint`, `husky`, `vitest`, `oxlint`, `oxfmt`, `conventional-changelog` with the Angular preset, and `typescript` (strict mode).
 - **Enhanced Oxlint Setup:** Linting is driven by a shared, type-aware Oxlint configuration (`oxc.config.ts` + `oxlint.config.ts`) so template updates keep rule behavior consistent.
 - **Interactive CLI:** Prompts you for project details if CLI arguments are missing, using `@clack/prompts`.
 - **🔄 Update Mode:** Detects existing projects and offers a safe update path.

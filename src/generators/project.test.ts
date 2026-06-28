@@ -121,6 +121,8 @@ describe('generateProject', () => {
 		expect(pkg.author).toBe('Test Author');
 		expect(pkg.bin).toBe('./dist/index.js');
 		expect(pkg.dependencies).toHaveProperty('commander');
+		expect(pkg.devDependencies).toHaveProperty('conventional-changelog');
+		expect(pkg.devDependencies).toHaveProperty('conventional-changelog-angular');
 		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
 
 		// Verify index.ts has hashbang
@@ -227,6 +229,8 @@ describe('generateProject', () => {
 		expect(pkg.dependencies).toHaveProperty('@mui/icons-material');
 		expect(pkg.dependencies).toHaveProperty('@trpc/react-query');
 		expect(pkg.dependencies).not.toHaveProperty('@trpc/tanstack-react-query');
+		expect(pkg.devDependencies).toHaveProperty('conventional-changelog');
+		expect(pkg.devDependencies).toHaveProperty('conventional-changelog-angular');
 		expect(pkg.workspaces).toContain('client');
 		expect(pkg.workspaces).toContain('server');
 		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');

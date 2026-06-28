@@ -48,6 +48,10 @@
 			"version": "7.2.1",
 			"description": "Generate a changelog from git metadata."
 		},
+		"conventional-changelog-angular": {
+			"version": "8.3.1",
+			"description": "Angular preset for conventional-changelog."
+		},
 		"husky": {
 			"version": "9.1.7",
 			"description": "Modern native git hooks made easy."

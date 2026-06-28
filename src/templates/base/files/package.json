@@ -24,6 +24,7 @@
 		"@types/node": "",
 		"@vitest/coverage-v8": "",
 		"conventional-changelog": "",
+		"conventional-changelog-angular": "",
 		"husky": "",
 		"oxlint": "",
 		"oxlint-tsgolint": "",

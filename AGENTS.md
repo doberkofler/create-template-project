@@ -84,7 +84,7 @@ Every generated project MUST include:
 - `commitlint`: For standardized commit messages.
 - `debug`: For structured logging.
 - `vitest` with coverage: For modern, fast testing.
-- `conventional-changelog`: For automated release notes.
+- `conventional-changelog` and `conventional-changelog-angular`: For automated release notes using the Angular preset.
 - `husky`: For git hooks (pre-commit linting).
 - `oxlint` & `oxlint-tsgolint`: For ultra-fast linting.
 - `oxfmt`: For consistent formatting.

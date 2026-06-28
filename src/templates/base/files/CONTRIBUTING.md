@@ -30,7 +30,7 @@ pnpm release -- patch   # or minor / major
 This will automatically:
 1. Run the CI suite (`pnpm run ci`).
 2. Bump the version in `package.json`.
-3. Update the `CHANGELOG.md`.
+3. Update the `CHANGELOG.md` using `conventional-changelog` with the Angular preset.
 4. Commit, tag, and push the changes.
 5. Create a GitHub release with auto-generated notes.
 6. Publish to npm (if configured).
@@ -39,4 +39,3 @@ This will automatically:
 1. Set `"private": false` in `package.json`.
 2. Set `"publish": true` in `.release-it.json`.
 3. Ensure you have the necessary `NPM_TOKEN` configured.
-
