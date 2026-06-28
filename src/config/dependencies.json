@@ -45,11 +45,11 @@
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
-			"version": "7.2.1",
+			"version": "8.0.0",
 			"description": "Generate a changelog from git metadata."
 		},
 		"conventional-changelog-angular": {
-			"version": "8.3.1",
+			"version": "9.1.0",
 			"description": "Angular preset for conventional-changelog."
 		},
 		"husky": {
