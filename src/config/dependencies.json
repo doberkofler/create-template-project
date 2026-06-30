@@ -49,7 +49,7 @@
 			"description": "Generate a changelog from git metadata."
 		},
 		"conventional-changelog-angular": {
-			"version": "9.1.0",
+			"version": "9.2.0",
 			"description": "Angular preset for conventional-changelog."
 		},
 		"husky": {
@@ -145,7 +145,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.101.1",
+			"version": "5.101.2",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
