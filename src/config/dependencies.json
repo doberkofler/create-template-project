@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.71.0",
+			"version": "1.72.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.56.0",
+			"version": "0.57.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -153,7 +153,7 @@
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
-			"version": "7.18.0",
+			"version": "7.18.1",
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
