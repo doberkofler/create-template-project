@@ -9,6 +9,8 @@ import {getProjectTemplates} from '#templates/registry.js';
 
 const debug = debugLib('create-template-project:generator');
 const moduleDir = import.meta.dirname;
+const PNPM_PACKAGE_MANAGER_VERSION = 'pnpm@11.13.0';
+const PNPM_NPMRC_CONTENT = 'resolution-mode=highest\nnode-linker=hoisted\n';
 
 const pathExists = async (filePath: string): Promise<boolean> => {
 	try {
@@ -138,6 +140,7 @@ type PackageJsonShape = {
 	scripts: Record<string, string>;
 	dependencies: Record<string, string>;
 	devDependencies: Record<string, string>;
+	packageManager?: string;
 	workspaces?: string[];
 };
 
@@ -597,6 +600,31 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 
 	// Apply final programmatic overrides
 	const pm = opts.packageManager;
+	if (pm === 'pnpm') {
+		finalPkg.packageManager = PNPM_PACKAGE_MANAGER_VERSION;
+	}
+
+	const npmrcPath = path.join(projectDir, '.npmrc');
+	const npmrcExists = await pathExists(npmrcPath);
+
+	if (isUpdate && npmrcExists) {
+		actions.push({
+			type: 'SKIP',
+			path: '.npmrc',
+			reason: 'Existing package manager configuration - preserved on update',
+		});
+	} else if (!npmrcExists) {
+		const npmrcContent = pm === 'pnpm' ? PNPM_NPMRC_CONTENT : '';
+		plannedDiffs.push({path: '.npmrc', before: '', after: npmrcContent});
+		actions.push({
+			type: 'ADD',
+			path: '.npmrc',
+			reason: 'Initial package manager configuration',
+		});
+		pendingOperations.push(async () => {
+			await fs.writeFile(npmrcPath, npmrcContent);
+		});
+	}
 
 	if (pm === 'pnpm' && finalPkg.workspaces) {
 		debug('Creating pnpm-workspace.yaml');
@@ -745,8 +773,9 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		const s = spinner();
 		s.start(`Installing dependencies using ${pm}...`);
 		try {
-			debug('Executing: %s install', pm);
-			await execa(pm, ['install'], {
+			const installArgs = pm === 'pnpm' ? ['install', '--config.resolution-mode=highest', '--config.node-linker=hoisted'] : ['install'];
+			debug('Executing: %s %s', pm, installArgs.join(' '));
+			await execa(pm, installArgs, {
 				cwd: projectDir,
 				stdio,
 				preferLocal: true,

@@ -49,6 +49,7 @@ const packageJsonSchema = z
 		author: z.string().optional(),
 		bin: z.string().optional(),
 		version: z.string().optional(),
+		packageManager: z.string().optional(),
 		scripts: z.record(z.string(), z.string()).default({}),
 		dependencies: z.record(z.string(), z.unknown()).default({}),
 		workspaces: z.array(z.string()).optional(),
@@ -290,6 +291,7 @@ describe('generateProject', () => {
 		// Verify package.json does NOT have workspaces
 		const pkg = await readPackageJson(projectPath);
 		expect(pkg.workspaces).toBeUndefined();
+		expect(pkg.packageManager).toBe('pnpm@11.13.0');
 
 		// Verify pnpm-workspace.yaml exists
 		const workspaceYaml = await fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8');
@@ -303,6 +305,72 @@ describe('generateProject', () => {
 		// Verify scripts are updated
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
 		expect(pkg.scripts.dev).toBe('pnpm -r run dev');
+	});
+
+	it('should create .npmrc for pnpm projects', async () => {
+		const projectName = 'test-pnpm-npmrc';
+		const projectPath = path.join(tmpDir, projectName);
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			packageManager: 'pnpm',
+			directory: projectPath,
+			update: false,
+		});
+
+		await generateProject(opts);
+
+		const pkg = await readPackageJson(projectPath);
+		expect(pkg.packageManager).toBe('pnpm@11.13.0');
+		await expect(fs.readFile(path.join(projectPath, '.npmrc'), 'utf8')).resolves.toBe('resolution-mode=highest\nnode-linker=hoisted\n');
+	});
+
+	it('should create empty .npmrc for non-pnpm projects', async () => {
+		const packageManagers = ['npm', 'yarn'] as const;
+
+		await Promise.all(
+			packageManagers.map(async (packageManager) => {
+				const projectName = `test-no-npmrc-${packageManager}`;
+				const projectPath = path.join(tmpDir, projectName);
+				const opts = createProjectOptions({
+					template: 'cli',
+					projectName,
+					packageManager,
+					directory: projectPath,
+					update: false,
+				});
+
+				await generateProject(opts);
+
+				await expect(fs.readFile(path.join(projectPath, '.npmrc'), 'utf8')).resolves.toBe('');
+			}),
+		);
+	});
+
+	it('should preserve existing .npmrc for pnpm projects on update', async () => {
+		const projectName = 'test-preserve-pnpm-npmrc';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(path.join(projectPath, '.npmrc'), 'strict-peer-dependencies=false\n');
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			packageManager: 'pnpm',
+			directory: projectPath,
+			update: true,
+			progress: false,
+		});
+
+		await generateProject(opts);
+
+		await expect(fs.readFile(path.join(projectPath, '.npmrc'), 'utf8')).resolves.toBe('strict-peer-dependencies=false\n');
 	});
 
 	it('should handle --update flag', async () => {
@@ -551,6 +619,23 @@ describe('generateProject', () => {
 		});
 		await expect(generateProject(opts)).rejects.toThrow(/Failed to install dependencies:?/u);
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('inst fail'));
+	});
+
+	it('should install pnpm projects with registry metadata compatibility config', async () => {
+		const projectName = 'test-pnpm-install-config';
+		const projectPath = path.join(tmpDir, projectName);
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			packageManager: 'pnpm',
+			directory: projectPath,
+			update: false,
+			build: true,
+		});
+
+		await generateProject(opts);
+
+		expect(execa).toHaveBeenCalledWith('pnpm', ['install', '--config.resolution-mode=highest', '--config.node-linker=hoisted'], expect.anything());
 	});
 
 	it('should handle format failure', async () => {
