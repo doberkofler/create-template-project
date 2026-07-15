@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.73.0",
+			"version": "1.74.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.57.0",
+			"version": "0.59.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
