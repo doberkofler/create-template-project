@@ -29,7 +29,7 @@ vi.mock('debug', async (importOriginal) => {
 
 vi.mock(import('@clack/prompts'), async (importOriginal) => {
 	const {createPromptsMock} = await import('./test/mocks.js');
-	return createPromptsMock(importOriginal as () => Promise<Record<string, unknown>>);
+	return createPromptsMock(importOriginal);
 });
 
 vi.mock(import('./generators/info.js'), async () => {

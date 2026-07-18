@@ -572,7 +572,7 @@ Restrictions & Behavior:
 	try {
 		await program.parseAsync(process.argv);
 	} catch (error: unknown) {
-		const code = typeof error === 'object' && error !== null && 'code' in error ? String((error as {code: unknown}).code) : '';
+		const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
 		if (code === 'commander.helpDisplayed' || code === 'commander.version' || code === 'PROCESS_EXIT_0') {
 			process.exit(0);
 		}

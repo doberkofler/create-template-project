@@ -10,7 +10,7 @@ vi.mock(import('./cli.js'));
 vi.mock(import('./generators/project.js'));
 vi.mock(import('@clack/prompts'), async (importOriginal) => {
 	const {createPromptsMock} = await import('./test/mocks.js');
-	return createPromptsMock(importOriginal as () => Promise<Record<string, unknown>>);
+	return createPromptsMock(importOriginal);
 });
 
 describe('index', () => {

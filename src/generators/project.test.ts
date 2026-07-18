@@ -80,14 +80,14 @@ const spinnerMock: ReturnType<typeof p.spinner> = {
 vi.mock(import('execa'));
 vi.mock(import('@clack/prompts'), async (importOriginal) => {
 	const {createPromptsMock} = await import('./test-mocks.js');
-	return createPromptsMock(importOriginal as () => Promise<Record<string, unknown>>);
+	return createPromptsMock(importOriginal);
 });
 
 vi.mock(import('#templates/base/index.js'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
-		getBaseTemplate: vi.fn<(opts: ProjectOptions) => TemplateDefinition>(actual.getBaseTemplate as (opts: ProjectOptions) => TemplateDefinition),
+		getBaseTemplate: vi.fn<(opts: ProjectOptions) => TemplateDefinition>(actual.getBaseTemplate),
 	};
 });
 

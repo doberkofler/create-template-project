@@ -23,7 +23,7 @@ const getOpts = (projectName: string, directory: string, update = false): Projec
 vi.mock(import('execa'));
 vi.mock(import('@clack/prompts'), async (importOriginal) => {
 	const {createPromptsMock} = await import('./test-mocks.js');
-	const promptModuleMock = await createPromptsMock(importOriginal as () => Promise<Record<string, unknown>>);
+	const promptModuleMock = await createPromptsMock(importOriginal);
 	return promptModuleMock;
 });
 
