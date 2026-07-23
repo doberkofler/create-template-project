@@ -181,6 +181,7 @@ export const linter = defineConfig({
 		'unicorn/no-typeof-undefined': 'off', // TODO: consider enabling
 		'unicorn/prefer-module': 'off', // TODO: consider enabling
 		'unicorn/prefer-number-coercion': 'off', // TODO: consider enabling
+		'react/function-component-definition': 'off', // TODO: consider enabling
 		'react/jsx-filename-extension': ['error', {extensions: ['.tsx']}],
 		'react/jsx-max-depth': ['error', {max: 5}],
 		'react/jsx-no-literals': 'off',

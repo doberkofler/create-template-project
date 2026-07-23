@@ -5,7 +5,7 @@
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
-			"version": "6.0.3",
+			"version": "6.0.4",
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
@@ -57,15 +57,15 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.74.0",
+			"version": "1.75.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "0.25.0",
+			"version": "7.0.2001",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.59.0",
+			"version": "0.60.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -97,11 +97,11 @@
 			"description": "TypeScript definitions for Express."
 		},
 		"react": {
-			"version": "19.2.7",
+			"version": "19.2.8",
 			"description": "A JavaScript library for building user interfaces."
 		},
 		"react-dom": {
-			"version": "19.2.7",
+			"version": "19.2.8",
 			"description": "React package for working with the DOM."
 		},
 		"@mui/material": {
@@ -145,7 +145,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.101.2",
+			"version": "5.101.4",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
