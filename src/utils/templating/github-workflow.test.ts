@@ -36,7 +36,7 @@ describe('github workflow processor', () => {
 		const content = '# [PM_SETUP]';
 		const opts = {...baseOpts, packageManager: 'pnpm' as const};
 		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/node.js.yml', opts, addedDeps: []});
-		expect(processed).toContain('uses: pnpm/action-setup@v4');
+		expect(processed).toContain('uses: pnpm/action-setup@v6.0.9');
 	});
 
 	it('should remove PM_SETUP if not pnpm', () => {

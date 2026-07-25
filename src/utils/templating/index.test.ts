@@ -22,7 +22,7 @@ describe('templating orchestrator', () => {
 		const processed = processContent('.github/workflows/node.js.yml', content, opts, []);
 
 		expect(processed).toContain('Project: test-project');
-		expect(processed).toContain('uses: pnpm/action-setup@v4');
+		expect(processed).toContain('uses: pnpm/action-setup@v6.0.9');
 	});
 
 	it('should handle generic replacements correctly', () => {

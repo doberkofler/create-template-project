@@ -291,7 +291,7 @@ describe('generateProject', () => {
 		// Verify package.json does NOT have workspaces
 		const pkg = await readPackageJson(projectPath);
 		expect(pkg.workspaces).toBeUndefined();
-		expect(pkg.packageManager).toBe('pnpm@11.13.0');
+		expect(pkg.packageManager).toBe('pnpm@11.16.0');
 
 		// Verify pnpm-workspace.yaml exists
 		const workspaceYaml = await fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8');
@@ -321,7 +321,7 @@ describe('generateProject', () => {
 		await generateProject(opts);
 
 		const pkg = await readPackageJson(projectPath);
-		expect(pkg.packageManager).toBe('pnpm@11.13.0');
+		expect(pkg.packageManager).toBe('pnpm@11.16.0');
 		await expect(fs.readFile(path.join(projectPath, '.npmrc'), 'utf8')).resolves.toBe('resolution-mode=highest\nnode-linker=hoisted\n');
 	});
 

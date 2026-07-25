@@ -9,7 +9,7 @@ import {getProjectTemplates} from '#templates/registry.js';
 
 const debug = debugLib('create-template-project:generator');
 const moduleDir = import.meta.dirname;
-const PNPM_PACKAGE_MANAGER_VERSION = 'pnpm@11.13.0';
+const PNPM_PACKAGE_MANAGER_VERSION = 'pnpm@11.16.0';
 const PNPM_NPMRC_CONTENT = 'resolution-mode=highest\nnode-linker=hoisted\n';
 
 const pathExists = async (filePath: string): Promise<boolean> => {

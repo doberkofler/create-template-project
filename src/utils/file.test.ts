@@ -143,10 +143,10 @@ describe('file utils', () => {
 		it('should handle GitHub Actions workflow generation for web-fullstack with pnpm', () => {
 			const content = `
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       # [PM_SETUP]
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: '22.x'
           cache: "{{packageManager}}"
@@ -156,7 +156,7 @@ describe('file utils', () => {
 `;
 			const optsFullstack: ProjectOptions = {...opts, template: 'web-fullstack', packageManager: 'pnpm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsFullstack, []);
-			expect(processed).toContain('uses: pnpm/action-setup@v4');
+			expect(processed).toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).toContain('cache: "pnpm"');
 			expect(processed).toContain('run: "pnpm install --frozen-lockfile"');
 			expect(processed).toContain('name: Install Playwright Browsers & Deps');
@@ -166,10 +166,10 @@ describe('file utils', () => {
 		it('should handle GitHub Actions workflow generation for cli with npm from generic workflow template', () => {
 			const content = `
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       # [PM_SETUP]
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: ' ESNext'
           cache: "{{packageManager}}"
@@ -179,7 +179,7 @@ describe('file utils', () => {
 `;
 			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
-			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).not.toContain('# [PM_SETUP]');
 			expect(processed).toContain('cache: "npm"');
 			expect(processed).toContain('run: "npm ci"');
@@ -191,10 +191,10 @@ describe('file utils', () => {
 		it('should handle GitHub Actions workflow generation for web-app with yarn', () => {
 			const content = `
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       # [PM_SETUP]
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: '22.x'
           cache: "{{packageManager}}"
@@ -204,7 +204,7 @@ describe('file utils', () => {
 `;
 			const optsWebApp: ProjectOptions = {...opts, template: 'web-app', packageManager: 'yarn'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsWebApp, []);
-			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).toContain('cache: "yarn"');
 			expect(processed).toContain('run: "yarn install --frozen-lockfile"');
 			expect(processed).toContain('name: Install Playwright Browsers & Deps');
@@ -214,10 +214,10 @@ describe('file utils', () => {
 		it('should handle GitHub Actions workflow generation for cli with npm (without pnpm setup block)', () => {
 			const content = `
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       # [PM_SETUP]
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: '22.x'
           cache: "{{packageManager}}"
@@ -227,7 +227,7 @@ describe('file utils', () => {
 `;
 			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
-			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).not.toContain('# [PM_SETUP]');
 			expect(processed).toContain('cache: "npm"');
 			expect(processed).toContain('run: "npm ci"');
@@ -239,10 +239,10 @@ describe('file utils', () => {
 		it('should handle GitHub Actions workflow generation for cli with npm and strip Playwright block', () => {
 			const content = `
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       # [PM_SETUP]
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: '22.x'
           cache: "{{packageManager}}"
@@ -252,7 +252,7 @@ describe('file utils', () => {
 `;
 			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
 			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
-			expect(processed).not.toContain('uses: pnpm/action-setup@v4');
+			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).not.toContain('# [PM_SETUP]');
 			expect(processed).toContain('cache: "npm"');
 			expect(processed).toContain('run: "npm ci"');
