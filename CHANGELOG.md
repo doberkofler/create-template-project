@@ -1,3 +1,5 @@
+## [1.5.24](https://github.com/doberkofler/create-template-project/compare/v1.5.23...v1.5.24) (2026-07-26)
+
 ## [1.5.23](https://github.com/doberkofler/create-template-project/compare/v1.5.22...v1.5.23) (2026-07-25)
 
 ## [1.5.22](https://github.com/doberkofler/create-template-project/compare/v1.5.21...v1.5.22) (2026-07-25)
