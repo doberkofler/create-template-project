@@ -17,7 +17,7 @@
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
-			"version": "1.61.1",
+			"version": "1.62.0",
 			"description": "Framework for Web-browser automation."
 		},
 		"debug": {
@@ -129,7 +129,7 @@
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
-			"version": "1.61.1",
+			"version": "1.62.0",
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
@@ -157,7 +157,7 @@
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
-			"version": "20.2.1",
+			"version": "21.0.0",
 			"description": "Interactive release-tool for Git repositories."
 		},
 		"cors": {
