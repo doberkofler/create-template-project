@@ -76,7 +76,8 @@ const isFileRequired = (relativePath: string, type: string): boolean => {
 	return true;
 };
 
-const isCustomConfigFile = (relativePath: string): boolean => relativePath === 'oxlint.config.ts' || relativePath === 'oxfmt.config.ts';
+const isCustomConfigFile = (relativePath: string): boolean =>
+	relativePath === 'oxlint.config.ts' || relativePath === 'oxfmt.config.ts' || relativePath === 'stylelint.config.js';
 
 type Action = {
 	type: 'ADD' | 'MODIFY' | 'MERGE' | 'CONFLICT' | 'SKIP' | 'DELETE' | 'UPDATED';
@@ -567,8 +568,8 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 					targetPath = path.join(projectDir, relativePath);
 				}
 
-				// Custom config files (oxlint.config.ts, oxfmt.config.ts): preserved on update
-				if (isUpdate && (relativePath === 'oxlint.config.ts' || relativePath === 'oxfmt.config.ts')) {
+				// Custom config files: preserved on update
+				if (isUpdate && isCustomConfigFile(relativePath)) {
 					actions.push({
 						type: 'SKIP',
 						path: relativePath,

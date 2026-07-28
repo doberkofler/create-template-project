@@ -1330,4 +1330,44 @@ describe('generateProject', () => {
 		const content = await fs.readFile(path.join(projectPath, 'oxfmt.config.ts'), 'utf8');
 		expect(content).toBe('user custom config');
 	});
+
+	it('should preserve physical stylelint.config.js on update', async () => {
+		const projectName = 'test-skip-stylelint';
+		const projectPath = path.join(tmpDir, projectName);
+		const templatePath = path.join(tmpDir, `${projectName}-template`);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.mkdir(templatePath, {recursive: true});
+		await fs.writeFile(path.join(projectPath, 'stylelint.config.js'), 'user custom config');
+		await fs.writeFile(path.join(templatePath, 'stylelint.config.js'), 'template config override');
+
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				dependencies: {},
+				devDependencies: {},
+				scripts: {},
+				files: [],
+				templateDir: templatePath,
+			}),
+		);
+
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+		const opts = createProjectOptions({
+			template: 'cli',
+			projectName,
+			directory: projectPath,
+			update: true,
+			progress: false,
+		});
+
+		await generateProject(opts);
+		const content = await fs.readFile(path.join(projectPath, 'stylelint.config.js'), 'utf8');
+		expect(content).toBe('user custom config');
+	});
 });
