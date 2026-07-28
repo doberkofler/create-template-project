@@ -71,7 +71,7 @@ const getSpinner = (progress: boolean): {start: (msg: string) => void; stop: (ms
 
 const isFileRequired = (relativePath: string, type: string): boolean => {
 	if (relativePath === 'vitest.config.ts') {
-		return !['cli', 'web-vanilla', 'web-app', 'web-fullstack'].includes(type);
+		return !['cli', 'web-vanilla', 'web-widget', 'web-app', 'web-fullstack'].includes(type);
 	}
 	return true;
 };
@@ -140,6 +140,7 @@ type PackageJsonShape = {
 	scripts: Record<string, string>;
 	dependencies: Record<string, string>;
 	devDependencies: Record<string, string>;
+	peerDependencies?: Record<string, string>;
 	packageManager?: string;
 	workspaces?: string[];
 };
@@ -168,7 +169,7 @@ let generateGeneratedMd: (
 ) => Promise<void>;
 
 const isTemplateType = (value: string): value is ProjectOptions['template'] =>
-	value === 'cli' || value === 'web-vanilla' || value === 'web-app' || value === 'web-fullstack';
+	value === 'cli' || value === 'web-vanilla' || value === 'web-widget' || value === 'web-app' || value === 'web-fullstack';
 
 const getMissingProjectConfigMessage = (pkgPath: string): string =>
 	[
@@ -286,7 +287,10 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 	const addedDeps: {name: string; description: string}[] = [];
 
 	const resolveDeps = (deps: Record<string, string> = {}): void => {
-		for (const dep of Object.keys(deps)) {
+		for (const [dep, version] of Object.entries(deps)) {
+			if (version.length > 0 && version !== dep) {
+				continue;
+			}
 			if (Object.hasOwn(depConfig.dependencies, dep)) {
 				const config = depConfig.dependencies[dep];
 				deps[dep] = config.version;
@@ -1115,6 +1119,22 @@ getTemplateArchitectureSection = (template: string): string[] => {
 				'### How to Enhance',
 				'- Add new UI logic or Web Components inside the `src/` directory.',
 				'- Create styling (`.css` or `.scss`) and import them directly into `main.ts`.',
+			];
+		}
+		case 'web-widget': {
+			return [
+				'## 🏗️ Web Widget Architecture',
+				'A publishable native TypeScript widget package with a Vite-powered demo site.',
+				'',
+				'### Source Files Generated',
+				'- **`src/lib/`**: The public widget implementation, exports, and optional React adapter subpath.',
+				'- **`src/styles/widget.css`**: The exported widget stylesheet and design tokens.',
+				'- **`src/demo/`**: The demo application used by Vite, Playwright, and screenshot generation.',
+				'',
+				'### How to Enhance',
+				'- Keep reusable package logic in `src/lib/` and demo-only behavior in `src/demo/`.',
+				'- Update `tsdown.config.ts` and `package.json` exports together when adding public entry points.',
+				'- Run `pnpm run docs:api` and `pnpm run screenshot` before publishing visible API or demo changes.',
 			];
 		}
 		case 'web-app': {

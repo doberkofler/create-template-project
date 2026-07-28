@@ -9,9 +9,16 @@ import {processContent as processContentInternal} from '#templating/index.js';
 const debug = debugLib('create-template-project:utils:file');
 
 type MergeablePackageJson = {
+	private?: boolean;
+	files?: string[];
+	main?: string;
+	module?: string;
+	types?: string;
+	exports?: Record<string, unknown>;
 	scripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
+	peerDependencies?: Record<string, string>;
 	workspaces?: string[];
 	bin?: string;
 };
@@ -54,6 +61,24 @@ export const processContent = (filePath: string, content: string, opts: ProjectO
 	processContentInternal(filePath, content, opts, addedDeps);
 
 export const mergePackageJson = (target: MergeablePackageJson, source: MergeablePackageJson): void => {
+	if (source.private !== undefined) {
+		target.private = source.private;
+	}
+	if (source.files !== undefined) {
+		target.files = source.files;
+	}
+	if (source.main !== undefined) {
+		target.main = source.main;
+	}
+	if (source.module !== undefined) {
+		target.module = source.module;
+	}
+	if (source.types !== undefined) {
+		target.types = source.types;
+	}
+	if (source.exports !== undefined) {
+		target.exports = source.exports;
+	}
 	if (source.scripts !== undefined) {
 		target.scripts = {...target.scripts, ...source.scripts};
 	}
@@ -64,6 +89,12 @@ export const mergePackageJson = (target: MergeablePackageJson, source: Mergeable
 		target.devDependencies = {
 			...target.devDependencies,
 			...source.devDependencies,
+		};
+	}
+	if (source.peerDependencies !== undefined) {
+		target.peerDependencies = {
+			...target.peerDependencies,
+			...source.peerDependencies,
 		};
 	}
 	if (source.workspaces !== undefined) {

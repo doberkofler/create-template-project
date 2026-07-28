@@ -152,7 +152,7 @@ const parseTemplateOption = (template: string | undefined): ProjectOptions['temp
 	const templateInput = stripQuotes(template);
 	const templateResult = TemplateTypeSchema.safeParse(templateInput);
 	if (!templateResult.success) {
-		p.log.error(`Invalid template type: ${template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
+		p.log.error(`Invalid template type: ${template}. Must be one of: cli, web-vanilla, web-widget, web-app, web-fullstack`);
 		process.exit(1);
 	}
 	return templateResult.data;
@@ -210,6 +210,7 @@ export const parseArgs = async (): Promise<ProjectOptions> => {
 Templates:
   cli            - Node.js CLI application with commander and cli-progress.
   web-vanilla    - Standalone web page (modern HTML/JS).
+  web-widget     - Publishable native TypeScript widget with demo, docs, and npm build.
   web-app        - React application with MUI and TanStack Query.
   web-fullstack  - Full-stack monorepo with Express server and React/MUI client.
 `,
@@ -220,7 +221,7 @@ Templates:
 	program
 		.command('info')
 		.description('Show detailed information about available templates and their components')
-		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-widget, web-app, web-fullstack)')
 		.action((opts: InfoCommandOptions) => {
 			debug('Executing "info" command with options: %O', opts);
 			p.intro('Template Information');
@@ -229,7 +230,7 @@ Templates:
 				const template = stripQuotes(opts.template);
 				const typeResult = TemplateTypeSchema.safeParse(template);
 				if (!typeResult.success) {
-					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
+					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-widget, web-app, web-fullstack`);
 					process.exit(1);
 				}
 				const info = getTemplateInfo(typeResult.data);
@@ -254,7 +255,7 @@ Templates:
 	program
 		.command('doctor')
 		.description('Check whether an existing project can be adopted for template updates')
-		.requiredOption('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.requiredOption('-t, --template <type>', 'Template type (cli, web-vanilla, web-widget, web-app, web-fullstack)')
 		.option('-d, --directory <path>', 'Project directory', '.')
 		.action(async (opts: CompatibilityCommandOptions) => {
 			debug('Executing "doctor" command with options: %O', opts);
@@ -277,7 +278,7 @@ Templates:
 	program
 		.command('adopt')
 		.description('Validate an existing project and add the create-template-project update marker')
-		.requiredOption('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.requiredOption('-t, --template <type>', 'Template type (cli, web-vanilla, web-widget, web-app, web-fullstack)')
 		.option('-d, --directory <path>', 'Project directory', '.')
 		.option('--yes', 'Adopt without confirmation', false)
 		.action(async (opts: CompatibilityCommandOptions & {yes?: boolean}) => {
@@ -312,7 +313,7 @@ Templates:
 	program
 		.command('create')
 		.description('Create a new project from a template')
-		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-widget, web-app, web-fullstack)')
 		.option('-n, --name <name>', 'Project name')
 		.option('--description <description>', 'Project description')
 		.option('-k, --keywords <keywords>', 'Project keywords (comma separated)')
@@ -328,7 +329,7 @@ Templates:
 			const templateInput = stripQuotes(opts.template);
 			const templateResult = TemplateTypeSchema.safeParse(templateInput);
 			if (!templateResult.success) {
-				p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
+				p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-widget, web-app, web-fullstack`);
 				process.exit(1);
 			}
 			commandResult = {
@@ -365,7 +366,7 @@ Restrictions & Behavior:
 			  - Confirmation: The command will show a summary of proposed changes and lets you preview diffs before applying.
  `,
 		)
-		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.option('-t, --template <type>', 'Template type (cli, web-vanilla, web-widget, web-app, web-fullstack)')
 		.option('--description <description>', 'Project description')
 		.option('-k, --keywords <keywords>', 'Project keywords (comma separated)')
 		.option('-a, --author <author>', "Author name (defaults to 'git config user.name')")
@@ -565,6 +566,7 @@ Restrictions & Behavior:
 					options: [
 						{label: 'CLI Application (Node.js)', value: 'cli'},
 						{label: 'Web-Vanilla (Standalone)', value: 'web-vanilla'},
+						{label: 'Web-Widget (Publishable)', value: 'web-widget'},
 						{label: 'Web-App (React + MUI)', value: 'web-app'},
 						{
 							label: 'Web-Fullstack (Express + React Monorepo)',

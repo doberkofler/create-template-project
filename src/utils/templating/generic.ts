@@ -14,6 +14,10 @@ export const genericProcessor: ContentProcessor = (content, {opts}) => {
 				description = 'A standalone web page/application for modern browsers.';
 				break;
 			}
+			case 'web-widget': {
+				description = 'A publishable native TypeScript web widget with a Vite demo and npm-ready package build.';
+				break;
+			}
 			case 'web-fullstack': {
 				description = 'A full-stack monorepo with an Express server and a React/MUI client.';
 				break;

@@ -1,0 +1,42 @@
+.widget {
+	--widget-bg: #121826;
+	--widget-fg: #f8fafc;
+	--widget-muted: #a5b4fc;
+	--widget-accent: #8b5cf6;
+
+	display: grid;
+	gap: 0.85rem;
+	max-width: 28rem;
+	padding: 1.25rem;
+	color: var(--widget-fg);
+	background: linear-gradient(135deg, var(--widget-bg), #312e81);
+	border-radius: 1.25rem;
+	box-shadow: 0 1.25rem 3rem rgba(15, 23, 42, 0.24);
+}
+
+.widget__title {
+	margin: 0;
+	font-size: 1.5rem;
+	line-height: 1.1;
+}
+
+.widget__message {
+	margin: 0;
+	color: var(--widget-muted);
+}
+
+.widget__button {
+	justify-self: start;
+	padding: 0.7rem 1rem;
+	font: inherit;
+	font-weight: 700;
+	color: var(--widget-fg);
+	cursor: pointer;
+	background: var(--widget-accent);
+	border: 0;
+	border-radius: 999px;
+}
+
+.widget__button:hover {
+	background: #7c3aed;
+}

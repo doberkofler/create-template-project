@@ -48,10 +48,17 @@ const packageJsonSchema = z
 		name: z.string().optional(),
 		author: z.string().optional(),
 		bin: z.string().optional(),
+		private: z.boolean().optional(),
+		files: z.array(z.string()).optional(),
+		main: z.string().optional(),
+		module: z.string().optional(),
+		types: z.string().optional(),
 		version: z.string().optional(),
 		packageManager: z.string().optional(),
 		scripts: z.record(z.string(), z.string()).default({}),
 		dependencies: z.record(z.string(), z.unknown()).default({}),
+		devDependencies: z.record(z.string(), z.unknown()).default({}),
+		peerDependencies: z.record(z.string(), z.unknown()).default({}),
 		workspaces: z.array(z.string()).optional(),
 	})
 	.loose();
@@ -192,6 +199,38 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		await expect(pathExists(projectPath)).resolves.toBe(true);
 		await expect(pathExists(path.join(projectPath, 'index.html'))).resolves.toBe(true);
+	});
+
+	it('should scaffold a web-widget project correctly', async () => {
+		const projectName = 'test-web-widget-project';
+		const projectPath = path.join(tmpDir, projectName);
+		const opts = createProjectOptions({
+			template: 'web-widget',
+			projectName,
+			createGithubRepository: false,
+			directory: projectPath,
+			update: false,
+		});
+
+		await generateProject(opts);
+
+		await expect(pathExists(projectPath)).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'src/lib/widget.ts'))).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'src/styles/widget.css'))).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'tsdown.config.ts'))).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'typedoc.json'))).resolves.toBe(true);
+
+		const pkg = await readPackageJson(projectPath);
+		expect(pkg).toHaveProperty('private', false);
+		expect(pkg.files).toContain('dist');
+		expect(pkg.main).toBe('./dist/index.mjs');
+		expect(pkg.types).toBe('./dist/index.d.mts');
+		expect(pkg.devDependencies).toHaveProperty('tsdown');
+		expect(pkg.devDependencies).toHaveProperty('typedoc');
+		expect(pkg.devDependencies).toHaveProperty('stylelint');
+		expect(pkg.peerDependencies).toHaveProperty('react');
+		expect(pkg.scripts.ci).toContain('run build:lib');
+		expect(pkg.scripts.ci).toContain('run docs:api');
 	});
 
 	it('should scaffold a web-app project correctly', async () => {
@@ -1037,7 +1076,7 @@ describe('generateProject', () => {
 	});
 
 	it('should include "lcov" reporter in all vitest/vite coverage configurations', async () => {
-		const templates = ['cli', 'web-vanilla', 'web-app', 'web-fullstack'] as const;
+		const templates = ['cli', 'web-vanilla', 'web-widget', 'web-app', 'web-fullstack'] as const;
 
 		await Promise.all(
 			templates.map(async (template) => {

@@ -58,6 +58,13 @@ describe('generic processor', () => {
 		expect(genericProcessor('{{description}}', {filePath: 'any', opts, addedDeps: []})).toBe('A standalone web page/application for modern browsers.');
 	});
 
+	it('should provide default description for web-widget', () => {
+		const opts = {...baseOpts, template: 'web-widget' as const};
+		expect(genericProcessor('{{description}}', {filePath: 'any', opts, addedDeps: []})).toBe(
+			'A publishable native TypeScript web widget with a Vite demo and npm-ready package build.',
+		);
+	});
+
 	it('should provide default description for web-app', () => {
 		const opts = {...baseOpts, template: 'web-app' as const};
 		expect(genericProcessor('{{description}}', {filePath: 'any', opts, addedDeps: []})).toBe('A React application with MUI and TanStack Query.');

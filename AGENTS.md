@@ -4,7 +4,7 @@ This document provides essential instructions for autonomous agents (like Cursor
 
 ## Project Overview
 
-An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-App, Web-Fullstack). It emphasizes best practices including strict TypeScript, automated linting, testing, and GitHub integration.
+An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-Widget, Web-App, Web-Fullstack). It emphasizes best practices including strict TypeScript, automated linting, testing, and GitHub integration.
 
 ## Build, Lint, and Test Commands
 

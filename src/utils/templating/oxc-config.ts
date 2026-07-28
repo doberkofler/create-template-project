@@ -6,7 +6,8 @@ export const oxcConfigProcessor: ContentProcessor = (content, {filePath, opts}) 
 	}
 
 	const shouldAddNodeEnv = opts.template === 'cli' || opts.template === 'web-fullstack';
-	const shouldAddBrowserEnv = opts.template === 'web-vanilla' || opts.template === 'web-app' || opts.template === 'web-fullstack';
+	const shouldAddBrowserEnv =
+		opts.template === 'web-vanilla' || opts.template === 'web-widget' || opts.template === 'web-app' || opts.template === 'web-fullstack';
 
 	const linesToAdd: string[] = [];
 	if (shouldAddNodeEnv && !content.includes('node: true')) {

@@ -81,7 +81,7 @@ const createCompatibleProject = async (directory: string, name: string): Promise
 		'vitest.config.ts',
 		'commitlint.config.js',
 		'.husky/pre-commit',
-		'.github/workflows/node.js.yml',
+		'.github/workflows/ci.yml',
 		'oxc.config.ts',
 		'oxlint.config.ts',
 		'oxfmt.config.ts',

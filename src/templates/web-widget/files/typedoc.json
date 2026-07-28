@@ -1,0 +1,12 @@
+{
+	"entryPoints": ["src/lib/index.ts", "src/lib/react.tsx"],
+	"out": "docs/api",
+	"exclude": ["**/*.test.ts", "**/*.test.tsx", "tests/**", "src/demo/**"],
+	"excludeInternal": true,
+	"excludePrivate": true,
+	"excludeProtected": true,
+	"readme": "none",
+	"plugin": [],
+	"tsconfig": "tsconfig.json",
+	"logLevel": "Warn"
+}

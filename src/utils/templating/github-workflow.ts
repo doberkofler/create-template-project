@@ -10,7 +10,7 @@ const WORKFLOW_PLAYWRIGHT_SETUP = `      - name: Install Playwright Browsers & D
         run: npx playwright install --with-deps chromium`;
 
 export const githubWorkflowProcessor: ContentProcessor = (content, {filePath, opts}) => {
-	if (!filePath.includes('.github/workflows/node.js.yml')) {
+	if (!filePath.includes('.github/workflows/') || !filePath.endsWith('.yml')) {
 		return content;
 	}
 
@@ -26,7 +26,10 @@ export const githubWorkflowProcessor: ContentProcessor = (content, {filePath, op
 	}
 
 	let playwrightSetup = '';
-	if (template === 'web-fullstack' || template === 'web-app' || template === 'web-vanilla') {
+	if (
+		(filePath.includes('ci.yml') || filePath.includes('node.js.yml')) &&
+		(template === 'web-fullstack' || template === 'web-app' || template === 'web-vanilla' || template === 'web-widget')
+	) {
 		playwrightSetup = WORKFLOW_PLAYWRIGHT_SETUP;
 	}
 

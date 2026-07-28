@@ -3,10 +3,10 @@
 [![NPM Version](https://img.shields.io/npm/v/create-template-project.svg)](https://www.npmjs.com/package/create-template-project)
 [![NPM Downloads](https://img.shields.io/npm/dm/create-template-project.svg)](https://www.npmjs.com/package/create-template-project)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml/badge.svg)](https://github.com/doberkofler/create-template-project/actions/workflows/node.js.yml)
+[![CI](https://github.com/doberkofler/create-template-project/actions/workflows/ci.yml/badge.svg)](https://github.com/doberkofler/create-template-project/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/doberkofler/create-template-project/badge.svg?branch=main)](https://coveralls.io/github/doberkofler/create-template-project?branch=main)
 
-An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-App, Web-Fullstack) with best-practice configurations pre-installed.
+An ultra-modular, type-safe Node.js CLI tool used to scaffold new project templates (CLI, Web-Vanilla, Web-Widget, Web-App, Web-Fullstack) with best-practice configurations pre-installed.
 
 ## 🚀 Quick Start
 
@@ -107,7 +107,7 @@ After adoption, `update` can safely run against the project. `doctor` is read-on
 
 #### Command Options (create):
 
-- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
+- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-widget`, `web-app`, `web-fullstack`)
 - `-n, --name <name>`: Project name
 - `--description <description>`: Project description
 - `-k, --keywords <keywords>`: Project keywords (comma separated)
@@ -121,7 +121,7 @@ After adoption, `update` can safely run against the project. `doctor` is read-on
 
 #### Command Options (update):
 
-- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
+- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-widget`, `web-app`, `web-fullstack`)
 - `--description <description>`: Project description
 - `-k, --keywords <keywords>`: Project keywords (comma separated)
 - `-a, --author <author>`: Author name (defaults to 'git config user.name')
@@ -136,7 +136,7 @@ After adoption, `update` can safely run against the project. `doctor` is read-on
 
 #### Command Options (doctor/adopt):
 
-- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
+- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-widget`, `web-app`, `web-fullstack`)
 - `-d, --directory <path>`: Project directory (defaults to `.`)
 - `--yes`: Adopt without confirmation (`adopt` only)
 
@@ -149,6 +149,10 @@ A clean Node.js CLI environment featuring `commander` and `cli-progress`. Suppor
 ### 🔵 Web-Vanilla
 
 Standalone web page setup for modern browsers. Can be used with or without a build step.
+
+### 🟣 Web-Widget
+
+Publishable native TypeScript widget package with `tsdown` library builds, Vite demo output, TypeDoc API docs, Stylelint CSS checks, Playwright e2e tests, screenshot generation, npm exports, and an optional React adapter subpath.
 
 ### 🟡 Web-App
 

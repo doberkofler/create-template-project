@@ -1,0 +1,36 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+          cache: "{{packageManager}}"
+      - name: Install dependencies
+        run: "{{installCommand}}"
+      - name: Build demo
+        run: "{{packageManager}} run build -- --base=/{{projectName}}/"
+      - name: Build API docs
+        run: "{{packageManager}} run docs:api"
+      - name: Stage API docs
+        run: mkdir -p dist-demo/docs && mv docs/api dist-demo/docs/api
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist-demo
+      - id: deployment
+        uses: actions/deploy-pages@v4

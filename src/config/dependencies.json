@@ -175,6 +175,26 @@
 		"vitest-browser-react": {
 			"version": "2.2.0",
 			"description": "Native React testing utilities for Vitest browser mode."
+		},
+		"tsdown": {
+			"version": "0.22.9",
+			"description": "Modern TypeScript library bundler powered by Rolldown."
+		},
+		"@tsdown/css": {
+			"version": "0.22.9",
+			"description": "CSS support plugin for tsdown."
+		},
+		"typedoc": {
+			"version": "0.28.20",
+			"description": "Documentation generator for TypeScript projects."
+		},
+		"stylelint": {
+			"version": "17.14.0",
+			"description": "A mighty CSS linter that helps avoid errors and enforce conventions."
+		},
+		"stylelint-config-standard": {
+			"version": "40.0.0",
+			"description": "Standard shareable config for stylelint."
 		}
 	}
 }

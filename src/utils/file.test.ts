@@ -155,7 +155,7 @@ describe('file utils', () => {
       - run: "{{packageManager}} run ci"
 `;
 			const optsFullstack: ProjectOptions = {...opts, template: 'web-fullstack', packageManager: 'pnpm'};
-			const processed = processContent('.github/workflows/node.js.yml', content, optsFullstack, []);
+			const processed = processContent('.github/workflows/ci.yml', content, optsFullstack, []);
 			expect(processed).toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).toContain('cache: "pnpm"');
 			expect(processed).toContain('run: "pnpm install --frozen-lockfile"');
@@ -178,7 +178,7 @@ describe('file utils', () => {
       - run: "{{packageManager}} run ci"
 `;
 			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
-			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
+			const processed = processContent('.github/workflows/ci.yml', content, optsCli, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).not.toContain('# [PM_SETUP]');
 			expect(processed).toContain('cache: "npm"');
@@ -203,7 +203,7 @@ describe('file utils', () => {
       - run: "{{packageManager}} run ci"
 `;
 			const optsWebApp: ProjectOptions = {...opts, template: 'web-app', packageManager: 'yarn'};
-			const processed = processContent('.github/workflows/node.js.yml', content, optsWebApp, []);
+			const processed = processContent('.github/workflows/ci.yml', content, optsWebApp, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).toContain('cache: "yarn"');
 			expect(processed).toContain('run: "yarn install --frozen-lockfile"');
@@ -226,7 +226,7 @@ describe('file utils', () => {
       - run: "{{packageManager}} run ci"
 `;
 			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
-			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
+			const processed = processContent('.github/workflows/ci.yml', content, optsCli, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).not.toContain('# [PM_SETUP]');
 			expect(processed).toContain('cache: "npm"');
@@ -251,7 +251,7 @@ describe('file utils', () => {
       - run: "{{packageManager}} run ci"
 `;
 			const optsCli: ProjectOptions = {...opts, template: 'cli', packageManager: 'npm'};
-			const processed = processContent('.github/workflows/node.js.yml', content, optsCli, []);
+			const processed = processContent('.github/workflows/ci.yml', content, optsCli, []);
 			expect(processed).not.toContain('uses: pnpm/action-setup@v6.0.9');
 			expect(processed).not.toContain('# [PM_SETUP]');
 			expect(processed).toContain('cache: "npm"');

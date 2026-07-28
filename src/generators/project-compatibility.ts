@@ -40,6 +40,25 @@ const pathExists = async (filePath: string): Promise<boolean> => {
 	}
 };
 
+const listFiles = async (directory: string): Promise<string[]> => {
+	try {
+		const entries = await fs.readdir(directory, {withFileTypes: true});
+		const nested = await Promise.all(
+			entries.map(async (entry): Promise<string[]> => {
+				const entryPath = path.join(directory, entry.name);
+				if (entry.isDirectory()) {
+					const nestedFiles = await listFiles(entryPath);
+					return nestedFiles;
+				}
+				return entry.isFile() ? [entryPath] : [];
+			}),
+		);
+		return nested.flat();
+	} catch {
+		return [];
+	}
+};
+
 const parseStringRecord = (value: unknown): Record<string, string> | undefined => {
 	if (!isRecord(value)) {
 		return undefined;
@@ -80,6 +99,7 @@ const hasAnyDependency = (pkg: PackageJson | undefined, dependency: string): boo
 const requiredFilesByTemplate: Readonly<Record<TemplateType, readonly string[]>> = {
 	cli: ['src/index.ts', 'src/index.test.ts', 'vite.config.ts'],
 	'web-vanilla': ['index.html', 'src/index.ts', 'vite.config.ts', 'playwright.config.ts'],
+	'web-widget': ['index.html', 'src/lib/index.ts', 'tsdown.config.ts', 'typedoc.json', 'vite.config.ts', 'playwright.config.ts'],
 	'web-app': ['index.html', 'src/index.tsx', 'src/App.tsx', 'vite.config.ts', 'playwright.config.ts'],
 	'web-fullstack': ['client/package.json', 'server/package.json', 'client/src/main.tsx', 'server/src/index.ts'],
 };
@@ -87,6 +107,7 @@ const requiredFilesByTemplate: Readonly<Record<TemplateType, readonly string[]>>
 const requiredDependenciesByTemplate: Readonly<Record<TemplateType, readonly string[]>> = {
 	cli: ['vite'],
 	'web-vanilla': ['vite', 'vitest', 'playwright'],
+	'web-widget': ['vite', 'vitest', 'playwright', 'tsdown', 'typedoc', 'stylelint'],
 	'web-app': ['react', 'react-dom', '@mui/material', 'vite'],
 	'web-fullstack': ['express', '@trpc/server', 'react', 'react-dom'],
 };
@@ -104,11 +125,23 @@ export const validateProjectCompatibility = async (directory: string, template: 
 	addCheck('package-name', 'package.json has a name', typeof pkg?.name === 'string' && pkg.name.length > 0, true);
 	addCheck('esm', 'package.json uses ESM type module', pkg?.type === 'module');
 
-	const commonFiles = ['tsconfig.json', 'vitest.config.ts', 'commitlint.config.js', '.husky/pre-commit', '.github/workflows/node.js.yml'];
+	const canonicalWorkflowPath = '.github/workflows/ci.yml';
+	const legacyWorkflowPath = '.github/workflows/node.js.yml';
+	const canonicalWorkflowExists = await pathExists(path.join(directory, canonicalWorkflowPath));
+	const legacyWorkflowExists = await pathExists(path.join(directory, legacyWorkflowPath));
+
+	const commonFiles = ['tsconfig.json', 'vitest.config.ts', 'commitlint.config.js', '.husky/pre-commit'];
 	const commonFileResults = await Promise.all(commonFiles.map(async (filePath) => ({filePath, exists: await pathExists(path.join(directory, filePath))})));
 	for (const {filePath, exists} of commonFileResults) {
 		addCheck(`file:${filePath}`, `${filePath} exists`, exists);
 	}
+	addCheck(
+		`file:${canonicalWorkflowPath}`,
+		canonicalWorkflowExists
+			? `${canonicalWorkflowPath} exists`
+			: `${canonicalWorkflowPath} exists (canonical; legacy ${legacyWorkflowPath} is accepted for adoption)`,
+		canonicalWorkflowExists || legacyWorkflowExists,
+	);
 
 	const configFiles = ['oxc.config.ts', 'oxlint.config.ts', 'oxfmt.config.ts'];
 	const configFileResults = await Promise.all(configFiles.map(async (filePath) => ({filePath, exists: await pathExists(path.join(directory, filePath))})));
@@ -129,6 +162,28 @@ export const validateProjectCompatibility = async (directory: string, template: 
 	);
 	for (const {filePath, exists} of templateFileResults) {
 		addCheck(`template-file:${filePath}`, `${template} file ${filePath} exists`, exists);
+	}
+
+	if (template === 'web-widget') {
+		const sourceFiles = await listFiles(path.join(directory, 'src/lib'));
+		const styleFiles = await listFiles(path.join(directory, 'src/styles'));
+		const implementationFiles = sourceFiles
+			.map((filePath) => path.relative(directory, filePath).split(path.sep).join('/'))
+			.filter((filePath) => /\.tsx?$/u.test(filePath) && !filePath.endsWith('/index.ts') && !filePath.endsWith('/react.tsx') && !filePath.includes('.test.'));
+		const widgetStyles = styleFiles
+			.map((filePath) => path.relative(directory, filePath).split(path.sep).join('/'))
+			.filter((filePath) => filePath.endsWith('.css'));
+
+		addCheck(
+			'web-widget:implementation',
+			implementationFiles.length > 0 ? `web-widget implementation found (${implementationFiles.join(', ')})` : 'web-widget implementation exists in src/lib',
+			implementationFiles.length > 0,
+		);
+		addCheck(
+			'web-widget:stylesheet',
+			widgetStyles.length > 0 ? `web-widget stylesheet found (${widgetStyles.join(', ')})` : 'web-widget stylesheet exists in src/styles',
+			widgetStyles.length > 0,
+		);
 	}
 
 	for (const dependency of requiredDependenciesByTemplate[template]) {

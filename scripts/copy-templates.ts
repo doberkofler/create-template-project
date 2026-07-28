@@ -24,7 +24,7 @@ const copyTemplates = async (): Promise<void> => {
 		console.log(`Copied config files to dist`);
 	}
 
-	const templates = ['base', 'cli', 'web-vanilla', 'web-app', 'web-fullstack'];
+	const templates = ['base', 'cli', 'web-vanilla', 'web-widget', 'web-app', 'web-fullstack'];
 	const copyOperations = templates.map(async (templateName): Promise<void> => {
 		const srcFiles = path.join(src, templateName, 'files');
 		const distFiles = path.join(dist, templateName, 'files');

@@ -17,10 +17,11 @@ describe('info generator', () => {
 
 	it('should return info for all templates', () => {
 		const allInfo = getAllTemplatesInfo();
-		expect(allInfo).toHaveLength(4);
+		expect(allInfo).toHaveLength(5);
 		const names = allInfo.map((i) => i.name);
 		expect(names).toContain('cli');
 		expect(names).toContain('web-vanilla');
+		expect(names).toContain('web-widget');
 		expect(names).toContain('web-app');
 		expect(names).toContain('web-fullstack');
 	});

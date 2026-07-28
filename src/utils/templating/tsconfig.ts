@@ -19,11 +19,21 @@ export const tsconfigProcessor: ContentProcessor = (content, {filePath, opts}) =
 	const {template} = opts;
 	let processed = content;
 
-	// Web-Fullstack/Web-Vanilla/Web-App tsconfig.json overrides
-	if (template === 'web-fullstack' || template === 'web-vanilla' || template === 'web-app') {
+	// Web templates need DOM libs and JSX support for browser code and adapters.
+	if (template === 'web-fullstack' || template === 'web-vanilla' || template === 'web-widget' || template === 'web-app') {
 		processed = processed.replace(
 			/\/\* Language and Environment \*\/[\s\S]*?\/\* Strict Type-Checking Options \*\//u,
 			`${WEB_ENV}\n\n\t\t/* Strict Type-Checking Options */`,
+		);
+	}
+
+	if (template === 'web-widget') {
+		processed = processed.replace(
+			'"moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,',
+			`"moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
+		"paths": {
+			"${opts.projectName}": ["./src/lib/index.ts"]
+		},`,
 		);
 	}
 

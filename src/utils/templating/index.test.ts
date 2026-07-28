@@ -19,7 +19,7 @@ describe('templating orchestrator', () => {
 	it('should apply multiple processors in order', () => {
 		const content = 'Project: {{projectName}}\n# [PM_SETUP]';
 		const opts: ProjectOptions = {...baseOpts, packageManager: 'pnpm'};
-		const processed = processContent('.github/workflows/node.js.yml', content, opts, []);
+		const processed = processContent('.github/workflows/ci.yml', content, opts, []);
 
 		expect(processed).toContain('Project: test-project');
 		expect(processed).toContain('uses: pnpm/action-setup@v6.0.9');

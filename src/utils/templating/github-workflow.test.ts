@@ -23,25 +23,25 @@ describe('github workflow processor', () => {
 
 	it('should replace installCommand for npm', () => {
 		const content = '{{installCommand}}';
-		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/node.js.yml', opts: baseOpts, addedDeps: []})).toBe('npm ci');
+		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts: baseOpts, addedDeps: []})).toBe('npm ci');
 	});
 
 	it('should replace installCommand for pnpm', () => {
 		const content = '{{installCommand}}';
 		const opts = {...baseOpts, packageManager: 'pnpm' as const};
-		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/node.js.yml', opts, addedDeps: []})).toBe('pnpm install --frozen-lockfile');
+		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts, addedDeps: []})).toBe('pnpm install --frozen-lockfile');
 	});
 
 	it('should handle PM_SETUP for pnpm', () => {
 		const content = '# [PM_SETUP]';
 		const opts = {...baseOpts, packageManager: 'pnpm' as const};
-		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/node.js.yml', opts, addedDeps: []});
+		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts, addedDeps: []});
 		expect(processed).toContain('uses: pnpm/action-setup@v6.0.9');
 	});
 
 	it('should remove PM_SETUP if not pnpm', () => {
 		const content = '      # [PM_SETUP]\n      - name: Next';
-		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/node.js.yml', opts: baseOpts, addedDeps: []});
+		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts: baseOpts, addedDeps: []});
 		expect(processed).not.toContain('# [PM_SETUP]');
 		expect(processed).toContain('- name: Next');
 	});
@@ -49,13 +49,13 @@ describe('github workflow processor', () => {
 	it('should handle PLAYWRIGHT_SETUP for web templates', () => {
 		const content = '# [PLAYWRIGHT_SETUP]';
 		const opts = {...baseOpts, template: 'web-app' as const};
-		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/node.js.yml', opts, addedDeps: []});
+		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts, addedDeps: []});
 		expect(processed).toContain('npx playwright install --with-deps chromium');
 	});
 
 	it('should remove PLAYWRIGHT_SETUP for cli template', () => {
 		const content = '      # [PLAYWRIGHT_SETUP]\n      - name: Next';
-		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/node.js.yml', opts: baseOpts, addedDeps: []});
+		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts: baseOpts, addedDeps: []});
 		expect(processed).not.toContain('# [PLAYWRIGHT_SETUP]');
 		expect(processed).toContain('- name: Next');
 	});
