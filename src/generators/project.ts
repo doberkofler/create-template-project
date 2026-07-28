@@ -251,7 +251,7 @@ const buildSimpleUnifiedDiff = (filePath: string, before: string, after: string)
 type PackageJsonShape = {
 	name: string;
 	version: string;
-	private: boolean;
+	private?: boolean;
 	description: string;
 	keywords: string[];
 	homepage: string;
@@ -353,8 +353,47 @@ const parseExistingProjectPackage = (raw: string): ExistingProjectPackage => {
 		scripts: parseStringRecord(parsed.scripts),
 		dependencies: parseStringRecord(parsed.dependencies),
 		devDependencies: parseStringRecord(parsed.devDependencies),
+		peerDependencies: parseStringRecord(parsed.peerDependencies),
 		'create-template-project': typeof template === 'string' && isTemplateType(template) ? {template} : undefined,
 	};
+};
+
+const parseExactVersion = (version: string): [number, number, number] | undefined => {
+	const match = /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:[-+].*)?$/u.exec(version);
+	if (match?.groups === undefined) {
+		return undefined;
+	}
+	return [Number(match.groups.major), Number(match.groups.minor), Number(match.groups.patch)];
+};
+
+const isGreaterOrEqualVersion = (current: string, next: string): boolean => {
+	const currentParts = parseExactVersion(current);
+	const nextParts = parseExactVersion(next);
+	if (currentParts === undefined || nextParts === undefined) {
+		return false;
+	}
+
+	for (const [index, currentPart] of currentParts.entries()) {
+		const nextPart = nextParts[index];
+		if (currentPart > nextPart) {
+			return true;
+		}
+		if (currentPart < nextPart) {
+			return false;
+		}
+	}
+	return true;
+};
+
+const mergePackageRecord = (target: Record<string, string>, source: Record<string, string>, preserveExistingVersions: boolean): Record<string, string> => {
+	const merged = {...target};
+	for (const [name, version] of Object.entries(source)) {
+		if (preserveExistingVersions && Object.hasOwn(merged, name) && isGreaterOrEqualVersion(merged[name], version)) {
+			continue;
+		}
+		merged[name] = version;
+	}
+	return merged;
 };
 
 const parseTemplatePackageJson = (raw: string): TemplatePackageJson => {
@@ -456,6 +495,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 	const pkgPath = path.join(projectDir, 'package.json');
 	if (isUpdate && (await pathExists(pkgPath))) {
 		debug('Loading existing package.json for update');
+		const defaultPkg = finalPkg;
 		const existingPkg = parseExistingProjectPackage(await fs.readFile(pkgPath, 'utf8'));
 
 		if (!existingPkg['create-template-project']) {
@@ -463,8 +503,18 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		}
 
 		finalPkg = {
-			...finalPkg,
 			...existingPkg,
+			name: existingPkg.name ?? defaultPkg.name,
+			version: existingPkg.version ?? defaultPkg.version,
+			private: existingPkg.private,
+			description: existingPkg.description ?? defaultPkg.description,
+			keywords: existingPkg.keywords ?? defaultPkg.keywords,
+			homepage: existingPkg.homepage ?? defaultPkg.homepage,
+			bugs: existingPkg.bugs ?? defaultPkg.bugs,
+			license: existingPkg.license ?? defaultPkg.license,
+			author: existingPkg.author ?? defaultPkg.author,
+			repository: existingPkg.repository ?? defaultPkg.repository,
+			type: existingPkg.type ?? defaultPkg.type,
 			'create-template-project': {
 				...existingPkg['create-template-project'],
 				template: type,
@@ -472,6 +522,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 			scripts: {...existingPkg.scripts},
 			dependencies: {...existingPkg.dependencies},
 			devDependencies: {...existingPkg.devDependencies},
+			peerDependencies: {...existingPkg.peerDependencies},
 		}; // Keep existing name/version/type if they exist
 		debug('Loaded existing package.json: %O', finalPkg);
 	}
@@ -502,8 +553,8 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		resolveDeps(templateDevDeps);
 
 		Object.assign(finalPkg.scripts, t.scripts);
-		Object.assign(finalPkg.dependencies, templateDeps);
-		Object.assign(finalPkg.devDependencies, templateDevDeps);
+		finalPkg.dependencies = mergePackageRecord(finalPkg.dependencies, templateDeps, isUpdate);
+		finalPkg.devDependencies = mergePackageRecord(finalPkg.devDependencies, templateDevDeps, isUpdate);
 
 		if (t.workspaces !== undefined) {
 			finalPkg.workspaces = t.workspaces;
@@ -513,7 +564,10 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		if (pkgPart !== undefined) {
 			resolveDeps(pkgPart.dependencies);
 			resolveDeps(pkgPart.devDependencies);
-			mergePackageJson(finalPkg, pkgPart);
+			mergePackageJson(finalPkg, pkgPart, {
+				preserveExistingPackageFields: isUpdate,
+				preserveExistingDependencyVersions: isUpdate,
+			});
 		}
 	}
 

@@ -23,6 +23,53 @@ type MergeablePackageJson = {
 	bin?: string;
 };
 
+type MergePackageJsonOptions = {
+	preserveExistingPackageFields?: boolean;
+	preserveExistingDependencyVersions?: boolean;
+};
+
+const parseExactVersion = (version: string): [number, number, number] | undefined => {
+	const match = /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:[-+].*)?$/u.exec(version);
+	if (match?.groups === undefined) {
+		return undefined;
+	}
+	return [Number(match.groups.major), Number(match.groups.minor), Number(match.groups.patch)];
+};
+
+const isGreaterOrEqualVersion = (current: string, next: string): boolean => {
+	const currentParts = parseExactVersion(current);
+	const nextParts = parseExactVersion(next);
+	if (currentParts === undefined || nextParts === undefined) {
+		return false;
+	}
+
+	for (const [index, currentPart] of currentParts.entries()) {
+		const nextPart = nextParts[index];
+		if (currentPart > nextPart) {
+			return true;
+		}
+		if (currentPart < nextPart) {
+			return false;
+		}
+	}
+	return true;
+};
+
+const mergeStringRecord = (
+	target: Record<string, string> | undefined,
+	source: Record<string, string>,
+	preserveExistingVersions: boolean,
+): Record<string, string> => {
+	const merged = {...target};
+	for (const [name, version] of Object.entries(source)) {
+		if (preserveExistingVersions && Object.hasOwn(merged, name) && isGreaterOrEqualVersion(merged[name], version)) {
+			continue;
+		}
+		merged[name] = version;
+	}
+	return merged;
+};
+
 const toErrorDetail = (error: unknown): {message: string; detail: string; exitCode?: number} => {
 	if (error instanceof Error) {
 		const value = error as Error & {stdout?: string; stderr?: string; exitCode?: number};
@@ -60,36 +107,36 @@ export const getAllFiles = async (dirPath: string, arrayOfFiles: string[] = []):
 export const processContent = (filePath: string, content: string, opts: ProjectOptions, addedDeps: {name: string; description: string}[]): string =>
 	processContentInternal(filePath, content, opts, addedDeps);
 
-export const mergePackageJson = (target: MergeablePackageJson, source: MergeablePackageJson): void => {
+export const mergePackageJson = (target: MergeablePackageJson, source: MergeablePackageJson, options: MergePackageJsonOptions = {}): void => {
+	const preservePackageFields = options.preserveExistingPackageFields === true;
+	const preserveDependencyVersions = options.preserveExistingDependencyVersions === true;
+
 	if (source.private !== undefined) {
 		target.private = source.private;
 	}
-	if (source.files !== undefined) {
+	if (source.files !== undefined && (!preservePackageFields || target.files === undefined)) {
 		target.files = source.files;
 	}
-	if (source.main !== undefined) {
+	if (source.main !== undefined && (!preservePackageFields || target.main === undefined)) {
 		target.main = source.main;
 	}
-	if (source.module !== undefined) {
+	if (source.module !== undefined && (!preservePackageFields || target.module === undefined)) {
 		target.module = source.module;
 	}
-	if (source.types !== undefined) {
+	if (source.types !== undefined && (!preservePackageFields || target.types === undefined)) {
 		target.types = source.types;
 	}
-	if (source.exports !== undefined) {
+	if (source.exports !== undefined && (!preservePackageFields || target.exports === undefined)) {
 		target.exports = source.exports;
 	}
 	if (source.scripts !== undefined) {
 		target.scripts = {...target.scripts, ...source.scripts};
 	}
 	if (source.dependencies !== undefined) {
-		target.dependencies = {...target.dependencies, ...source.dependencies};
+		target.dependencies = mergeStringRecord(target.dependencies, source.dependencies, preserveDependencyVersions);
 	}
 	if (source.devDependencies !== undefined) {
-		target.devDependencies = {
-			...target.devDependencies,
-			...source.devDependencies,
-		};
+		target.devDependencies = mergeStringRecord(target.devDependencies, source.devDependencies, preserveDependencyVersions);
 	}
 	if (source.peerDependencies !== undefined) {
 		target.peerDependencies = {
@@ -97,10 +144,10 @@ export const mergePackageJson = (target: MergeablePackageJson, source: Mergeable
 			...source.peerDependencies,
 		};
 	}
-	if (source.workspaces !== undefined) {
+	if (source.workspaces !== undefined && (!preservePackageFields || target.workspaces === undefined)) {
 		target.workspaces = source.workspaces;
 	}
-	if (source.bin !== undefined) {
+	if (source.bin !== undefined && (!preservePackageFields || target.bin === undefined)) {
 		target.bin = source.bin;
 	}
 };

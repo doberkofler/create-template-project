@@ -436,6 +436,66 @@ describe('generateProject', () => {
 		expect(pkg.version).toBe('1.0.0');
 	});
 
+	it('should preserve adopted web-widget package publish fields and newer dependency versions on update', async () => {
+		const projectName = 'test-adopted-widget-package';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		const existingPackageJson = {
+			name: projectName,
+			version: '0.2.0',
+			description: 'Existing widget package',
+			keywords: ['widget'],
+			files: ['dist', 'CHANGELOG.md'],
+			type: 'module',
+			main: './dist/index.mjs',
+			module: './dist/index.mjs',
+			types: './dist/index.d.mts',
+			exports: {
+				'.': {
+					types: './dist/index.d.mts',
+					import: './dist/index.mjs',
+					default: './dist/index.mjs',
+				},
+				'./styles/scoped-search-bar.css': './dist/styles/scoped-search-bar.css',
+			},
+			scripts: {
+				lint: 'oxlint',
+			},
+			devDependencies: {
+				stylelint: '17.14.1',
+				tsdown: '0.22.14',
+			},
+			'create-template-project': {template: 'web-widget'},
+		};
+		await fs.writeFile(path.join(projectPath, 'package.json'), JSON.stringify(existingPackageJson, null, '\t'));
+		const opts = createProjectOptions({
+			template: 'web-widget',
+			projectName,
+			directory: projectPath,
+			update: true,
+			progress: false,
+		});
+
+		await generateProject(opts);
+
+		const packageRaw = await fs.readFile(path.join(projectPath, 'package.json'), 'utf8');
+		const adoptedWidgetPackageSchema = packageJsonSchema.extend({
+			exports: z.record(z.string(), z.unknown()),
+			private: z.boolean(),
+			peerDependencies: z.record(z.string(), z.string()),
+		});
+		const packageJson = adoptedWidgetPackageSchema.parse(JSON.parse(packageRaw));
+		expect(packageJson.exports).toHaveProperty('./styles/scoped-search-bar.css', './dist/styles/scoped-search-bar.css');
+		expect(packageJson.exports).not.toHaveProperty('./styles/widget.css');
+		expect(packageJson.devDependencies.stylelint).toBe('17.14.1');
+		expect(packageJson.devDependencies.tsdown).toBe('0.22.14');
+		expect(packageJson).toMatchObject({private: false});
+		expect(packageJson.scripts).toHaveProperty('start', 'vite preview --port 4173 --strictPort');
+		expect(packageJson.peerDependencies).toHaveProperty('react', '>=18.0.0');
+		expect(packageRaw.indexOf('"description"')).toBeLessThan(packageRaw.indexOf('"keywords"'));
+		expect(packageRaw.indexOf('"exports"')).toBeLessThan(packageRaw.indexOf('"scripts"'));
+	});
+
 	it('should handle gh repo create failure', async () => {
 		const projectName = 'test-github-fail';
 		const projectPath = path.join(tmpDir, projectName);
