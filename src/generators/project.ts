@@ -102,6 +102,129 @@ type PlannedDiff = {
 	after: string;
 };
 
+type PendingOperation = {
+	path: string;
+	run: () => Promise<void>;
+};
+
+type UpdateFilePolicy = {
+	shouldAddDuringUpdate: boolean;
+	reason: string;
+};
+
+const toPosixPath = (filePath: string): string => filePath.split(path.sep).join('/');
+
+const isOptionalCapabilityFile = (filePath: string): boolean => {
+	const normalizedPath = toPosixPath(filePath);
+	return normalizedPath.startsWith('.github/workflows/') && normalizedPath !== '.github/workflows/ci.yml' && normalizedPath !== '.github/workflows/node.js.yml';
+};
+
+const isStarterFile = (filePath: string): boolean => {
+	const normalizedPath = toPosixPath(filePath);
+	return (
+		isSeedFile(normalizedPath) ||
+		normalizedPath.startsWith('tests/e2e/') ||
+		normalizedPath.startsWith('src/demo/') ||
+		normalizedPath.endsWith('.test.ts') ||
+		normalizedPath.endsWith('.test.tsx') ||
+		normalizedPath.endsWith('.spec.ts') ||
+		normalizedPath.endsWith('.spec.tsx')
+	);
+};
+
+const getAddReason = (filePath: string): string => {
+	const normalizedPath = toPosixPath(filePath);
+	if (normalizedPath === 'package.json') {
+		return 'Initial project metadata, dependencies, and scripts';
+	}
+	if (normalizedPath === '.npmrc') {
+		return 'Package manager configuration required by the template';
+	}
+	if (normalizedPath === 'pnpm-workspace.yaml') {
+		return 'Workspace configuration required by pnpm';
+	}
+	if (normalizedPath === '.github/workflows/ci.yml') {
+		return 'Continuous integration workflow required by the base template';
+	}
+	if (normalizedPath.startsWith('.github/workflows/')) {
+		return 'GitHub workflow provided by the template';
+	}
+	if (normalizedPath.includes('lint') || normalizedPath.includes('oxc') || normalizedPath.includes('oxfmt') || normalizedPath.includes('stylelint')) {
+		return 'Linting and formatting configuration required by the template';
+	}
+	if (
+		normalizedPath.includes('tsconfig') ||
+		normalizedPath.includes('vite') ||
+		normalizedPath.includes('tsdown') ||
+		normalizedPath.includes('playwright') ||
+		normalizedPath.includes('typedoc')
+	) {
+		return 'Build, test, or documentation tooling configuration required by the template';
+	}
+	return 'Template tooling file required for this project type';
+};
+
+const getModifyReason = (filePath: string): string => {
+	const normalizedPath = toPosixPath(filePath);
+	if (normalizedPath === 'package.json') {
+		return 'Update dependencies, scripts, and template metadata';
+	}
+	if (normalizedPath === 'pnpm-workspace.yaml') {
+		return 'Update workspace configuration for pnpm';
+	}
+	if (normalizedPath === '.github/workflows/ci.yml' || normalizedPath === '.github/workflows/node.js.yml') {
+		return 'Update continuous integration workflow to match the base template';
+	}
+	if (normalizedPath.startsWith('.github/workflows/')) {
+		return 'Update GitHub workflow to match the template';
+	}
+	if (normalizedPath.includes('lint') || normalizedPath.includes('oxc') || normalizedPath.includes('oxfmt') || normalizedPath.includes('stylelint')) {
+		return 'Update linting and formatting configuration';
+	}
+	if (
+		normalizedPath.includes('tsconfig') ||
+		normalizedPath.includes('vite') ||
+		normalizedPath.includes('tsdown') ||
+		normalizedPath.includes('playwright') ||
+		normalizedPath.includes('typedoc')
+	) {
+		return 'Update build, test, or documentation tooling configuration';
+	}
+	return 'Update template-managed tooling or configuration';
+};
+
+const getDeleteReason = (filePath: string): string => {
+	const normalizedPath = toPosixPath(filePath);
+	if (normalizedPath === 'vitest.config.ts') {
+		return 'File no longer required because this template uses Vite/Vitest configuration';
+	}
+	return 'File no longer required for this template type';
+};
+
+const getUpdateFilePolicy = (filePath: string): UpdateFilePolicy => {
+	if (isOptionalCapabilityFile(filePath)) {
+		return {
+			shouldAddDuringUpdate: false,
+			reason: 'Optional capability file - available but skipped during update',
+		};
+	}
+
+	if (isStarterFile(filePath)) {
+		return {
+			shouldAddDuringUpdate: false,
+			reason: 'Starter/example project file - available but skipped during update',
+		};
+	}
+
+	return {
+		shouldAddDuringUpdate: true,
+		reason: getAddReason(filePath),
+	};
+};
+
+const formatActionSummary = (actions: readonly Action[]): string =>
+	actions.map((a) => `  ${a.type.padEnd(8)} ${a.path}${a.reason === undefined ? '' : ` - ${a.reason}`}`).join('\n');
+
 const buildSimpleUnifiedDiff = (filePath: string, before: string, after: string): string => {
 	const beforeLines = before.split('\n');
 	const afterLines = after.split('\n');
@@ -395,7 +518,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 
 	// Second pass: Collect and report actions
 	const actions: Action[] = [];
-	const pendingOperations: (() => Promise<void>)[] = [];
+	const pendingOperations: PendingOperation[] = [];
 	const plannedDiffs: PlannedDiff[] = [];
 
 	/* eslint-disable eslint/no-await-in-loop -- file planning is intentionally sequential to keep action ordering deterministic */
@@ -422,13 +545,18 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 
 				if (!isFileRequired(relativePath, type)) {
 					if (isUpdate && (await pathExists(targetPath))) {
+						const existingContent = await fs.readFile(targetPath, 'utf8');
+						plannedDiffs.push({path: relativePath, before: existingContent, after: ''});
 						actions.push({
 							type: 'DELETE',
 							path: relativePath,
-							reason: 'File no longer required for this template type',
+							reason: getDeleteReason(relativePath),
 						});
-						pendingOperations.push(async () => {
-							await fs.rm(targetPath, {force: true});
+						pendingOperations.push({
+							path: relativePath,
+							run: async () => {
+								await fs.rm(targetPath, {force: true});
+							},
 						});
 					}
 					continue;
@@ -468,49 +596,66 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 						const action: (typeof actions)[0] = {
 							type: 'MODIFY',
 							path: finalRelativePath,
-							reason: 'Template tooling or configuration update',
+							reason: getModifyReason(finalRelativePath),
 						};
 						actions.push(action);
-						pendingOperations.push(async () => {
-							if (finalRelativePath === 'oxc.config.ts') {
-								await fs.writeFile(finalTargetPath, content);
-								action.type = 'UPDATED';
-								action.reason = 'Default config was updated to the latest template version';
-								log.info(`✔ Updated: ${finalRelativePath}`);
-							} else {
-								const result = await mergeFile(finalTargetPath, existingContent, content, log);
-								if (result === 'merged') {
-									action.type = 'MERGE';
-									action.reason = 'Merged template updates with your manual changes';
-									action.recommendedAction = 'Review changes for correct integration';
-									log.info(`ℹ Merged: ${finalRelativePath}`);
-								} else if (result === 'conflict') {
-									action.type = 'CONFLICT';
-									action.reason = 'Conflicting changes between template and your code';
-									action.recommendedAction = 'Resolve git conflict markers in this file';
-									log.warn(`⚠ Conflict: ${finalRelativePath}`);
-								} else if (result === 'updated') {
+						pendingOperations.push({
+							path: finalRelativePath,
+							run: async () => {
+								if (finalRelativePath === 'oxc.config.ts') {
+									await fs.writeFile(finalTargetPath, content);
 									action.type = 'UPDATED';
-									action.reason = 'File was updated to the latest template version';
+									action.reason = 'Default config was updated to the latest template version';
 									log.info(`✔ Updated: ${finalRelativePath}`);
+								} else {
+									const result = await mergeFile(finalTargetPath, existingContent, content, log);
+									if (result === 'merged') {
+										action.type = 'MERGE';
+										action.reason = 'Merged template updates with your manual changes';
+										action.recommendedAction = 'Review changes for correct integration';
+										log.info(`ℹ Merged: ${finalRelativePath}`);
+									} else if (result === 'conflict') {
+										action.type = 'CONFLICT';
+										action.reason = 'Conflicting changes between template and your code';
+										action.recommendedAction = 'Resolve git conflict markers in this file';
+										log.warn(`⚠ Conflict: ${finalRelativePath}`);
+									} else if (result === 'updated') {
+										action.type = 'UPDATED';
+										action.reason = 'File was updated to the latest template version';
+										log.info(`✔ Updated: ${finalRelativePath}`);
+									}
 								}
-							}
+							},
 						});
 					}
 				} else if (!exists) {
+					if (isUpdate) {
+						const policy = getUpdateFilePolicy(finalRelativePath);
+						if (!policy.shouldAddDuringUpdate) {
+							actions.push({
+								type: 'SKIP',
+								path: finalRelativePath,
+								reason: policy.reason,
+							});
+							continue;
+						}
+					}
 					plannedDiffs.push({path: finalRelativePath, before: '', after: content});
 					actions.push({
 						type: 'ADD',
 						path: finalRelativePath,
-						reason: 'New template file added',
+						reason: getAddReason(finalRelativePath),
 					});
-					pendingOperations.push(async () => {
-						await fs.mkdir(path.dirname(finalTargetPath), {recursive: true});
-						await fs.writeFile(finalTargetPath, content);
-						const normalizedPath = finalRelativePath.split(path.sep).join('/');
-						if (normalizedPath.startsWith('.husky/') && !normalizedPath.endsWith('/')) {
-							await fs.chmod(finalTargetPath, 0o755);
-						}
+					pendingOperations.push({
+						path: finalRelativePath,
+						run: async () => {
+							await fs.mkdir(path.dirname(finalTargetPath), {recursive: true});
+							await fs.writeFile(finalTargetPath, content);
+							const normalizedPath = finalRelativePath.split(path.sep).join('/');
+							if (normalizedPath.startsWith('.husky/') && !normalizedPath.endsWith('/')) {
+								await fs.chmod(finalTargetPath, 0o755);
+							}
+						},
 					});
 				}
 			}
@@ -539,13 +684,18 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 
 			if (!isFileRequired(file.path, type)) {
 				if (isUpdate && (await pathExists(targetPath))) {
+					const existingContent = await fs.readFile(targetPath, 'utf8');
+					plannedDiffs.push({path: file.path, before: existingContent, after: ''});
 					actions.push({
 						type: 'DELETE',
 						path: file.path,
-						reason: 'File no longer required for this template type',
+						reason: getDeleteReason(file.path),
 					});
-					pendingOperations.push(async () => {
-						await fs.rm(targetPath, {force: true});
+					pendingOperations.push({
+						path: file.path,
+						run: async () => {
+							await fs.rm(targetPath, {force: true});
+						},
 					});
 				}
 				continue;
@@ -562,45 +712,62 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 					const action: (typeof actions)[0] = {
 						type: 'MODIFY',
 						path: file.path,
-						reason: 'Template configuration update',
+						reason: getModifyReason(file.path),
 					};
 					actions.push(action);
-					pendingOperations.push(async () => {
-						if (file.path === 'oxc.config.ts') {
-							await fs.writeFile(targetPath, content);
-							action.type = 'UPDATED';
-							action.reason = 'Default config was updated to the latest template version';
-							log.info(`✔ Updated: ${file.path}`);
-						} else {
-							const result = await mergeFile(targetPath, existingContent, content, log);
-							if (result === 'merged') {
-								action.type = 'MERGE';
-								action.reason = 'Merged template updates with your manual changes';
-								action.recommendedAction = 'Review changes for correct integration';
-								log.info(`ℹ Merged: ${file.path}`);
-							} else if (result === 'conflict') {
-								action.type = 'CONFLICT';
-								action.reason = 'Conflicting changes between template and your code';
-								action.recommendedAction = 'Resolve git conflict markers in this file';
-								log.warn(`⚠ Conflict: ${file.path}`);
-							} else if (result === 'updated') {
+					pendingOperations.push({
+						path: file.path,
+						run: async () => {
+							if (file.path === 'oxc.config.ts') {
+								await fs.writeFile(targetPath, content);
 								action.type = 'UPDATED';
-								action.reason = 'File was updated to the latest template version';
+								action.reason = 'Default config was updated to the latest template version';
 								log.info(`✔ Updated: ${file.path}`);
+							} else {
+								const result = await mergeFile(targetPath, existingContent, content, log);
+								if (result === 'merged') {
+									action.type = 'MERGE';
+									action.reason = 'Merged template updates with your manual changes';
+									action.recommendedAction = 'Review changes for correct integration';
+									log.info(`ℹ Merged: ${file.path}`);
+								} else if (result === 'conflict') {
+									action.type = 'CONFLICT';
+									action.reason = 'Conflicting changes between template and your code';
+									action.recommendedAction = 'Resolve git conflict markers in this file';
+									log.warn(`⚠ Conflict: ${file.path}`);
+								} else if (result === 'updated') {
+									action.type = 'UPDATED';
+									action.reason = 'File was updated to the latest template version';
+									log.info(`✔ Updated: ${file.path}`);
+								}
 							}
-						}
+						},
 					});
 				}
 			} else if (!exists) {
+				if (isUpdate) {
+					const policy = getUpdateFilePolicy(file.path);
+					if (!policy.shouldAddDuringUpdate) {
+						actions.push({
+							type: 'SKIP',
+							path: file.path,
+							reason: policy.reason,
+						});
+						continue;
+					}
+				}
 				plannedDiffs.push({path: file.path, before: '', after: content});
 				actions.push({
 					type: 'ADD',
 					path: file.path,
-					reason: 'New template file added',
+					reason: getAddReason(file.path),
 				});
-				pendingOperations.push(async () => {
-					await fs.mkdir(path.dirname(targetPath), {recursive: true});
-					await fs.writeFile(targetPath, content);
+				pendingOperations.push({
+					path: file.path,
+					run: async () => {
+						await fs.mkdir(path.dirname(targetPath), {recursive: true});
+						await fs.writeFile(targetPath, content);
+					},
 				});
 			}
 		}
@@ -628,10 +795,13 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		actions.push({
 			type: 'ADD',
 			path: '.npmrc',
-			reason: 'Initial package manager configuration',
+			reason: getAddReason('.npmrc'),
 		});
-		pendingOperations.push(async () => {
-			await fs.writeFile(npmrcPath, npmrcContent);
+		pendingOperations.push({
+			path: '.npmrc',
+			run: async () => {
+				await fs.writeFile(npmrcPath, npmrcContent);
+			},
 		});
 	}
 
@@ -653,10 +823,13 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 			actions.push({
 				type: workspaceExists ? 'MODIFY' : 'ADD',
 				path: 'pnpm-workspace.yaml',
-				reason: 'Updated workspace configuration for pnpm',
+				reason: workspaceExists ? getModifyReason('pnpm-workspace.yaml') : getAddReason('pnpm-workspace.yaml'),
 			});
-			pendingOperations.push(async () => {
-				await fs.writeFile(workspacePath, workspaceYaml);
+			pendingOperations.push({
+				path: 'pnpm-workspace.yaml',
+				run: async () => {
+					await fs.writeFile(workspacePath, workspaceYaml);
+				},
 			});
 		}
 		delete finalPkg.workspaces;
@@ -684,63 +857,109 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 			actions.push({
 				type: 'MODIFY',
 				path: 'package.json',
-				reason: 'Updated dependencies and scripts to match latest template',
+				reason: getModifyReason('package.json'),
 			});
 		} else {
-			actions.push({type: 'ADD', path: 'package.json', reason: 'Initial project configuration'});
+			actions.push({type: 'ADD', path: 'package.json', reason: getAddReason('package.json')});
 		}
-		pendingOperations.push(async () => {
-			debug('Writing final consolidated package.json to: %s', pkgPath);
-			await fs.writeFile(pkgPath, newPkgContent);
+		pendingOperations.push({
+			path: 'package.json',
+			run: async () => {
+				debug('Writing final consolidated package.json to: %s', pkgPath);
+				await fs.writeFile(pkgPath, newPkgContent);
+			},
 		});
 	}
 
 	// If update, show summary and ask for confirmation
 	if (isUpdate && actions.length > 0 && process.env.NODE_ENV !== 'test') {
-		const summary = actions
-			.filter((a) => a.type !== 'SKIP')
-			.map((a) => `  ${a.type.padEnd(8)} ${a.path}`)
-			.join('\n');
+		const summary = formatActionSummary(actions);
 
 		if (summary) {
 			const relativeProjectDir = path.relative(process.cwd(), projectDir) || '.';
 			prompts.note(summary, `Planned changes in ${relativeProjectDir}:`);
+			const syncedPaths = new Set<string>();
+			const syncFile = async (filePath: string): Promise<void> => {
+				const operation = pendingOperations.find((candidate) => candidate.path === filePath && !syncedPaths.has(candidate.path));
+				if (operation === undefined) {
+					prompts.note('This file has no pending sync operation.', `Sync: ${filePath}`);
+					return;
+				}
+				await operation.run();
+				syncedPaths.add(filePath);
+				prompts.log.success(`Synced ${filePath}`);
+			};
 
 			let confirmed = false;
 			/* eslint-disable eslint/no-await-in-loop -- prompt loop is intentionally sequential */
 			while (!confirmed) {
-				const action = await prompts.select({
-					message: 'Choose next step:',
+				const selectedFile = await prompts.select({
+					message: 'Choose file to inspect or sync:',
 					options: [
-						{label: 'Show diff', value: 'show-diff'},
-						{label: 'Apply changes', value: 'apply'},
+						...plannedDiffs.map((entry) => ({
+							label: entry.path,
+							value: entry.path,
+							hint: `${syncedPaths.has(entry.path) ? 'synced; ' : ''}${actions.find((candidate) => candidate.path === entry.path)?.reason ?? 'Planned file change'}`,
+						})),
+						{label: 'Continue update', value: 'continue-update'},
 						{label: 'Cancel update', value: 'cancel'},
 					],
 				});
-				if (prompts.isCancel(action) || action === 'cancel') {
+				if (prompts.isCancel(selectedFile) || selectedFile === 'cancel') {
 					prompts.cancel('Update cancelled.');
 					process.exit(0);
 				}
-				if (action === 'show-diff') {
-					for (const entry of plannedDiffs) {
-						const diff = buildSimpleUnifiedDiff(entry.path, entry.before, entry.after);
-						prompts.note(diff, `Diff preview: ${entry.path}`);
+				if (selectedFile === 'continue-update') {
+					confirmed = true;
+					continue;
+				}
+				const fileActionOptions = syncedPaths.has(selectedFile)
+					? [
+							{label: 'Show diff', value: 'show-diff'},
+							{label: 'Back', value: 'back'},
+						]
+					: [
+							{label: 'Show diff', value: 'show-diff'},
+							{label: 'Sync file', value: 'sync-file'},
+							{label: 'Back', value: 'back'},
+						];
+				const fileAction = await prompts.select({
+					message: `Choose action for ${selectedFile}:`,
+					options: fileActionOptions,
+				});
+				if (prompts.isCancel(fileAction) || fileAction === 'back') {
+					continue;
+				}
+				if (fileAction === 'show-diff') {
+					const selectedDiff = plannedDiffs.find((entry) => entry.path === selectedFile);
+					if (selectedDiff !== undefined) {
+						const diff = buildSimpleUnifiedDiff(selectedDiff.path, selectedDiff.before, selectedDiff.after);
+						prompts.note(diff, `Diff preview: ${selectedDiff.path}`);
 					}
 					continue;
 				}
-				confirmed = true;
+				if (fileAction === 'sync-file') {
+					await syncFile(selectedFile);
+				}
 			}
 			/* eslint-enable eslint/no-await-in-loop */
+
+			await pendingOperations
+				.filter((operation) => !syncedPaths.has(operation.path))
+				.reduce(async (previous, operation) => {
+					await previous;
+					await operation.run();
+				}, Promise.resolve());
 		} else {
 			log.info('No changes detected.');
 		}
+	} else {
+		// Apply pending operations without prompts during tests and non-update scaffolding.
+		await pendingOperations.reduce(async (previous, operation) => {
+			await previous;
+			await operation.run();
+		}, Promise.resolve());
 	}
-
-	// Apply pending operations
-	await pendingOperations.reduce(async (previous, operation) => {
-		await previous;
-		await operation();
-	}, Promise.resolve());
 
 	const states: GeneratorState = {
 		gitInitialized: false,

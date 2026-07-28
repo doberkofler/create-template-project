@@ -46,8 +46,12 @@ node_modules/
 # Build output
 # ---------------------------
 dist/
-build/
+dist-demo/
+docs/
 coverage/
+.nyc_output/
+playwright-report/
+test-results/
 tmp/
 temp/
 .tmp/
@@ -57,12 +61,6 @@ temp/
 # TypeScript
 # ---------------------------
 *.tsbuildinfo
-
-# ---------------------------
-# Testing
-# ---------------------------
-coverage/
-.nyc_output/
 
 # ---------------------------
 # Package managers
@@ -92,3 +90,7 @@ coverage/
 # ---------------------------
 # Custom
 # ---------------------------
+
+# NOTE:
+# add custom ignores here
+

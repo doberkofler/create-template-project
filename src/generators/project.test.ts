@@ -792,7 +792,7 @@ describe('generateProject', () => {
 		expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining('Updated: p.txt'));
 	});
 
-	it('should allow showing diffs before applying update', async () => {
+	it('should allow showing an individual file diff before applying update', async () => {
 		const previousNodeEnv = process.env.NODE_ENV;
 		process.env.NODE_ENV = 'development';
 		const projectName = 'test-dry-run';
@@ -813,15 +813,106 @@ describe('generateProject', () => {
 			directory: projectPath,
 			update: true,
 		});
-		vi.mocked(p.select).mockResolvedValueOnce('show-diff').mockResolvedValueOnce('apply');
+		vi.mocked(p.select).mockResolvedValueOnce('.gitignore').mockResolvedValueOnce('show-diff').mockResolvedValueOnce('continue-update');
 
 		try {
 			await generateProject(opts);
 			const gitignoreAfter = await fs.readFile(path.join(projectPath, '.gitignore'), 'utf8');
 			expect(gitignoreAfter).toBeTypeOf('string');
-			expect(p.select).toHaveBeenCalledWith(expect.objectContaining({message: 'Choose next step:'}));
+			expect(p.select).toHaveBeenCalledWith(expect.objectContaining({message: 'Choose file to inspect or sync:'}));
+			expect(p.select).toHaveBeenCalledWith(expect.objectContaining({message: 'Choose action for .gitignore:'}));
 			expect(p.confirm).not.toHaveBeenCalled();
-			expect(p.note).toHaveBeenCalledWith(expect.stringContaining('--- a/'), expect.stringContaining('Diff preview:'));
+			expect(p.note).toHaveBeenCalledWith(expect.stringContaining('--- a/.gitignore'), 'Diff preview: .gitignore');
+		} finally {
+			process.env.NODE_ENV = previousNodeEnv;
+		}
+	});
+
+	it('should show missing starter files as skipped during update', async () => {
+		const previousNodeEnv = process.env.NODE_ENV;
+		process.env.NODE_ENV = 'development';
+		const projectName = 'test-update-skip-starter';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				files: [{path: 'tests/e2e/example.e2e-test.ts', content: 'test'}],
+				templateDir: undefined,
+			}),
+		);
+		vi.mocked(p.select).mockResolvedValueOnce('continue-update');
+
+		try {
+			await generateProject(
+				createProjectOptions({
+					template: 'cli',
+					projectName,
+					directory: projectPath,
+					update: true,
+				}),
+			);
+
+			const starterFileExists = await pathExists(path.join(projectPath, 'tests/e2e/example.e2e-test.ts'));
+			if (starterFileExists) {
+				throw new Error('Starter file should be skipped during update.');
+			}
+			expect(p.note).toHaveBeenCalledWith(
+				expect.stringContaining('SKIP     tests/e2e/example.e2e-test.ts - Starter/example project file - available but skipped during update'),
+				expect.stringContaining('Planned changes'),
+			);
+		} finally {
+			process.env.NODE_ENV = previousNodeEnv;
+		}
+	});
+
+	it('should show optional workflows as skipped during update', async () => {
+		const previousNodeEnv = process.env.NODE_ENV;
+		process.env.NODE_ENV = 'development';
+		const projectName = 'test-update-skip-optional-workflow';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+		vi.mocked(getBaseTemplate).mockReturnValue(
+			templateDefinitionFactory({
+				name: 'base',
+				files: [{path: '.github/workflows/pages.yml', content: 'name: Pages\n'}],
+				templateDir: undefined,
+			}),
+		);
+		vi.mocked(p.select).mockResolvedValueOnce('continue-update');
+
+		try {
+			await generateProject(
+				createProjectOptions({
+					template: 'cli',
+					projectName,
+					directory: projectPath,
+					update: true,
+				}),
+			);
+
+			const workflowExists = await pathExists(path.join(projectPath, '.github/workflows/pages.yml'));
+			if (workflowExists) {
+				throw new Error('Optional workflow should be skipped during update.');
+			}
+			expect(p.note).toHaveBeenCalledWith(
+				expect.stringContaining('SKIP     .github/workflows/pages.yml - Optional capability file - available but skipped during update'),
+				expect.stringContaining('Planned changes'),
+			);
 		} finally {
 			process.env.NODE_ENV = previousNodeEnv;
 		}
