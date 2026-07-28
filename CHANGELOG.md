@@ -1,3 +1,17 @@
+# [1.6.0](https://github.com/doberkofler/create-template-project/compare/v1.5.24...v1.6.0) (2026-07-28)
+
+### Bug Fixes
+
+* expose web-widget styles via package styles subpath ([ce428be](https://github.com/doberkofler/create-template-project/commit/ce428be9bfadf95115593c4e2b9dacf1fe9b1118))
+
+### Features
+
+* add docker command to convert an existing project to a template based one ([19f9a1c](https://github.com/doberkofler/create-template-project/commit/19f9a1cf4f98f8e4e56cb03a33f53496f275fb97))
+* improve doctor compare rules ([177fe4e](https://github.com/doberkofler/create-template-project/commit/177fe4ec577899551a3e330af53477d6563e4d22))
+* improve react tests ([b2f76b7](https://github.com/doberkofler/create-template-project/commit/b2f76b7bb69ffc6bb2d0a34ec26ffd0dccb9e27b))
+* improve the package.json update ([c75a4b9](https://github.com/doberkofler/create-template-project/commit/c75a4b9d832f61cc41a8e6a6012f49a5b9cb7640))
+* split stylelint.config.js ([5de5182](https://github.com/doberkofler/create-template-project/commit/5de5182eb2a3e98d474fe833b24df98338631c7d))
+
 ## [1.5.24](https://github.com/doberkofler/create-template-project/compare/v1.5.23...v1.5.24) (2026-07-26)
 
 ## [1.5.23](https://github.com/doberkofler/create-template-project/compare/v1.5.22...v1.5.23) (2026-07-25)
