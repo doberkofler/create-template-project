@@ -177,11 +177,11 @@
 			"description": "Native React testing utilities for Vitest browser mode."
 		},
 		"tsdown": {
-			"version": "0.22.9",
+			"version": "0.22.14",
 			"description": "Modern TypeScript library bundler powered by Rolldown."
 		},
 		"@tsdown/css": {
-			"version": "0.22.9",
+			"version": "0.22.14",
 			"description": "CSS support plugin for tsdown."
 		},
 		"typedoc": {
@@ -189,7 +189,7 @@
 			"description": "Documentation generator for TypeScript projects."
 		},
 		"stylelint": {
-			"version": "17.14.0",
+			"version": "17.14.1",
 			"description": "A mighty CSS linter that helps avoid errors and enforce conventions."
 		},
 		"stylelint-config-standard": {
