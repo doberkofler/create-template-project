@@ -37,6 +37,65 @@ vi.mock(import('./generators/info.js'), async () => {
 	return createTemplateInfoMock();
 });
 
+const getAdoptedTemplate = (value: unknown): string | undefined => {
+	if (typeof value !== 'object' || value === null || !('create-template-project' in value)) {
+		return undefined;
+	}
+	const config = value['create-template-project'];
+	if (typeof config !== 'object' || config === null || !('template' in config)) {
+		return undefined;
+	}
+	return typeof config.template === 'string' ? config.template : undefined;
+};
+
+const createCompatibleProject = async (directory: string, name: string): Promise<void> => {
+	await fs.mkdir(path.join(directory, 'src'), {recursive: true});
+	await fs.mkdir(path.join(directory, '.husky'), {recursive: true});
+	await fs.mkdir(path.join(directory, '.github', 'workflows'), {recursive: true});
+	await fs.writeFile(
+		path.join(directory, 'package.json'),
+		JSON.stringify({
+			name,
+			type: 'module',
+			scripts: {
+				typecheck: 'tsc --noEmit',
+				lint: 'oxlint',
+				'format:check': 'oxfmt --check',
+				ci: 'pnpm run typecheck && pnpm run test',
+				test: 'vitest run',
+			},
+			devDependencies: {
+				'@commitlint/cli': '1.0.0',
+				husky: '1.0.0',
+				oxfmt: '1.0.0',
+				oxlint: '1.0.0',
+				typescript: '1.0.0',
+				vite: '1.0.0',
+				vitest: '1.0.0',
+			},
+		}),
+	);
+
+	const filePaths = [
+		'tsconfig.json',
+		'vitest.config.ts',
+		'commitlint.config.js',
+		'.husky/pre-commit',
+		'.github/workflows/node.js.yml',
+		'oxc.config.ts',
+		'oxlint.config.ts',
+		'oxfmt.config.ts',
+		'src/index.ts',
+		'src/index.test.ts',
+		'vite.config.ts',
+	];
+	await Promise.all(
+		filePaths.map(async (filePath) => {
+			await fs.writeFile(path.join(directory, filePath), '');
+		}),
+	);
+};
+
 describe('cli', () => {
 	const originalArgv = process.argv;
 	let exitSpy: MockInstance<(code?: string | number | null) => never>;
@@ -72,6 +131,45 @@ describe('cli', () => {
 		process.argv.push('info', '-t', 'invalid');
 		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
 		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('Invalid template type'));
+	});
+
+	it('should validate a compatible project with doctor', async () => {
+		const tempDir = path.resolve('./temp-doctor-compatible');
+		await createCompatibleProject(tempDir, 'doctor-compatible');
+
+		process.argv.push('doctor', '-t', 'cli', '-d', tempDir);
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 0');
+		expect(p.note).toHaveBeenCalledWith(expect.stringContaining('Status: PASS'), 'Compatibility Check');
+		expect(p.log.success).toHaveBeenCalledWith(expect.stringContaining('Project is compatible'));
+
+		await fs.rm(tempDir, {recursive: true, force: true});
+	});
+
+	it('should reject an incompatible project with doctor', async () => {
+		const tempDir = path.resolve('./temp-doctor-incompatible');
+		await fs.mkdir(tempDir, {recursive: true});
+		await fs.writeFile(path.join(tempDir, 'package.json'), JSON.stringify({name: 'doctor-incompatible'}));
+
+		process.argv.push('doctor', '-t', 'cli', '-d', tempDir);
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');
+		expect(p.note).toHaveBeenCalledWith(expect.stringContaining('Status: FAIL'), 'Compatibility Check');
+		expect(p.log.error).toHaveBeenCalledWith(expect.stringContaining('not compatible enough'));
+
+		await fs.rm(tempDir, {recursive: true, force: true});
+	});
+
+	it('should adopt a compatible project', async () => {
+		const tempDir = path.resolve('./temp-adopt-compatible');
+		await createCompatibleProject(tempDir, 'adopt-compatible');
+
+		process.argv.push('adopt', '-t', 'cli', '-d', tempDir, '--yes');
+		await expect(parseArgs()).rejects.toThrow('Process exited with code 0');
+
+		const pkg = JSON.parse(await fs.readFile(path.join(tempDir, 'package.json'), 'utf8')) as unknown;
+		expect(getAdoptedTemplate(pkg)).toBe('cli');
+		expect(p.log.success).toHaveBeenCalledWith(expect.stringContaining('Project adopted as cli'));
+
+		await fs.rm(tempDir, {recursive: true, force: true});
 	});
 
 	it('should parse create command arguments', async () => {

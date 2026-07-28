@@ -170,6 +170,13 @@ let generateGeneratedMd: (
 const isTemplateType = (value: string): value is ProjectOptions['template'] =>
 	value === 'cli' || value === 'web-vanilla' || value === 'web-app' || value === 'web-fullstack';
 
+const getMissingProjectConfigMessage = (pkgPath: string): string =>
+	[
+		`No "create-template-project" configuration found in ${pkgPath}.`,
+		'The update command only runs after a project has been adopted by this tool.',
+		'Run "create-template-project doctor --template <type> --directory <dir>" to validate the structure, then "create-template-project adopt --template <type> --directory <dir>" to add the marker.',
+	].join(' ');
+
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
 const parseStringRecord = (value: unknown): Record<string, string> => {
@@ -324,9 +331,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		const existingPkg = parseExistingProjectPackage(await fs.readFile(pkgPath, 'utf8'));
 
 		if (!existingPkg['create-template-project']) {
-			throw new Error(
-				`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`,
-			);
+			throw new Error(getMissingProjectConfigMessage(pkgPath));
 		}
 
 		finalPkg = {

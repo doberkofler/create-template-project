@@ -6,6 +6,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import debugLib from 'debug';
 import {getAllTemplatesInfo, getTemplateInfo} from './generators/info.js';
+import {formatCompatibilityReport, validateProjectCompatibility} from './generators/project-compatibility.js';
 
 type StoredProjectConfig = {
 	template?: ProjectOptions['template'];
@@ -50,6 +51,11 @@ type UpdateCommandOptions = {
 	directory: string;
 	build?: boolean;
 	progress?: boolean;
+};
+
+type CompatibilityCommandOptions = {
+	template: string;
+	directory: string;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
@@ -135,6 +141,47 @@ const getDefaultGithubUsername = async (): Promise<string> => {
 	}
 };
 
+const getMissingProjectConfigMessage = (pkgPath: string): string =>
+	[
+		`No "create-template-project" configuration found in ${pkgPath}.`,
+		'The update command only runs after a project has been adopted by this tool.',
+		'If this project matches a template, run "create-template-project doctor --template <type> --directory <dir>" to validate it, then "create-template-project adopt --template <type> --directory <dir>" to add the marker.',
+	].join(' ');
+
+const parseTemplateOption = (template: string | undefined): ProjectOptions['template'] => {
+	const templateInput = stripQuotes(template);
+	const templateResult = TemplateTypeSchema.safeParse(templateInput);
+	if (!templateResult.success) {
+		p.log.error(`Invalid template type: ${template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
+		process.exit(1);
+	}
+	return templateResult.data;
+};
+
+const adoptProject = async (directory: string, template: ProjectOptions['template']): Promise<void> => {
+	const pkgPath = path.join(directory, 'package.json');
+	const parsed = JSON.parse(await fs.readFile(pkgPath, 'utf8')) as unknown;
+	if (!isRecord(parsed)) {
+		p.log.error(`Failed to adopt project: ${pkgPath} does not contain a JSON object.`);
+		process.exit(1);
+	}
+
+	await fs.writeFile(
+		pkgPath,
+		`${JSON.stringify(
+			{
+				...parsed,
+				'create-template-project': {
+					...(isRecord(parsed['create-template-project']) ? parsed['create-template-project'] : {}),
+					template,
+				},
+			},
+			null,
+			'\t',
+		)}\n`,
+	);
+};
+
 const debug = debugLib('create-template-project:cli');
 
 export const parseArgs = async (): Promise<ProjectOptions> => {
@@ -160,12 +207,6 @@ export const parseArgs = async (): Promise<ProjectOptions> => {
 		.addHelpText(
 			'after',
 			`
-Commands:
-  create      - Create a new project from a template.
-  update      - Update an existing project from its template.
-  interactive - Start interactive project configuration.
-  info        - Show detailed information about available templates and components.
-
 Templates:
   cli            - Node.js CLI application with commander and cli-progress.
   web-vanilla    - Standalone web page (modern HTML/JS).
@@ -207,6 +248,64 @@ Templates:
 			}
 
 			p.outro('Use "create" to scaffold a new project.');
+			process.exit(0);
+		});
+
+	program
+		.command('doctor')
+		.description('Check whether an existing project can be adopted for template updates')
+		.requiredOption('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.option('-d, --directory <path>', 'Project directory', '.')
+		.action(async (opts: CompatibilityCommandOptions) => {
+			debug('Executing "doctor" command with options: %O', opts);
+			const template = parseTemplateOption(opts.template);
+			const directory = path.resolve(opts.directory);
+			const report = await validateProjectCompatibility(directory, template);
+			p.note(formatCompatibilityReport(report), 'Compatibility Check');
+
+			if (!report.passed) {
+				p.log.error('Project is not compatible enough to adopt safely. Fix the failed checks and run doctor again.');
+				process.exit(1);
+			}
+
+			p.log.success(
+				`Project is compatible. Run "create-template-project adopt --template ${template} --directory ${directory}" to add the create-template-project marker.`,
+			);
+			process.exit(0);
+		});
+
+	program
+		.command('adopt')
+		.description('Validate an existing project and add the create-template-project update marker')
+		.requiredOption('-t, --template <type>', 'Template type (cli, web-vanilla, web-app, web-fullstack)')
+		.option('-d, --directory <path>', 'Project directory', '.')
+		.option('--yes', 'Adopt without confirmation', false)
+		.action(async (opts: CompatibilityCommandOptions & {yes?: boolean}) => {
+			debug('Executing "adopt" command with options: %O', opts);
+			const template = parseTemplateOption(opts.template);
+			const directory = path.resolve(opts.directory);
+			const report = await validateProjectCompatibility(directory, template);
+			p.note(formatCompatibilityReport(report), 'Compatibility Check');
+
+			if (!report.passed) {
+				p.log.error('Project is not compatible enough to adopt safely. Fix the failed checks and run doctor again.');
+				process.exit(1);
+			}
+
+			if (opts.yes !== true) {
+				const confirmed = await p.confirm({
+					message: `Add create-template-project marker for template "${template}" to ${path.join(directory, 'package.json')}?`,
+					initialValue: false,
+				});
+
+				if (p.isCancel(confirmed) || !confirmed) {
+					p.cancel('Adoption cancelled.');
+					process.exit(0);
+				}
+			}
+
+			await adoptProject(directory, template);
+			p.log.success(`Project adopted as ${template}. You can now run "create-template-project update --directory ${directory}".`);
 			process.exit(0);
 		});
 
@@ -306,20 +405,14 @@ Restrictions & Behavior:
 			const projectConfig = pkg['create-template-project'];
 			// eslint-disable-next-line @typescript-eslint/prefer-optional-chain
 			if (projectConfig === undefined || projectConfig.template === undefined) {
-				p.log.error(`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`);
+				p.log.error(getMissingProjectConfigMessage(pkgPath));
 				process.exit(1);
 			}
 
 			const storedTemplate = projectConfig.template;
 			let template = storedTemplate;
 			if (opts.template !== undefined) {
-				const templateInput = stripQuotes(opts.template);
-				const templateResult = TemplateTypeSchema.safeParse(templateInput);
-				if (!templateResult.success) {
-					p.log.error(`Invalid template type: ${opts.template}. Must be one of: cli, web-vanilla, web-app, web-fullstack`);
-					process.exit(1);
-				}
-				template = templateResult.data;
+				template = parseTemplateOption(opts.template);
 			}
 			commandResult = {
 				...opts,
@@ -457,9 +550,7 @@ Restrictions & Behavior:
 				}
 
 				if (!existingConfig.template) {
-					p.log.error(
-						`No "create-template-project" configuration found in ${pkgPath}. The update command can only be used on projects created with this tool.`,
-					);
+					p.log.error(getMissingProjectConfigMessage(pkgPath));
 					process.exit(1);
 				}
 				update = true;

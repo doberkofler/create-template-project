@@ -61,7 +61,7 @@ Running the tool without any command will display the help message.
 
 ### CLI Commands
 
-You can skip the wizard by using the `create` or `update` commands with the appropriate options.
+You can skip the wizard by using the `create`, `doctor`, `adopt`, or `update` commands with the appropriate options.
 
 #### Create a new project
 
@@ -74,6 +74,30 @@ create-template-project create --template cli --name my-cool-tool --path ./my-co
 ```bash
 create-template-project update --template cli
 ```
+
+`update` requires a `create-template-project` marker in `package.json` so the tool knows which template owns the project:
+
+```json
+{
+	"create-template-project": {
+		"template": "web-app"
+	}
+}
+```
+
+If a project has a compatible structure but was not originally created by this tool, validate it first:
+
+```bash
+create-template-project doctor --template web-app --directory .
+```
+
+If the compatibility check passes, adopt the project to add the marker:
+
+```bash
+create-template-project adopt --template web-app --directory .
+```
+
+After adoption, `update` can safely run against the project. `doctor` is read-only; `adopt` only writes the `create-template-project` marker after validation and confirmation.
 
 #### Global Options:
 
@@ -109,6 +133,12 @@ create-template-project update --template cli
 - `--dev`: Run the dev server after updating
 - `--open`: Open the browser after updating
 - `--no-progress`: Do not show progress indicators
+
+#### Command Options (doctor/adopt):
+
+- `-t, --template <type>`: Template type (`cli`, `web-vanilla`, `web-app`, `web-fullstack`)
+- `-d, --directory <path>`: Project directory (defaults to `.`)
+- `--yes`: Adopt without confirmation (`adopt` only)
 
 ## Project Templates
 
