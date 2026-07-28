@@ -20,32 +20,14 @@ import {configs as regexpConfigs} from 'eslint-plugin-regexp';
 /** Filter out core ESLint rules bundled into eslint-plugin-regexp recommended config */
 const regexpPluginRules = Object.fromEntries(Object.entries(regexpConfigs.recommended.rules).filter(([key]) => key.startsWith('regexp/')));
 
-const commonIgnore = [
-	'**/.*',
-	'node_modules/**',
-	'dist/**',
-	'build/**',
-	'coverage/**',
-	'temp/**',
-	'public/**',
-	'**/*.md',
-];
+const commonIgnore = ['**/.*', 'node_modules/**', 'dist/**', 'build/**', 'coverage/**', 'temp/**', 'public/**', '**/*.md'];
 
 export const linter = defineConfig({
 	options: {
 		typeAware: true,
 		typeCheck: true,
 	},
-	plugins: [
-		'unicorn',
-		'typescript',
-		'oxc',
-		'import',
-		'react',
-		'jsdoc',
-		'promise',
-		'vitest',
-	],
+	plugins: ['unicorn', 'typescript', 'oxc', 'import', 'react', 'jsdoc', 'promise', 'vitest'],
 	jsPlugins: ['eslint-plugin-regexp'],
 	categories: {
 		correctness: 'error',
@@ -100,7 +82,7 @@ export const linter = defineConfig({
 		'import/no-named-export': 'off',
 		'import/no-namespace': 'off', // TODO: consider enabling
 		'import/no-nodejs-modules': 'off',
-		'import/no-unassigned-import': ['error', {'allow': ['**/*.css']}],
+		'import/no-unassigned-import': ['error', {allow: ['**/*.css']}],
 		'import/prefer-default-export': 'off',
 		'import/no-default-export': 'off',
 		'jest/consistent-test-it': 'off',
@@ -169,7 +151,7 @@ export const linter = defineConfig({
 		'oxc/no-rest-spread-properties': 'off',
 		'unicorn/escape-case': 'off',
 		'unicorn/filename-case': 'off', // TODO: consider enabling
-		'unicorn/max-nested-calls': ['warn', {'max': 5}],
+		'unicorn/max-nested-calls': ['warn', {max: 5}],
 		'unicorn/no-array-reduce': 'off', // TODO: consider enabling
 		'unicorn/no-array-sort': 'off', // TODO: consider enabling
 		'unicorn/no-hex-escape': 'off',
@@ -231,19 +213,19 @@ export const linter = defineConfig({
 			linkComponents: [],
 			version: undefined,
 		},
-	jsdoc: {
-		ignorePrivate: false,
-		ignoreInternal: false,
-		ignoreReplacesDocs: true,
-		overrideReplacesDocs: true,
-		augmentsExtendsReplacesDocs: false,
-		implementsReplacesDocs: false,
-		exemptDestructuredRootsFromChecks: false,
-		tagNamePreference: {},
-	},
-	vitest: {
-		typecheck: false,
-	},
+		jsdoc: {
+			ignorePrivate: false,
+			ignoreInternal: false,
+			ignoreReplacesDocs: true,
+			overrideReplacesDocs: true,
+			augmentsExtendsReplacesDocs: false,
+			implementsReplacesDocs: false,
+			exemptDestructuredRootsFromChecks: false,
+			tagNamePreference: {},
+		},
+		vitest: {
+			typecheck: false,
+		},
 	},
 	env: {
 		builtin: true,
