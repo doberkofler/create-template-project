@@ -13,6 +13,7 @@ export default defineConfig({
 	},
 	test: {
 		include: ['src/lib/**/*.test.{ts,tsx}'],
+		setupFiles: ['./src/lib/test-setup.ts'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html', 'lcov'],
