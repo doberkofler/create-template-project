@@ -216,7 +216,7 @@ describe('generateProject', () => {
 
 		await expect(pathExists(projectPath)).resolves.toBe(true);
 		await expect(pathExists(path.join(projectPath, 'src/lib/widget.ts'))).resolves.toBe(true);
-		await expect(pathExists(path.join(projectPath, 'src/styles/widget.css'))).resolves.toBe(true);
+		await expect(pathExists(path.join(projectPath, 'src/styles/index.css'))).resolves.toBe(true);
 		await expect(pathExists(path.join(projectPath, 'tsdown.config.ts'))).resolves.toBe(true);
 		await expect(pathExists(path.join(projectPath, 'typedoc.json'))).resolves.toBe(true);
 
@@ -456,7 +456,7 @@ describe('generateProject', () => {
 					import: './dist/index.mjs',
 					default: './dist/index.mjs',
 				},
-				'./styles/scoped-search-bar.css': './dist/styles/scoped-search-bar.css',
+				'./styles.css': './dist/styles/index.css',
 			},
 			scripts: {
 				lint: 'oxlint',
@@ -485,7 +485,7 @@ describe('generateProject', () => {
 			peerDependencies: z.record(z.string(), z.string()),
 		});
 		const packageJson = adoptedWidgetPackageSchema.parse(JSON.parse(packageRaw));
-		expect(packageJson.exports).toHaveProperty('./styles/scoped-search-bar.css', './dist/styles/scoped-search-bar.css');
+		expect(packageJson.exports).toHaveProperty('./styles.css', './dist/styles/index.css');
 		expect(packageJson.exports).not.toHaveProperty('./styles/widget.css');
 		expect(packageJson.devDependencies.stylelint).toBe('17.14.1');
 		expect(packageJson.devDependencies.tsdown).toBe('0.22.14');

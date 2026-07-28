@@ -15,7 +15,7 @@
 			"import": "./dist/react.mjs",
 			"default": "./dist/react.mjs"
 		},
-		"./styles/widget.css": "./dist/styles/widget.css"
+		"./styles.css": "./dist/styles/index.css"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",

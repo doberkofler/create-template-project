@@ -1402,7 +1402,7 @@ getTemplateArchitectureSection = (template: string): string[] => {
 				'',
 				'### Source Files Generated',
 				'- **`src/lib/`**: The public widget implementation, exports, and optional React adapter subpath.',
-				'- **`src/styles/widget.css`**: The exported widget stylesheet and design tokens.',
+				'- **`src/styles/index.css`**: The exported widget stylesheet available through the package `./styles.css` subpath.',
 				'- **`src/demo/`**: The demo application used by Vite, Playwright, and screenshot generation.',
 				'',
 				'### How to Enhance',

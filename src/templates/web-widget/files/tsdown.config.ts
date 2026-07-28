@@ -16,5 +16,5 @@ export default defineConfig({
 	target: 'es2022',
 	platform: 'neutral',
 	sourcemap: true,
-	copy: [{from: 'src/styles/widget.css', to: 'dist/styles', flatten: true}],
+	copy: [{from: 'src/styles/index.css', to: 'dist/styles', flatten: true}],
 });
