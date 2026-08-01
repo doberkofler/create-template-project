@@ -1,3 +1,9 @@
+# [1.7.0](https://github.com/doberkofler/create-template-project/compare/v1.6.2...v1.7.0) (2026-08-01)
+
+### Features
+
+* improved ci script ([b7792d5](https://github.com/doberkofler/create-template-project/commit/b7792d56a8c5bac241763e1a580232decc3167ee))
+
 ## [1.6.2](https://github.com/doberkofler/create-template-project/compare/v1.6.1...v1.6.2) (2026-07-31)
 
 ## [1.6.1](https://github.com/doberkofler/create-template-project/compare/v1.6.0...v1.6.1) (2026-07-28)
