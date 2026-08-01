@@ -17,7 +17,7 @@
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
-			"version": "1.62.0",
+			"version": "1.62.1",
 			"description": "Framework for Web-browser automation."
 		},
 		"debug": {
@@ -121,15 +121,15 @@
 			"description": "Styled components for Emotion."
 		},
 		"@types/react": {
-			"version": "19.2.17",
+			"version": "19.2.18",
 			"description": "TypeScript definitions for React."
 		},
 		"@types/react-dom": {
-			"version": "19.2.3",
+			"version": "19.2.4",
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
-			"version": "1.62.0",
+			"version": "1.62.1",
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
