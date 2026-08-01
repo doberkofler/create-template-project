@@ -127,11 +127,14 @@ describe('generateProject', () => {
 		const pkg = await readPackageJson(projectPath);
 		expect(pkg.name).toBe(projectName);
 		expect(pkg.author).toBe('Test Author');
+		expect(pkg).toMatchObject({private: false});
 		expect(pkg.bin).toBe('./dist/index.js');
 		expect(pkg.dependencies).toHaveProperty('commander');
 		expect(pkg.devDependencies).toHaveProperty('conventional-changelog');
 		expect(pkg.devDependencies).toHaveProperty('conventional-changelog-angular');
 		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
+		expect(pkg.scripts.ci).toContain('npm run integration-test');
+		expect(pkg.scripts['integration-test']).toBe('node -e ""');
 
 		// Verify index.ts has hashbang
 		const indexContent = await fs.readFile(path.join(projectPath, 'src/index.ts'), 'utf8');
@@ -199,6 +202,9 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		await expect(pathExists(projectPath)).resolves.toBe(true);
 		await expect(pathExists(path.join(projectPath, 'index.html'))).resolves.toBe(true);
+		const pkg = await readPackageJson(projectPath);
+		expect(pkg.scripts.ci).toContain('npm run integration-test');
+		expect(pkg.scripts['integration-test']).toBe('playwright test');
 	});
 
 	it('should scaffold a web-widget project correctly', async () => {
@@ -231,6 +237,8 @@ describe('generateProject', () => {
 		expect(pkg.peerDependencies).toHaveProperty('react');
 		expect(pkg.scripts.ci).toContain('run build:lib');
 		expect(pkg.scripts.ci).toContain('run docs:api');
+		expect(pkg.scripts.ci).toContain('npm run integration-test');
+		expect(pkg.scripts['integration-test']).toBe('playwright test');
 	});
 
 	it('should scaffold a web-app project correctly', async () => {
@@ -246,6 +254,9 @@ describe('generateProject', () => {
 		await generateProject(opts);
 		await expect(pathExists(projectPath)).resolves.toBe(true);
 		await expect(pathExists(path.join(projectPath, 'src/index.tsx'))).resolves.toBe(true);
+		const pkg = await readPackageJson(projectPath);
+		expect(pkg.scripts.ci).toContain('npm run integration-test');
+		expect(pkg.scripts['integration-test']).toBe('playwright test');
 		const webAppOxcConfig = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
 		expect(webAppOxcConfig).not.toContain('node: true');
 	});
@@ -274,6 +285,8 @@ describe('generateProject', () => {
 		expect(pkg.workspaces).toContain('client');
 		expect(pkg.workspaces).toContain('server');
 		expect(pkg.scripts['create-changelog']).toBe('conventional-changelog -p angular -i CHANGELOG.md -s -r 0');
+		expect(pkg.scripts.ci).toContain('npm run integration-test');
+		expect(pkg.scripts['integration-test']).toBe('playwright test');
 
 		const fullstackOxcConfig = await fs.readFile(path.join(projectPath, 'oxc.config.ts'), 'utf8');
 		expect(fullstackOxcConfig).toContain('node: true');
@@ -344,6 +357,38 @@ describe('generateProject', () => {
 		// Verify scripts are updated
 		expect(pkg.scripts.build).toBe('pnpm -r run build');
 		expect(pkg.scripts.dev).toBe('pnpm -r run dev');
+	});
+
+	it('should use pnpm in generated Playwright server commands', async () => {
+		const cases = [
+			{template: 'web-vanilla', commands: ["command: 'pnpm run dev'"]},
+			{template: 'web-app', commands: ["command: 'pnpm run build && pnpm run start'"]},
+			{
+				template: 'web-fullstack',
+				commands: ["command: 'pnpm run build && node dist/index.js'", "cwd: './server'", "command: 'pnpm run dev'", "cwd: './client'"],
+			},
+		] as const;
+
+		await Promise.all(
+			cases.map(async ({template, commands}) => {
+				const projectPath = path.join(tmpDir, `test-pnpm-playwright-${template}`);
+				await generateProject(
+					createProjectOptions({
+						template,
+						projectName: `test-${template}`,
+						packageManager: 'pnpm',
+						directory: projectPath,
+					}),
+				);
+
+				const playwrightConfig = await fs.readFile(path.join(projectPath, 'playwright.config.ts'), 'utf8');
+				for (const command of commands) {
+					expect(playwrightConfig).toContain(command);
+				}
+				expect(playwrightConfig).not.toContain("command: 'npm ");
+				expect(playwrightConfig).not.toContain('{{packageManager}}');
+			}),
+		);
 	});
 
 	it('should create .npmrc for pnpm projects', async () => {

@@ -22,7 +22,7 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: 'npm run build && npm run start',
+		command: '{{packageManager}} run build && {{packageManager}} run start',
 		url: 'http://localhost:3000',
 		reuseExistingServer: !isCi,
 	},

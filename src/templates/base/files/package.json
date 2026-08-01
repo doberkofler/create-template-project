@@ -1,15 +1,16 @@
 {
 	"name": "{{projectName}}",
 	"version": "0.1.0",
-	"private": true,
+	"private": false,
 	"type": "module",
 	"scripts": {
 		"typecheck": "tsc --noEmit",
 		"lint": "oxlint",
 		"format": "oxfmt --write",
 		"format:check": "oxfmt --check",
-		"ci": "{{packageManager}} run typecheck && {{packageManager}} run lint && {{packageManager}} run format:check && {{packageManager}} run build && {{packageManager}} run test",
+		"ci": "{{packageManager}} run typecheck && {{packageManager}} run lint && {{packageManager}} run format:check && {{packageManager}} run build && {{packageManager}} run test && {{packageManager}} run integration-test",
 		"test": "vitest run --coverage",
+		"integration-test": "node -e \"\"",
 		"release": "release-it",
 		"create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
 		"prepare": "husky"

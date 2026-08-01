@@ -22,7 +22,7 @@ app.use(
 
 app.use(express.static(path.join(rootDir, '../../client/dist')));
 
-app.get('*', (_req, res) => {
+app.get('/{*path}', (_req, res) => {
 	res.sendFile(path.join(rootDir, '../../client/dist/index.html'));
 });
 

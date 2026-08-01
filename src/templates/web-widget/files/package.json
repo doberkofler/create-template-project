@@ -24,7 +24,7 @@
 		"lint:css:fix": "stylelint --fix 'src/{demo,styles}/**/*.css'",
 		"format": "oxfmt --write && stylelint --fix 'src/{demo,styles}/**/*.css'",
 		"format:check": "oxfmt --check",
-		"ci": "{{packageManager}} run typecheck && {{packageManager}} run lint && {{packageManager}} run lint:css && {{packageManager}} run format:check && {{packageManager}} run build:lib && {{packageManager}} run build && {{packageManager}} run docs:api && {{packageManager}} run test",
+		"ci": "{{packageManager}} run typecheck && {{packageManager}} run lint && {{packageManager}} run lint:css && {{packageManager}} run format:check && {{packageManager}} run build:lib && {{packageManager}} run build && {{packageManager}} run docs:api && {{packageManager}} run test && {{packageManager}} run integration-test",
 		"build:lib": "tsdown",
 		"build:demo": "vite build",
 		"docs:api": "typedoc",

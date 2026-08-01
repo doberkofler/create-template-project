@@ -5,9 +5,7 @@ test('has title', async ({page}) => {
 	await expect(page).toHaveTitle(/{{projectName}}/u);
 });
 
-test('api is reachable', async ({page}) => {
-	const response = await page.request.get('/api/hello');
-	expect(response.ok()).toBeTruthy();
-	const data: unknown = await response.json();
-	expect(data).toMatchObject({message: 'Hello from Express!'});
+test('app heading is visible', async ({page}) => {
+	await page.goto('/');
+	await expect(page.getByRole('heading', {name: 'Hello from React!'})).toBeVisible();
 });

@@ -10,7 +10,6 @@
 	},
 	"scripts": {
 		"dev": "vite build --watch",
-		"build": "vite build",
-		"integration-test": "node -e \"\""
+		"build": "vite build"
 	}
 }

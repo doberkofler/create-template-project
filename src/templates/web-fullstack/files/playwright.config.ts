@@ -23,12 +23,14 @@ export default defineConfig({
 	],
 	webServer: [
 		{
-			command: 'npm run dev --workspace=server',
-			port: 3000,
+			command: '{{packageManager}} run build && node dist/index.js',
+			cwd: './server',
+			port: 3001,
 			reuseExistingServer: !isCi,
 		},
 		{
-			command: 'npm run dev --workspace=client',
+			command: '{{packageManager}} run dev',
+			cwd: './client',
 			port: 5173,
 			reuseExistingServer: !isCi,
 		},

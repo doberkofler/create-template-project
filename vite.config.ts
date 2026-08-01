@@ -5,7 +5,7 @@ export default defineConfig({
 	build: {
 		ssr: true,
 		lib: {
-			entry: path.resolve(__dirname, 'src/index.ts'),
+			entry: path.resolve(import.meta.dirname, 'src/index.ts'),
 			formats: ['es'],
 			fileName: 'index',
 		},

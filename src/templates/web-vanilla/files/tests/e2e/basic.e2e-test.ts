@@ -7,5 +7,5 @@ test('has title', async ({page}) => {
 
 test('header is visible', async ({page}) => {
 	await page.goto('/');
-	await expect(page.locator('h1')).toBeVisible();
+	await expect(page.getByRole('heading', {name: '{{projectName}}', exact: true})).toBeVisible();
 });

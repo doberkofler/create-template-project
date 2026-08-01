@@ -40,7 +40,7 @@ export const getWebAppTemplate = (_opts: ProjectOptions): TemplateDefinition => 
 		test: 'vitest run',
 		'test:ui': 'vitest',
 		'integration-test': 'playwright test',
-		start: 'vite preview',
+		start: 'vite preview --port 3000 --strictPort',
 	},
 	files: [],
 	templateDir: getTemplateDir(import.meta.dirname, 'web-app'),
