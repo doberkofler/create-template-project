@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.2.0",
+			"version": "8.2.1",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -37,7 +37,7 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.1.2",
+			"version": "26.2.0",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
@@ -45,7 +45,7 @@
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
-			"version": "8.1.0",
+			"version": "8.1.1",
 			"description": "Generate a changelog from git metadata."
 		},
 		"conventional-changelog-angular": {
@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.76.0",
+			"version": "1.77.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.61.0",
+			"version": "0.62.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -105,11 +105,11 @@
 			"description": "React package for working with the DOM."
 		},
 		"@mui/material": {
-			"version": "9.2.0",
+			"version": "9.3.1",
 			"description": "Material UI components."
 		},
 		"@mui/icons-material": {
-			"version": "9.2.0",
+			"version": "9.3.1",
 			"description": "Material Design icons distributed as SVG React components."
 		},
 		"@emotion/react": {
@@ -157,7 +157,7 @@
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
-			"version": "21.0.0",
+			"version": "21.0.1",
 			"description": "Interactive release-tool for Git repositories."
 		},
 		"cors": {
