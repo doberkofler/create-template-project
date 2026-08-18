@@ -17,30 +17,32 @@ const setForwardedRef = (ref: ForwardedRef<DemoWidgetInstance>, value: DemoWidge
 };
 
 export const DemoWidget = forwardRef<DemoWidgetInstance, DemoWidgetReactProps>((props, ref): ReactElement => {
-	const {message, ...mountOptions} = props;
+	const {message} = props;
+	const initialOptionsRef = useRef<DemoWidgetOptions>(props);
 	const hostRef = useRef<HTMLDivElement | null>(null);
 	const instanceRef = useRef<DemoWidgetInstance | null>(null);
 
 	useEffect(() => {
 		const host = hostRef.current;
 		if (host === null) {
-			return (): void => {
-				setForwardedRef(ref, null);
-			};
+			throw new Error('Widget host was not mounted.');
 		}
 
-		const instance = new NativeDemoWidget(host, {...mountOptions, ...(message === undefined ? {} : {message})});
+		const instance = new NativeDemoWidget(host, initialOptionsRef.current);
 		instanceRef.current = instance;
-		setForwardedRef(ref, instance);
 
 		return (): void => {
 			instanceRef.current = null;
-			setForwardedRef(ref, null);
 			instance.destroy();
 		};
-		// Mount-only options are intentionally captured once. Mutable props are synced below through native setters.
-		// oxlint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	useEffect(() => {
+		setForwardedRef(ref, instanceRef.current);
+		return (): void => {
+			setForwardedRef(ref, null);
+		};
+	}, [ref]);
 
 	useEffect(() => {
 		if (message !== undefined) {
