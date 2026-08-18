@@ -1,3 +1,9 @@
+# [1.8.0](https://github.com/doberkofler/create-template-project/compare/v1.7.2...v1.8.0) (2026-08-18)
+
+### Bug Fixes
+
+* **web-widget:** make React wrapper compiler-safe ([26d75db](https://github.com/doberkofler/create-template-project/commit/26d75db77899ff5ed9e1291d03ba8b8216ef8ffd))
+
 ## [1.7.2](https://github.com/doberkofler/create-template-project/compare/v1.7.1...v1.7.2) (2026-08-10)
 
 ## [1.7.1](https://github.com/doberkofler/create-template-project/compare/v1.7.0...v1.7.1) (2026-08-10)
