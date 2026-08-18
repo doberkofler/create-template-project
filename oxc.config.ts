@@ -35,6 +35,7 @@ export const linter = defineConfig({
 	},
 	rules: {
 		...regexpPluginRules,
+		'eslint/capitalized-comments': 'off', // TODO: consider enabling
 		'eslint/complexity': 'off', // TODO: consider enabling
 		'eslint/curly': ['error', 'all'],
 		'eslint/id-length': 'off',
@@ -44,7 +45,6 @@ export const linter = defineConfig({
 		'eslint/max-lines-per-function': 'off', // TODO: consider enabling
 		'eslint/max-params': 'off', // TODO: consider enabling
 		'eslint/max-statements': 'off', // TODO: consider enabling
-		'eslint/capitalized-comments': 'off', // TODO: consider enabling
 		'eslint/no-await-in-loop': 'warn',
 		'eslint/no-console': 'off',
 		'eslint/no-continue': 'off',
@@ -55,6 +55,7 @@ export const linter = defineConfig({
 		'eslint/no-warning-comments': 'off',
 		'eslint/no-undefined': 'off', // TODO: consider enabling
 		'eslint/no-plusplus': 'off',
+		'eslint/one-var': 'off',
 		'eslint/sort-imports': 'off',
 		'eslint/sort-keys': 'off',
 		'eslint/no-ternary': 'off',

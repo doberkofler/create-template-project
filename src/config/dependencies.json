@@ -25,11 +25,11 @@
 			"description": "A tiny JavaScript debugging utility modelled after Node.js core debugging technique."
 		},
 		"@commitlint/cli": {
-			"version": "21.2.1",
+			"version": "21.2.2",
 			"description": "Lint commit messages to ensure they follow conventional commits."
 		},
 		"@commitlint/config-conventional": {
-			"version": "21.2.0",
+			"version": "21.2.2",
 			"description": "Shareable commitlint config enforcing conventional commits."
 		},
 		"@types/debug": {
@@ -45,11 +45,11 @@
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
-			"version": "8.1.1",
+			"version": "8.1.3",
 			"description": "Generate a changelog from git metadata."
 		},
 		"conventional-changelog-angular": {
-			"version": "9.2.1",
+			"version": "9.3.0",
 			"description": "Angular preset for conventional-changelog."
 		},
 		"husky": {
@@ -157,7 +157,7 @@
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
-			"version": "21.0.1",
+			"version": "21.0.2",
 			"description": "Interactive release-tool for Git repositories."
 		},
 		"cors": {
@@ -169,7 +169,7 @@
 			"description": "TypeScript definitions for cors."
 		},
 		"eslint-plugin-regexp": {
-			"version": "3.1.1",
+			"version": "3.2.0",
 			"description": "ESLint plugin for finding regexp mistakes and style guide violations."
 		},
 		"vitest-browser-react": {
