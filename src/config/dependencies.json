@@ -9,11 +9,11 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "4.1.10",
+			"version": "4.1.11",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "4.1.10",
+			"version": "4.1.11",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
@@ -41,7 +41,7 @@
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "4.1.10",
+			"version": "4.1.11",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.78.0",
+			"version": "1.79.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.63.0",
+			"version": "0.64.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -74,7 +74,7 @@
 			"fixed": true
 		},
 		"vitest": {
-			"version": "4.1.10",
+			"version": "4.1.11",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
