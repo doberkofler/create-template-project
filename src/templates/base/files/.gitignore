@@ -52,6 +52,7 @@ coverage/
 .nyc_output/
 playwright-report/
 test-results/
+.vitest-attachments/
 tmp/
 temp/
 .tmp/
