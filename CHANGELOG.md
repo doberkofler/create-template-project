@@ -1,3 +1,9 @@
+# [1.9.0](https://github.com/doberkofler/create-template-project/compare/v1.8.0...v1.9.0) (2026-08-19)
+
+### Features
+
+* **dependencies:** support fixed versions and age-aware updates ([c74c435](https://github.com/doberkofler/create-template-project/commit/c74c435a89f2b7575c77b123734140fefd526a57))
+
 # [1.8.0](https://github.com/doberkofler/create-template-project/compare/v1.7.2...v1.8.0) (2026-08-18)
 
 ### Bug Fixes
