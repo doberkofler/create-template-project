@@ -70,7 +70,8 @@
 		},
 		"typescript": {
 			"version": "6.0.3",
-			"description": "A superset of JavaScript that compiles to clean JavaScript output."
+			"description": "A superset of JavaScript that compiles to clean JavaScript output.",
+			"fixed": true
 		},
 		"vitest": {
 			"version": "4.1.10",
