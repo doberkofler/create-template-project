@@ -1,3 +1,13 @@
+# [1.10.0](https://github.com/doberkofler/create-template-project/compare/v1.9.0...v1.10.0) (2026-08-20)
+
+### Bug Fixes
+
+* add vitest ignore ([86fd5ce](https://github.com/doberkofler/create-template-project/commit/86fd5ce30f96794c093e33a4729ec85b16b0c9d4))
+
+### Features
+
+* **ci:** configure parallel coveralls reporting in template workflow ([16356b3](https://github.com/doberkofler/create-template-project/commit/16356b34e43273951d9a1f0a1171071f07bde79c))
+
 # [1.9.0](https://github.com/doberkofler/create-template-project/compare/v1.8.0...v1.9.0) (2026-08-19)
 
 ### Features
