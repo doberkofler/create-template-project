@@ -1,3 +1,5 @@
+## [1.10.1](https://github.com/doberkofler/create-template-project/compare/v1.10.0...v1.10.1) (2026-08-23)
+
 # [1.10.0](https://github.com/doberkofler/create-template-project/compare/v1.9.0...v1.10.0) (2026-08-20)
 
 ### Bug Fixes
