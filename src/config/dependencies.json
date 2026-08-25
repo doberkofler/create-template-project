@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.79.0",
+			"version": "1.80.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.64.0",
+			"version": "0.65.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -126,7 +126,7 @@
 			"description": "TypeScript definitions for React."
 		},
 		"@types/react-dom": {
-			"version": "19.2.4",
+			"version": "19.2.5",
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
@@ -146,7 +146,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.101.4",
+			"version": "5.102.2",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
