@@ -5,7 +5,7 @@
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
-			"version": "6.1.0",
+			"version": "6.1.1",
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
@@ -37,7 +37,7 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.3.0",
+			"version": "26.4.0",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
@@ -106,11 +106,11 @@
 			"description": "React package for working with the DOM."
 		},
 		"@mui/material": {
-			"version": "9.3.1",
+			"version": "9.4.0",
 			"description": "Material UI components."
 		},
 		"@mui/icons-material": {
-			"version": "9.3.1",
+			"version": "9.4.0",
 			"description": "Material Design icons distributed as SVG React components."
 		},
 		"@emotion/react": {
@@ -146,15 +146,15 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.102.5",
+			"version": "5.102.8",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
-			"version": "4.4.3",
+			"version": "4.5.2",
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
-			"version": "7.18.2",
+			"version": "7.18.3",
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
