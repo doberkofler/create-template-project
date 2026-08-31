@@ -150,7 +150,7 @@
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
-			"version": "4.5.2",
+			"version": "4.5.4",
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
