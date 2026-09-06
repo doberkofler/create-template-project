@@ -9,15 +9,15 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "4.1.11",
+			"version": "5.0.0",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "4.1.11",
+			"version": "5.0.0",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
-			"version": "1.62.1",
+			"version": "1.63.0",
 			"description": "Framework for Web-browser automation."
 		},
 		"debug": {
@@ -37,11 +37,11 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.4.0",
+			"version": "26.4.1",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "4.1.11",
+			"version": "5.0.0",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.80.0",
+			"version": "1.81.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.65.0",
+			"version": "0.66.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -74,7 +74,7 @@
 			"fixed": true
 		},
 		"vitest": {
-			"version": "4.1.11",
+			"version": "5.0.0",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
@@ -126,11 +126,11 @@
 			"description": "TypeScript definitions for React."
 		},
 		"@types/react-dom": {
-			"version": "19.2.5",
+			"version": "19.2.7",
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
-			"version": "1.62.1",
+			"version": "1.63.0",
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
@@ -170,19 +170,19 @@
 			"description": "TypeScript definitions for cors."
 		},
 		"eslint-plugin-regexp": {
-			"version": "3.2.0",
+			"version": "3.3.0",
 			"description": "ESLint plugin for finding regexp mistakes and style guide violations."
 		},
 		"vitest-browser-react": {
-			"version": "2.2.0",
+			"version": "2.3.0",
 			"description": "Native React testing utilities for Vitest browser mode."
 		},
 		"tsdown": {
-			"version": "0.22.14",
+			"version": "0.23.0",
 			"description": "Modern TypeScript library bundler powered by Rolldown."
 		},
 		"@tsdown/css": {
-			"version": "0.22.14",
+			"version": "0.23.0",
 			"description": "CSS support plugin for tsdown."
 		},
 		"typedoc": {
@@ -190,7 +190,7 @@
 			"description": "Documentation generator for TypeScript projects."
 		},
 		"stylelint": {
-			"version": "17.14.1",
+			"version": "17.15.0",
 			"description": "A mighty CSS linter that helps avoid errors and enforce conventions."
 		},
 		"stylelint-config-standard": {
