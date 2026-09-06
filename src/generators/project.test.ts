@@ -32,6 +32,14 @@ const createProjectOptions = (overrides: Partial<ProjectOptions> & Pick<ProjectO
 
 const createExitCodeError = (message: string, exitCode: number): Error & {exitCode: number} => Object.assign(new Error(message), {exitCode});
 
+const getNextMajorVersion = (version: string): string => {
+	const match = /^(?<major>\d+)\./u.exec(version);
+	if (match?.groups?.major === undefined) {
+		throw new Error(`Expected an exact semantic version, received "${version}".`);
+	}
+	return `${Number(match.groups.major) + 1}.0.0`;
+};
+
 const templateDefinitionFactory = (overrides: Partial<TemplateDefinition>): TemplateDefinition => ({
 	name: 'base',
 	description: 'base template',
@@ -484,6 +492,13 @@ describe('generateProject', () => {
 	it('should preserve adopted web-widget package publish fields and newer dependency versions on update', async () => {
 		const projectName = 'test-adopted-widget-package';
 		const projectPath = path.join(tmpDir, projectName);
+		const dependencyConfigRaw = await fs.readFile(path.resolve(import.meta.dirname, '../config/dependencies.json'), 'utf8');
+		const parsedDependencyConfig = JSON.parse(dependencyConfigRaw) as unknown;
+		const dependencySchema = z.object({version: z.string()});
+		const dependenciesSchema = z.record(z.string(), dependencySchema);
+		const dependencyConfig = z.object({dependencies: dependenciesSchema}).parse(parsedDependencyConfig);
+		const newerStylelintVersion = getNextMajorVersion(dependencyConfig.dependencies.stylelint.version);
+		const newerTsdownVersion = getNextMajorVersion(dependencyConfig.dependencies.tsdown.version);
 		await fs.mkdir(projectPath, {recursive: true});
 		const existingPackageJson = {
 			name: projectName,
@@ -507,8 +522,8 @@ describe('generateProject', () => {
 				lint: 'oxlint',
 			},
 			devDependencies: {
-				stylelint: '17.14.1',
-				tsdown: '0.22.14',
+				stylelint: newerStylelintVersion,
+				tsdown: newerTsdownVersion,
 			},
 			'create-template-project': {template: 'web-widget'},
 		};
@@ -532,8 +547,8 @@ describe('generateProject', () => {
 		const packageJson = adoptedWidgetPackageSchema.parse(JSON.parse(packageRaw));
 		expect(packageJson.exports).toHaveProperty('./styles.css', './dist/styles/index.css');
 		expect(packageJson.exports).not.toHaveProperty('./styles/widget.css');
-		expect(packageJson.devDependencies.stylelint).toBe('17.14.1');
-		expect(packageJson.devDependencies.tsdown).toBe('0.22.14');
+		expect(packageJson.devDependencies.stylelint).toBe(newerStylelintVersion);
+		expect(packageJson.devDependencies.tsdown).toBe(newerTsdownVersion);
 		expect(packageJson).toMatchObject({private: false});
 		expect(packageJson.scripts).toHaveProperty('start', 'vite preview --port 4173 --strictPort');
 		expect(packageJson.peerDependencies).toHaveProperty('react', '>=18.0.0');
