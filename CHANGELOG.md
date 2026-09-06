@@ -1,3 +1,5 @@
+# [1.11.0](https://github.com/doberkofler/create-template-project/compare/v1.10.3...v1.11.0) (2026-09-06)
+
 ## [1.10.3](https://github.com/doberkofler/create-template-project/compare/v1.10.2...v1.10.3) (2026-08-31)
 
 ## [1.10.2](https://github.com/doberkofler/create-template-project/compare/v1.10.1...v1.10.2) (2026-08-30)
