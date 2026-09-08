@@ -351,7 +351,7 @@ describe('generateProject', () => {
 		// Verify package.json does NOT have workspaces
 		const pkg = await readPackageJson(projectPath);
 		expect(pkg.workspaces).toBeUndefined();
-		expect(pkg.packageManager).toBe('pnpm@11.16.0');
+		expect(pkg.packageManager).toBeUndefined();
 
 		// Verify pnpm-workspace.yaml exists
 		const workspaceYaml = await fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8');
@@ -413,8 +413,35 @@ describe('generateProject', () => {
 		await generateProject(opts);
 
 		const pkg = await readPackageJson(projectPath);
-		expect(pkg.packageManager).toBe('pnpm@11.16.0');
+		expect(pkg.packageManager).toBeUndefined();
 		await expect(fs.readFile(path.join(projectPath, '.npmrc'), 'utf8')).resolves.toBe('resolution-mode=highest\nnode-linker=hoisted\n');
+	});
+
+	it('should remove an existing pnpm package manager pin on update', async () => {
+		const projectName = 'test-remove-pnpm-package-manager';
+		const projectPath = path.join(tmpDir, projectName);
+		await fs.mkdir(projectPath, {recursive: true});
+		await fs.writeFile(
+			path.join(projectPath, 'package.json'),
+			JSON.stringify({
+				name: projectName,
+				packageManager: 'pnpm@11.16.0',
+				'create-template-project': {template: 'cli'},
+			}),
+		);
+
+		await generateProject(
+			createProjectOptions({
+				template: 'cli',
+				projectName,
+				packageManager: 'pnpm',
+				directory: projectPath,
+				update: true,
+			}),
+		);
+
+		const pkg = await readPackageJson(projectPath);
+		expect(pkg.packageManager).toBeUndefined();
 	});
 
 	it('should create empty .npmrc for non-pnpm projects', async () => {

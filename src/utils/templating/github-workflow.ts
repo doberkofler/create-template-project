@@ -3,7 +3,7 @@ import {type ContentProcessor} from './types.js';
 const WORKFLOW_PNPM_SETUP = `      - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 9
+          version: latest
           run_install: false`;
 
 const WORKFLOW_PLAYWRIGHT_SETUP = `      - name: Install Playwright Browsers & Deps

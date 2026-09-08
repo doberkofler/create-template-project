@@ -37,6 +37,7 @@ describe('github workflow processor', () => {
 		const opts = {...baseOpts, packageManager: 'pnpm' as const};
 		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts, addedDeps: []});
 		expect(processed).toContain('uses: pnpm/action-setup@v6');
+		expect(processed).toContain('version: latest');
 	});
 
 	it('should remove PM_SETUP if not pnpm', () => {

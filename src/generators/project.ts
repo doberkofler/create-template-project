@@ -9,7 +9,6 @@ import {getProjectTemplates} from '#templates/registry.js';
 
 const debug = debugLib('create-template-project:generator');
 const moduleDir = import.meta.dirname;
-const PNPM_PACKAGE_MANAGER_VERSION = 'pnpm@11.16.0';
 const PNPM_NPMRC_CONTENT = 'resolution-mode=highest\nnode-linker=hoisted\n';
 
 const pathExists = async (filePath: string): Promise<boolean> => {
@@ -831,8 +830,8 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 
 	// Apply final programmatic overrides
 	const pm = opts.packageManager;
-	if (pm === 'pnpm') {
-		finalPkg.packageManager = PNPM_PACKAGE_MANAGER_VERSION;
+	if (typeof finalPkg.packageManager === 'string' && finalPkg.packageManager.startsWith('pnpm@')) {
+		delete finalPkg.packageManager;
 	}
 
 	const npmrcPath = path.join(projectDir, '.npmrc');
