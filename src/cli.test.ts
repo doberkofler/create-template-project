@@ -587,7 +587,8 @@ describe('cli', () => {
 			.mockResolvedValueOnce('.')
 			.mockResolvedValueOnce('Test Description')
 			.mockResolvedValueOnce('test, keywords')
-			.mockResolvedValueOnce('Test Author');
+			.mockResolvedValueOnce('Test Author')
+			.mockResolvedValueOnce('test-github-user');
 		vi.mocked(p.select).mockResolvedValueOnce('update');
 
 		await expect(parseArgs()).rejects.toThrow('Process exited with code 1');

@@ -299,7 +299,7 @@ Templates:
 					initialValue: false,
 				});
 
-				if (p.isCancel(confirmed) || !confirmed) {
+				if (p.isCancel(confirmed) || confirmed !== true) {
 					p.cancel('Adoption cancelled.');
 					process.exit(0);
 				}
@@ -446,7 +446,7 @@ Restrictions & Behavior:
 				validate: (value = '') => (value.length > 0 ? undefined : 'Project name is required'),
 			});
 
-			if (p.isCancel(projectName)) {
+			if (p.isCancel(projectName) || typeof projectName !== 'string') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -456,7 +456,7 @@ Restrictions & Behavior:
 				initialValue: '.',
 			});
 
-			if (p.isCancel(directory)) {
+			if (p.isCancel(directory) || typeof directory !== 'string') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -491,7 +491,7 @@ Restrictions & Behavior:
 				defaultValue: existingDescription,
 			});
 
-			if (p.isCancel(projectDescription)) {
+			if (p.isCancel(projectDescription) || typeof projectDescription !== 'string') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -502,7 +502,7 @@ Restrictions & Behavior:
 				defaultValue: existingKeywords.join(', '),
 			});
 
-			if (p.isCancel(projectKeywords)) {
+			if (p.isCancel(projectKeywords) || typeof projectKeywords !== 'string') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -516,7 +516,7 @@ Restrictions & Behavior:
 				validate: (value = '') => (value.length > 0 ? undefined : 'Author name is required'),
 			});
 
-			if (p.isCancel(author)) {
+			if (p.isCancel(author) || typeof author !== 'string') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -530,7 +530,7 @@ Restrictions & Behavior:
 				validate: (value = '') => (value.length > 0 ? undefined : 'GitHub username is required'),
 			});
 
-			if (p.isCancel(githubUsername)) {
+			if (p.isCancel(githubUsername) || typeof githubUsername !== 'string') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -625,7 +625,7 @@ Restrictions & Behavior:
 				initialValue: true,
 			});
 
-			if (p.isCancel(build)) {
+			if (p.isCancel(build) || typeof build !== 'boolean') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}
@@ -635,7 +635,7 @@ Restrictions & Behavior:
 				initialValue: false,
 			});
 
-			if (p.isCancel(createGithubRepositoryRes)) {
+			if (p.isCancel(createGithubRepositoryRes) || typeof createGithubRepositoryRes !== 'boolean') {
 				p.cancel('Operation cancelled.');
 				process.exit(0);
 			}

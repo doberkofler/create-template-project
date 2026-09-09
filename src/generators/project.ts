@@ -959,7 +959,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 						{label: 'Cancel update', value: 'cancel'},
 					],
 				});
-				if (prompts.isCancel(selectedFile) || selectedFile === 'cancel') {
+				if (prompts.isCancel(selectedFile) || typeof selectedFile !== 'string' || selectedFile === 'cancel') {
 					prompts.cancel('Update cancelled.');
 					process.exit(0);
 				}
