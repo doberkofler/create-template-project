@@ -37,7 +37,7 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.5.0",
+			"version": "26.5.1",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
@@ -98,11 +98,11 @@
 			"description": "TypeScript definitions for Express."
 		},
 		"react": {
-			"version": "19.2.8",
+			"version": "19.3.0",
 			"description": "A JavaScript library for building user interfaces."
 		},
 		"react-dom": {
-			"version": "19.2.8",
+			"version": "19.3.0",
 			"description": "React package for working with the DOM."
 		},
 		"@mui/material": {
@@ -122,11 +122,11 @@
 			"description": "Styled components for Emotion."
 		},
 		"@types/react": {
-			"version": "19.2.18",
+			"version": "19.3.0",
 			"description": "TypeScript definitions for React."
 		},
 		"@types/react-dom": {
-			"version": "19.2.7",
+			"version": "19.3.0",
 			"description": "TypeScript definitions for React DOM."
 		},
 		"@playwright/test": {
@@ -150,7 +150,7 @@
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
-			"version": "4.5.4",
+			"version": "4.6.1",
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
