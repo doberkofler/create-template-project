@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.2.2",
+			"version": "8.3.0",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -150,7 +150,7 @@
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
-			"version": "4.6.1",
+			"version": "4.6.2",
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
