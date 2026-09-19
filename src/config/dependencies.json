@@ -9,11 +9,11 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "5.0.0",
+			"version": "5.0.1",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "5.0.0",
+			"version": "5.0.1",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
@@ -37,11 +37,11 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.5.1",
+			"version": "26.6.1",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "5.0.0",
+			"version": "5.0.1",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -57,15 +57,15 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.82.0",
+			"version": "1.83.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
-			"version": "7.0.2001",
+			"version": "7.0.2002",
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.67.0",
+			"version": "0.68.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -74,7 +74,7 @@
 			"fixed": true
 		},
 		"vitest": {
-			"version": "5.0.0",
+			"version": "5.0.1",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
@@ -134,31 +134,31 @@
 			"description": "End-to-end testing framework."
 		},
 		"@trpc/server": {
-			"version": "11.18.0",
+			"version": "11.19.0",
 			"description": "tRPC server library."
 		},
 		"@trpc/client": {
-			"version": "11.18.0",
+			"version": "11.19.0",
 			"description": "tRPC client library."
 		},
 		"@trpc/react-query": {
-			"version": "11.18.0",
+			"version": "11.19.0",
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.102.8",
+			"version": "5.103.1",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
-			"version": "4.6.2",
+			"version": "4.6.5",
 			"description": "TypeScript-first schema validation with static type inference."
 		},
 		"react-router-dom": {
-			"version": "7.18.3",
+			"version": "7.18.4",
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
-			"version": "21.0.2",
+			"version": "21.0.3",
 			"description": "Interactive release-tool for Git repositories."
 		},
 		"cors": {

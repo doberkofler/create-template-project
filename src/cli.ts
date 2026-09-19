@@ -299,7 +299,7 @@ Templates:
 					initialValue: false,
 				});
 
-				if (p.isCancel(confirmed) || confirmed !== true) {
+				if (p.isCancel(confirmed) || !confirmed) {
 					p.cancel('Adoption cancelled.');
 					process.exit(0);
 				}
