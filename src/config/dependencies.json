@@ -37,7 +37,7 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.6.1",
+			"version": "26.6.2",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
@@ -158,7 +158,7 @@
 			"description": "Declarative routing for React web applications."
 		},
 		"release-it": {
-			"version": "21.0.3",
+			"version": "21.1.0",
 			"description": "Interactive release-tool for Git repositories."
 		},
 		"cors": {
