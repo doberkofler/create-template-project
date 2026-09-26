@@ -25,5 +25,6 @@ export default defineConfig({
 		command: '{{packageManager}} run build && {{packageManager}} run start',
 		url: 'http://localhost:4173',
 		reuseExistingServer: !isCi,
+		gracefulShutdown: {signal: 'SIGTERM', timeout: 5000},
 	},
 });

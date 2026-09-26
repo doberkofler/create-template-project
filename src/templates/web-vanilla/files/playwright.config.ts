@@ -25,5 +25,6 @@ export default defineConfig({
 		command: '{{packageManager}} run dev',
 		url: 'http://localhost:5173',
 		reuseExistingServer: !isCi,
+		gracefulShutdown: {signal: 'SIGTERM', timeout: 5000},
 	},
 });

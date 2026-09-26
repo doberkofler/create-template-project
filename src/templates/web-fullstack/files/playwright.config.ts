@@ -27,12 +27,14 @@ export default defineConfig({
 			cwd: './server',
 			port: 3001,
 			reuseExistingServer: !isCi,
+			gracefulShutdown: {signal: 'SIGTERM', timeout: 5000},
 		},
 		{
 			command: '{{packageManager}} run dev',
 			cwd: './client',
 			port: 5173,
 			reuseExistingServer: !isCi,
+			gracefulShutdown: {signal: 'SIGTERM', timeout: 5000},
 		},
 	],
 });
