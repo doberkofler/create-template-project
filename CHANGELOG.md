@@ -1,3 +1,9 @@
+# [1.12.0](https://github.com/doberkofler/create-template-project/compare/v1.11.4...v1.12.0) (2026-09-26)
+
+### Bug Fixes
+
+* gracefully shut down template web servers in Playwright tests ([14b9c1e](https://github.com/doberkofler/create-template-project/commit/14b9c1eab04909e85cadce8195e4bab7df8ea639))
+
 ## [1.11.4](https://github.com/doberkofler/create-template-project/compare/v1.11.3...v1.11.4) (2026-09-23)
 
 ## [1.11.3](https://github.com/doberkofler/create-template-project/compare/v1.11.2...v1.11.3) (2026-09-20)
