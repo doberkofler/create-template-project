@@ -9,11 +9,11 @@
 			"description": "The default Vite plugin for React projects."
 		},
 		"@vitest/browser": {
-			"version": "5.0.1",
+			"version": "5.0.3",
 			"description": "Run Vitest in the browser."
 		},
 		"@vitest/browser-playwright": {
-			"version": "5.0.1",
+			"version": "5.0.3",
 			"description": "Playwright provider for Vitest browser mode."
 		},
 		"playwright": {
@@ -37,11 +37,11 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.6.2",
+			"version": "26.6.3",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
-			"version": "5.0.1",
+			"version": "5.0.3",
 			"description": "V8 coverage provider for Vitest."
 		},
 		"conventional-changelog": {
@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.85.0",
+			"version": "1.86.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.70.0",
+			"version": "0.71.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -74,7 +74,7 @@
 			"fixed": true
 		},
 		"vitest": {
-			"version": "5.0.1",
+			"version": "5.0.3",
 			"description": "A Vite-native unit test framework."
 		},
 		"commander": {
@@ -146,7 +146,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.103.2",
+			"version": "5.104.0",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
