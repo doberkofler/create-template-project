@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.3.1",
+			"version": "8.3.2",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -37,7 +37,7 @@
 			"description": "TypeScript definitions for debug."
 		},
 		"@types/node": {
-			"version": "26.6.3",
+			"version": "26.6.4",
 			"description": "TypeScript definitions for Node.js."
 		},
 		"@vitest/coverage-v8": {
@@ -146,7 +146,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.104.0",
+			"version": "5.104.1",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
@@ -190,7 +190,7 @@
 			"description": "Documentation generator for TypeScript projects."
 		},
 		"stylelint": {
-			"version": "17.15.0",
+			"version": "17.16.0",
 			"description": "A mighty CSS linter that helps avoid errors and enforce conventions."
 		},
 		"stylelint-config-standard": {
