@@ -19,23 +19,34 @@ We follow the **Conventional Commits** specification. This is **enforced** by `c
 - `fix(parser): handle empty input gracefully`
 - `docs: update contributing guidelines`
 
-## Release Process
+## Dependency Updates and Releases
 
-To release a new version:
+Dependencies and releases are driven by the **`update-dependencies`** GitHub Actions workflow (`.github/workflows/update-dependencies.yml`), run manually from the Actions tab or the terminal:
 
 ```sh
-pnpm release -- patch   # or minor / major
+gh workflow run update-dependencies.yml
 ```
 
-This will automatically:
-1. Run the CI suite (`pnpm run ci`).
-2. Bump the version in `package.json`.
-3. Update the `CHANGELOG.md` using `conventional-changelog` with the Angular preset.
-4. Commit, tag, and push the changes.
-5. Create a GitHub release with auto-generated notes.
-6. Publish to npm (if configured).
+The workflow:
 
-**Note:** NPM publishing is **disabled** by default for new projects. To enable it:
-1. Set `"private": false` in `package.json`.
-2. Set `"publish": true` in `.release-it.json`.
-3. Ensure you have the necessary `NPM_TOKEN` configured.
+1. Installs dependencies with the lockfile frozen.
+2. Updates dependencies to the newest versions that satisfy the configured **minimum release age** (see below).
+3. Runs formatting and the full CI suite; it **stops immediately** if anything fails.
+4. Commits and pushes the updates (`chore: update dependencies`) when there are changes.
+5. Runs `release-it` for a **patch** release and publishes to npm using **trusted publishing** (OIDC) — no tokens.
+
+### Minimum release age
+
+To reduce supply-chain risk, dependencies are not updated until they have been published for a while. This is enforced per package manager:
+
+- **pnpm** — `minimumReleaseAge` in `pnpm-workspace.yaml` (minutes)
+- **Yarn** — `npmMinimalAgeGate` in `.yarnrc.yml`
+- **npm** — `min-release-age` in `.npmrc` (days)
+
+### npm trusted publishing
+
+Publishing uses npm's OIDC trusted publishing instead of an `NPM_TOKEN`. Configure it once per package on [npmjs.com](https://www.npmjs.com): open the package, then **Settings → Trusted Publisher → GitHub Actions**, and enter the repository owner, repository name, and workflow filename `update-dependencies.yml`. The package's `repository.url` in `package.json` must match the GitHub repository exactly.
+
+### Manual release
+
+Running `pnpm run release` locally only bumps the version, updates `CHANGELOG.md`, creates the git tag, and creates the GitHub release. It does **not** publish to npm; publishing happens exclusively through the workflow.

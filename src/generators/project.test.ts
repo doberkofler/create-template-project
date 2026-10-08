@@ -355,6 +355,7 @@ describe('generateProject', () => {
 
 		// Verify pnpm-workspace.yaml exists
 		const workspaceYaml = await fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8');
+		expect(workspaceYaml).toContain('minimumReleaseAge: 1440');
 		expect(workspaceYaml).toContain("- 'client'");
 		expect(workspaceYaml).toContain("- 'server'");
 
@@ -415,6 +416,7 @@ describe('generateProject', () => {
 		const pkg = await readPackageJson(projectPath);
 		expect(pkg.packageManager).toBeUndefined();
 		await expect(fs.readFile(path.join(projectPath, '.npmrc'), 'utf8')).resolves.toBe('resolution-mode=highest\nnode-linker=hoisted\n');
+		await expect(fs.readFile(path.join(projectPath, 'pnpm-workspace.yaml'), 'utf8')).resolves.toBe('minimumReleaseAge: 1440\n');
 	});
 
 	it('should remove an existing pnpm package manager pin on update', async () => {
@@ -444,26 +446,31 @@ describe('generateProject', () => {
 		expect(pkg.packageManager).toBeUndefined();
 	});
 
-	it('should create empty .npmrc for non-pnpm projects', async () => {
-		const packageManagers = ['npm', 'yarn'] as const;
-
-		await Promise.all(
-			packageManagers.map(async (packageManager) => {
-				const projectName = `test-no-npmrc-${packageManager}`;
-				const projectPath = path.join(tmpDir, projectName);
-				const opts = createProjectOptions({
-					template: 'cli',
-					projectName,
-					packageManager,
-					directory: projectPath,
-					update: false,
-				});
-
-				await generateProject(opts);
-
-				await expect(fs.readFile(path.join(projectPath, '.npmrc'), 'utf8')).resolves.toBe('');
+	it('should create package-manager specific config for non-pnpm projects', async () => {
+		const npmProjectPath = path.join(tmpDir, 'test-npm-config');
+		await generateProject(
+			createProjectOptions({
+				template: 'cli',
+				projectName: 'test-npm-config',
+				packageManager: 'npm',
+				directory: npmProjectPath,
+				update: false,
 			}),
 		);
+		await expect(fs.readFile(path.join(npmProjectPath, '.npmrc'), 'utf8')).resolves.toBe('min-release-age=1\n');
+
+		const yarnProjectPath = path.join(tmpDir, 'test-yarn-config');
+		await generateProject(
+			createProjectOptions({
+				template: 'cli',
+				projectName: 'test-yarn-config',
+				packageManager: 'yarn',
+				directory: yarnProjectPath,
+				update: false,
+			}),
+		);
+		await expect(fs.readFile(path.join(yarnProjectPath, '.npmrc'), 'utf8')).resolves.toBe('');
+		await expect(fs.readFile(path.join(yarnProjectPath, '.yarnrc.yml'), 'utf8')).resolves.toBe('npmMinimalAgeGate: "1d"\n');
 	});
 
 	it('should preserve existing .npmrc for pnpm projects on update', async () => {

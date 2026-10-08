@@ -10,6 +10,9 @@ import {getProjectTemplates} from '#templates/registry.js';
 const debug = debugLib('create-template-project:generator');
 const moduleDir = import.meta.dirname;
 const PNPM_NPMRC_CONTENT = 'resolution-mode=highest\nnode-linker=hoisted\n';
+const NPM_NPMRC_CONTENT = 'min-release-age=1\n';
+const YARN_YARNRC_CONTENT = 'npmMinimalAgeGate: "1d"\n';
+const MINIMUM_RELEASE_AGE_MINUTES = 1440;
 
 const pathExists = async (filePath: string): Promise<boolean> => {
 	try {
@@ -140,6 +143,9 @@ const getAddReason = (filePath: string): string => {
 	if (normalizedPath === '.npmrc') {
 		return 'Package manager configuration required by the template';
 	}
+	if (normalizedPath === '.yarnrc.yml') {
+		return 'Yarn configuration enforcing a minimum release age';
+	}
 	if (normalizedPath === 'pnpm-workspace.yaml') {
 		return 'Workspace configuration required by pnpm';
 	}
@@ -168,6 +174,9 @@ const getModifyReason = (filePath: string): string => {
 	const normalizedPath = toPosixPath(filePath);
 	if (normalizedPath === 'package.json') {
 		return 'Update dependencies, scripts, and template metadata';
+	}
+	if (normalizedPath === '.yarnrc.yml') {
+		return 'Update Yarn configuration';
 	}
 	if (normalizedPath === 'pnpm-workspace.yaml') {
 		return 'Update workspace configuration for pnpm';
@@ -844,7 +853,7 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 			reason: 'Existing package manager configuration - preserved on update',
 		});
 	} else if (!npmrcExists) {
-		const npmrcContent = pm === 'pnpm' ? PNPM_NPMRC_CONTENT : '';
+		const npmrcContent = pm === 'pnpm' ? PNPM_NPMRC_CONTENT : pm === 'npm' ? NPM_NPMRC_CONTENT : '';
 		plannedDiffs.push({path: '.npmrc', before: '', after: npmrcContent});
 		actions.push({
 			type: 'ADD',
@@ -859,9 +868,36 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 		});
 	}
 
-	if (pm === 'pnpm' && finalPkg.workspaces) {
+	if (pm === 'yarn') {
+		const yarnrcPath = path.join(projectDir, '.yarnrc.yml');
+		const yarnrcExists = await pathExists(yarnrcPath);
+
+		if (isUpdate && yarnrcExists) {
+			actions.push({
+				type: 'SKIP',
+				path: '.yarnrc.yml',
+				reason: 'Existing package manager configuration - preserved on update',
+			});
+		} else if (!yarnrcExists) {
+			plannedDiffs.push({path: '.yarnrc.yml', before: '', after: YARN_YARNRC_CONTENT});
+			actions.push({
+				type: 'ADD',
+				path: '.yarnrc.yml',
+				reason: getAddReason('.yarnrc.yml'),
+			});
+			pendingOperations.push({
+				path: '.yarnrc.yml',
+				run: async () => {
+					await fs.writeFile(yarnrcPath, YARN_YARNRC_CONTENT);
+				},
+			});
+		}
+	}
+
+	if (pm === 'pnpm') {
 		debug('Creating pnpm-workspace.yaml');
-		const workspaceYaml = `packages:\n${finalPkg.workspaces.map((w: string) => `  - '${w}'`).join('\n')}\n`;
+		const packagesSection = finalPkg.workspaces ? `packages:\n${finalPkg.workspaces.map((w: string) => `  - '${w}'`).join('\n')}\n` : '';
+		const workspaceYaml = `minimumReleaseAge: ${MINIMUM_RELEASE_AGE_MINUTES}\n${packagesSection}`;
 		const workspacePath = path.join(projectDir, 'pnpm-workspace.yaml');
 		const workspaceExists = await pathExists(workspacePath);
 
@@ -886,12 +922,15 @@ export const generateProject = async (opts: ProjectOptions): Promise<void> => {
 				},
 			});
 		}
-		delete finalPkg.workspaces;
 
-		for (const key of Object.keys(finalPkg.scripts)) {
-			const value = finalPkg.scripts[key];
-			if (typeof value === 'string' && value.includes('--workspaces')) {
-				finalPkg.scripts[key] = value.replace(' run ', ' -r run ').replace(' --workspaces', '');
+		if (finalPkg.workspaces) {
+			delete finalPkg.workspaces;
+
+			for (const key of Object.keys(finalPkg.scripts)) {
+				const value = finalPkg.scripts[key];
+				if (typeof value === 'string' && value.includes('--workspaces')) {
+					finalPkg.scripts[key] = value.replace(' run ', ' -r run ').replace(' --workspaces', '');
+				}
 			}
 		}
 	}

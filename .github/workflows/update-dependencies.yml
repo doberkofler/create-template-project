@@ -1,0 +1,79 @@
+name: update-dependencies
+
+on:
+  workflow_dispatch:
+    inputs:
+      min-release-age:
+        description: Minimum release age (days) for template dependencies
+        required: false
+        default: "1"
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: update-dependencies
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: latest
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: "pnpm"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Upgrade npm (required for trusted publishing)
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update template dependency versions
+        run: pnpm run dependencies-update -- --min-release-age ${{ inputs.min-release-age }}
+
+      - name: Update root dependencies
+        run: pnpm up --latest
+
+      - name: Format
+        run: pnpm run format
+
+      - name: Lint, build and unit test
+        run: pnpm run ci
+
+      - name: Integration test
+        run: pnpm run integration-test
+
+      - name: Commit and push dependency updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No dependency changes to commit."
+          else
+            git commit -m "chore: update dependencies" --no-verify
+            git push
+          fi
+
+      - name: Release
+        run: pnpm exec release-it patch --ci --npm.publish --npm.skipChecks --no-hooks.before:init
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

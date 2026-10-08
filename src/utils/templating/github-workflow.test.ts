@@ -32,6 +32,25 @@ describe('github workflow processor', () => {
 		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts, addedDeps: []})).toBe('pnpm install --frozen-lockfile');
 	});
 
+	it('should replace updateCommand for npm', () => {
+		const content = '{{updateCommand}}';
+		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/update-dependencies.yml', opts: baseOpts, addedDeps: []})).toBe(
+			'npx --yes npm-check-updates -u && npm install',
+		);
+	});
+
+	it('should replace updateCommand for pnpm', () => {
+		const content = '{{updateCommand}}';
+		const opts = {...baseOpts, packageManager: 'pnpm' as const};
+		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/update-dependencies.yml', opts, addedDeps: []})).toBe('pnpm up --latest');
+	});
+
+	it('should replace updateCommand for yarn', () => {
+		const content = '{{updateCommand}}';
+		const opts = {...baseOpts, packageManager: 'yarn' as const};
+		expect(githubWorkflowProcessor(content, {filePath: '.github/workflows/update-dependencies.yml', opts, addedDeps: []})).toBe('yarn up');
+	});
+
 	it('should handle PM_SETUP for pnpm', () => {
 		const content = '# [PM_SETUP]';
 		const opts = {...baseOpts, packageManager: 'pnpm' as const};

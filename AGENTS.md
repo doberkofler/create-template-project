@@ -91,6 +91,24 @@ Every generated project MUST include:
 - `typescript`: Strict mode configuration.
 - `AGENTS.md` & `README.md`: With appropriate badges and instructions.
 - `CONTRIBUTING.md`: Basic contribution guidelines.
+- `update-dependencies` GitHub Actions workflow: Manual-dispatch job that updates dependencies, gates on CI, commits, and releases via npm trusted publishing (OIDC). See "Automated Dependency Updates and Releases".
+
+### Automated Dependency Updates and Releases
+
+Generated projects (and this repository) ship `.github/workflows/update-dependencies.yml`. It is triggered manually (`gh workflow run update-dependencies.yml`) and:
+
+1. Updates dependencies to the newest versions satisfying the configured minimum release age.
+2. Runs the full CI suite and stops immediately on failure (nothing is committed).
+3. Commits and pushes updates when there are changes.
+4. Runs `release-it` for a patch release and publishes via npm trusted publishing (OIDC).
+
+Minimum release age is enforced per package manager and is emitted by the generator:
+
+- **pnpm** — `minimumReleaseAge` in `pnpm-workspace.yaml` (minutes).
+- **Yarn** — `npmMinimalAgeGate` in `.yarnrc.yml` (duration string).
+- **npm** — `min-release-age` in `.npmrc` (days).
+
+`{{updateCommand}}` in workflow templates resolves to the package-manager-specific bumper (`pnpm up --latest`, `yarn up`, or `npx --yes npm-check-updates -u && npm install`). `npm-check-updates` reads each manager's native minimum-release-age config automatically. Local `pnpm run release` never publishes; publishing happens only through the workflow.
 
 ## Mandatory Completion Protocol (Definition of Done)
 

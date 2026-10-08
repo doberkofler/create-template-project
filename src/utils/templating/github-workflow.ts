@@ -17,12 +17,15 @@ export const githubWorkflowProcessor: ContentProcessor = (content, {filePath, op
 	const {template, packageManager: pm} = opts;
 
 	let installCommand = 'npm ci';
+	let updateCommand = 'npx --yes npm-check-updates -u && npm install';
 	let pmSetup = '';
 	if (pm === 'pnpm') {
 		installCommand = 'pnpm install --frozen-lockfile';
+		updateCommand = 'pnpm up --latest';
 		pmSetup = WORKFLOW_PNPM_SETUP;
 	} else if (pm === 'yarn') {
 		installCommand = 'yarn install --frozen-lockfile';
+		updateCommand = 'yarn up';
 	}
 
 	let playwrightSetup = '';
@@ -35,6 +38,7 @@ export const githubWorkflowProcessor: ContentProcessor = (content, {filePath, op
 
 	let processed = content
 		.replaceAll('{{installCommand}}', installCommand)
+		.replaceAll('{{updateCommand}}', updateCommand)
 		.replaceAll('# [PM_SETUP]', pmSetup)
 		.replaceAll('# [PLAYWRIGHT_SETUP]', playwrightSetup);
 
