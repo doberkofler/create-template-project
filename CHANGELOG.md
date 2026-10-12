@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/doberkofler/create-template-project/compare/v1.12.2...v1.13.0) (2026-10-12)
+
+### Features
+
+* add dependencies-release script and require Node 24 ([620e2bd](https://github.com/doberkofler/create-template-project/commit/620e2bd76d87793d53ced69c2d3d8df77082375e))
+* automate dependency updates and releases ([0d558ca](https://github.com/doberkofler/create-template-project/commit/0d558ca9ee6d54e6268a0f9feee22b381f4dc0f7))
+
 ## [1.12.2](https://github.com/doberkofler/create-template-project/compare/v1.12.1...v1.12.2) (2026-10-03)
 
 ## [1.12.1](https://github.com/doberkofler/create-template-project/compare/v1.12.0...v1.12.1) (2026-10-02)
