@@ -1,6 +1,9 @@
-import {describe, it, expect} from 'vitest';
-import {githubWorkflowProcessor} from './github-workflow.js';
+import {readFileSync} from 'node:fs';
+
 import {type ProjectOptions} from '#shared/types.js';
+import {describe, expect, it} from 'vitest';
+
+import {githubWorkflowProcessor} from './github-workflow.js';
 
 describe('github workflow processor', () => {
 	const baseOpts: ProjectOptions = {
@@ -57,6 +60,11 @@ describe('github workflow processor', () => {
 		const processed = githubWorkflowProcessor(content, {filePath: '.github/workflows/ci.yml', opts, addedDeps: []});
 		expect(processed).toContain('uses: pnpm/action-setup@v6');
 		expect(processed).toContain('version: latest');
+	});
+
+	it('should explicitly configure pnpm in the repository CI workflow', () => {
+		const workflow = readFileSync(new URL('../../../.github/workflows/node.js.yml', import.meta.url), 'utf8');
+		expect(workflow).toContain('uses: pnpm/action-setup@v6\n        with:\n          version: latest');
 	});
 
 	it('should remove PM_SETUP if not pnpm', () => {
