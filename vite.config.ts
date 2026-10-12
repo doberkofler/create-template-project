@@ -11,7 +11,7 @@ export default defineConfig({
 		},
 		outDir: 'dist',
 		emptyOutDir: true,
-		target: 'node22',
+		target: 'node24',
 	},
 	test: {
 		exclude: ['**/node_modules/**', '**/dist/**', 'src/templates/**/files/**', 'temp/**'],

@@ -61,6 +61,7 @@
 		"build": "vite build && node scripts/copy-templates.ts",
 		"dependencies-check": "node scripts/dependencies.ts",
 		"dependencies-update": "node scripts/dependencies.ts --update",
+		"dependencies-release": "node scripts/dependencies-release.ts",
 		"test": "vitest run --coverage --exclude '**/*.integration.*.test.ts'",
 		"run-interactive": "node ./dist/index.js interactive",
 		"integration-test:cli": "rimraf --max-retries=3 ./temp/cli && node ./dist/index.js create --package-manager=pnpm --build --debug --no-progress --template=cli --name=cli --author=\"Jon Doe\" --github-username=\"jon-doe\" --path=./temp/cli",
@@ -101,6 +102,6 @@
 		"vitest": "5.0.3"
 	},
 	"engines": {
-		"node": ">=22"
+		"node": ">=24"
 	}
 }

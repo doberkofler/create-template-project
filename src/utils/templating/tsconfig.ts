@@ -38,7 +38,10 @@ export const tsconfigProcessor: ContentProcessor = (content, {filePath, opts}) =
 	}
 
 	if (template === 'web-fullstack') {
-		processed = processed.replace(/"include":\s*\[\s*"src\/\*\*\/\*"\s*\]/u, '"include": ["client/src/**/*", "server/src/**/*"]');
+		processed = processed.replace(
+			/"include":\s*\[\s*"src\/\*\*\/\*"\s*(?:,\s*"scripts\/\*\*\/\*"\s*)?\]/u,
+			'"include": ["client/src/**/*", "server/src/**/*", "scripts/**/*"]',
+		);
 	}
 
 	return processed;

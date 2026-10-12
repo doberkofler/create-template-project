@@ -33,7 +33,7 @@ describe('tsconfig processor', () => {
 		const content = '"include": ["src/**/*"]';
 		const opts = {...baseOpts, template: 'web-fullstack' as const};
 		const processed = tsconfigProcessor(content, {filePath: 'tsconfig.json', opts, addedDeps: []});
-		expect(processed).toContain('"include": ["client/src/**/*", "server/src/**/*"]');
+		expect(processed).toContain('"include": ["client/src/**/*", "server/src/**/*", "scripts/**/*"]');
 	});
 
 	it('should NOT replace include for web-app', () => {

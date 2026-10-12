@@ -11,6 +11,7 @@
 		"ci": "{{packageManager}} run typecheck && {{packageManager}} run lint && {{packageManager}} run format:check && {{packageManager}} run build && {{packageManager}} run test && {{packageManager}} run integration-test",
 		"test": "vitest run --coverage",
 		"integration-test": "node -e \"\"",
+		"dependencies-release": "node scripts/dependencies-release.ts",
 		"release": "release-it",
 		"create-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
 		"prepare": "husky"

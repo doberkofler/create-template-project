@@ -37,7 +37,7 @@ A modern project built with {{projectName}}, emphasizing type safety, performanc
 ### Language & Runtime
 
 - **TypeScript:** Strict mode is mandatory. Use explicit types for function boundaries.
-- **Node.js:** Targets >= 22.0.0.
+- **Node.js:** Targets >= 24.0.0.
 - **ESM:** The project uses ES Modules (`"type": "module"` in `package.json`).
 
 ### Imports

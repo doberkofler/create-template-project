@@ -303,7 +303,7 @@ describe('generateProject', () => {
 		const tsconfig = await fs.readFile(path.join(projectPath, 'tsconfig.json'), 'utf8');
 		expect(tsconfig).toContain('"lib": ["ES2023", "DOM", "DOM.Iterable"]');
 		expect(tsconfig).toContain('"jsx": "react-jsx"');
-		expect(tsconfig).toContain('"include": ["client/src/**/*", "server/src/**/*"]');
+		expect(tsconfig).toContain('"include": ["client/src/**/*", "server/src/**/*", "scripts/**/*"]');
 
 		// Verify CONTRIBUTING.md contains dependencies
 		const contributing = await fs.readFile(path.join(projectPath, 'CONTRIBUTING.md'), 'utf8');
@@ -1365,6 +1365,42 @@ describe('generateProject', () => {
 		const rootConfig = path.resolve(__dirname, '../../vite.config.ts');
 		const rootContent = await fs.readFile(rootConfig, 'utf8');
 		expect(rootContent).toContain("'lcov'");
+	});
+
+	it('should scaffold the dependency release script for every template', async () => {
+		const templates = ['cli', 'web-vanilla', 'web-widget', 'web-app', 'web-fullstack'] as const;
+
+		await Promise.all(
+			templates.map(async (template) => {
+				const projectName = `test-dependencies-release-${template}`;
+				const projectPath = path.join(tmpDir, projectName);
+				await generateProject(
+					createProjectOptions({
+						template,
+						projectName,
+						directory: projectPath,
+						update: false,
+						progress: false,
+					}),
+				);
+
+				const scriptPath = path.join(projectPath, 'scripts/dependencies-release.ts');
+				await expect(pathExists(scriptPath)).resolves.toBe(true);
+
+				const scriptContent = await fs.readFile(scriptPath, 'utf8');
+				expect(scriptContent).toContain('update-dependencies.yml');
+				expect(scriptContent).not.toContain('{{');
+				// Template workflows declare no workflow_dispatch inputs.
+				expect(scriptContent).not.toContain('min-release-age');
+
+				const pkg = await readPackageJson(projectPath);
+				expect(pkg.scripts['dependencies-release']).toBe('node scripts/dependencies-release.ts');
+
+				// The script is only type-checked and linted when it is part of the program.
+				const tsconfig = await fs.readFile(path.join(projectPath, 'tsconfig.json'), 'utf8');
+				expect(tsconfig).toContain('"scripts/**/*"');
+			}),
+		);
 	});
 
 	it('should overwrite oxc.config.ts on update instead of merging', async () => {

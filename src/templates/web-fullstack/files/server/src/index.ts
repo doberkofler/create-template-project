@@ -7,7 +7,9 @@ import path from 'node:path';
 
 const rootDir = import.meta.dirname;
 const app = express();
-const port = Number(process.env['PORT'] ?? 3001);
+// Destructured so the port keeps working with `noPropertyAccessFromIndexSignature`.
+const {PORT} = process.env;
+const port = Number(PORT ?? 3001);
 
 app.use(cors());
 app.use(express.json());

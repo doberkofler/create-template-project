@@ -137,7 +137,7 @@ describe('file utils', () => {
 			const processed = processContent('tsconfig.json', content, optsFullstack, []);
 			expect(processed).toContain('"lib": ["ES2023", "DOM", "DOM.Iterable"]');
 			expect(processed).toContain('"jsx": "react-jsx"');
-			expect(processed).toContain('"include": ["client/src/**/*", "server/src/**/*"]');
+			expect(processed).toContain('"include": ["client/src/**/*", "server/src/**/*", "scripts/**/*"]');
 		});
 
 		it('should handle GitHub Actions workflow generation for web-fullstack with pnpm', () => {
