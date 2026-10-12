@@ -58,6 +58,15 @@ jobs:
       - name: Lint, build and unit test
         run: pnpm run ci
 
+      # NOTE: The generated web templates run Playwright in their integration tests.
+      # The Chromium revision must match the Playwright version pinned by the
+      # dependency update step above, so it is read from src/config/dependencies.json.
+      - name: Install Playwright Browsers & Deps
+        run: |
+          version="$(node -p "require('./src/config/dependencies.json').dependencies['playwright'].version")"
+          echo "Installing Chromium for playwright@${version}"
+          npx --yes "playwright@${version}" install --with-deps chromium
+
       - name: Integration test
         run: pnpm run integration-test
 
