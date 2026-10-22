@@ -1,3 +1,10 @@
+## [1.13.2](https://github.com/doberkofler/create-template-project/compare/v1.13.1...v1.13.2) (2026-10-22)
+
+### Bug Fixes
+
+* **ci:** configure pnpm version for node workflow ([e318f28](https://github.com/doberkofler/create-template-project/commit/e318f2837fbfddd55bc8542caef4617b1a53ffbd))
+* **ci:** install Playwright browsers before integration tests ([763a28e](https://github.com/doberkofler/create-template-project/commit/763a28e22dabcd8eec4ab3712c01bc2ae391eab3))
+
 ## [1.13.1](https://github.com/doberkofler/create-template-project/compare/v1.13.0...v1.13.1) (2026-10-12)
 
 # [1.13.0](https://github.com/doberkofler/create-template-project/compare/v1.12.2...v1.13.0) (2026-10-12)
