@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"vite": {
-			"version": "8.3.4",
+			"version": "8.3.5",
 			"description": "Native-ESM powered web dev build tool"
 		},
 		"@vitejs/plugin-react": {
@@ -25,11 +25,11 @@
 			"description": "A tiny JavaScript debugging utility modelled after Node.js core debugging technique."
 		},
 		"@commitlint/cli": {
-			"version": "21.2.3",
+			"version": "21.2.4",
 			"description": "Lint commit messages to ensure they follow conventional commits."
 		},
 		"@commitlint/config-conventional": {
-			"version": "21.2.3",
+			"version": "21.2.4",
 			"description": "Shareable commitlint config enforcing conventional commits."
 		},
 		"@types/debug": {
@@ -57,7 +57,7 @@
 			"description": "Modern native git hooks made easy."
 		},
 		"oxlint": {
-			"version": "1.88.0",
+			"version": "1.89.0",
 			"description": "A JavaScript linter written in Rust."
 		},
 		"oxlint-tsgolint": {
@@ -65,7 +65,7 @@
 			"description": "TypeScript-specific rules for oxlint."
 		},
 		"oxfmt": {
-			"version": "0.73.0",
+			"version": "0.74.0",
 			"description": "High performance JavaScript / TypeScript formatter."
 		},
 		"typescript": {
@@ -146,7 +146,7 @@
 			"description": "tRPC integration for React Query."
 		},
 		"@tanstack/react-query": {
-			"version": "5.104.3",
+			"version": "5.104.5",
 			"description": "Powerful asynchronous state management for TS/JS."
 		},
 		"zod": {
